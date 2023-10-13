@@ -1,0 +1,80 @@
+column_name,description,type,format,example
+subject,unique participant ID,string,unique string (random number sequence for adult experiments; incremental numbering for children),Crossact1_p101
+experiment_name,name of the experiment in the paper,string,Experiment 1; Experiment 2; Experiment 3; Experiment S1,Experiment 1
+version,experiment version ,string,adults1A corresponds to Exp 1; adults1B corresponds to replication (S1); kids2A corresponds to Exp 2; kids 2B corresponds to Exp 3,kids2A
+age_group,whether the participants are adults or children,string,adults; kids,kids
+ambiguity_condition,condition variable denoting how ambiguity was manipulated,string,ambiguous corresponds to the cross-situational manipulation of ambiguity; partially ambiguous is the condition in the replication where manipulated items are somewhat disambiguated; ambiguous_me corresponds to the mutual exclusivity manipulation in Exp 3,ambiguous
+trialType,"type of trial (familiarization or not; experiment phase: learning, selection, test)",string,"familiarization phases: fam-learning, fam-selection (corresponds to sampling phase), fam-test; experimental phases: learning, selection, test, familiarItem-test (in Exp 3, testing the familiar items from training)",selection
+trialIndex,trial number,numeric,ranges: 1-36 (Exp 1); 1-44 (Exp S1); 1-29 (Exp 2); 1-27 (Exp 3),1
+trialNum,"trial number, indexed by experiment phase (e.g., learning trials are numbered starting at 1)",numeric,re-indexed by trialType,1
+testHalf,only applies to Exp S1 (adult replication): indicates whether test was before or after sampling phase,numeric,1 or 2,1
+label1,"on learning trials, the first label presented",string,label,penguin
+label2,"on learning trials, the second label presented",string,label,cow
+location1,"on learning trials, the location of image1",string,left or right,left
+location2,"on learning trials, the location of image2",string,left or right,right
+image1,"on learning trials, one of the two images presented",string,format has path to stimulus from experiment implementation,stims/penguin.png
+image2,"on learning trials, one of the two images presented",string,format has path to stimulus from experiment implementation,stims/cow.png
+image3,"on test or selection trials, one of the images available to select",string,format has path to stimulus from experiment implementation,stims/dog.png
+image4,"on test or selection trials, one of the images available to select",string,format has path to stimulus from experiment implementation,stims/monkey.png
+image5,"on test or selection trials, one of the images available to select",string,format has path to stimulus from experiment implementation,stims/pig.png
+image6,"on test or selection trials, one of the images available to select",string,format has path to stimulus from experiment implementation,stims/dog.png
+image7,"on test or selection trials, one of the images available to select",string,format has path to stimulus from experiment implementation,stims/1.png
+image8,"on test or selection trials, one of the images available to select",string,format has path to stimulus from experiment implementation,stims/2.png
+High1,image belonging to the group of (fully) ambiguous items (numbering is arbitrary),string,format has path to stimulus from experiment implementation,stims/1.png
+High2,image belonging to the group of (fully) ambiguous items (numbering is arbitrary),string,format has path to stimulus from experiment implementation,stims/2.png
+High3,image belonging to the group of (fully) ambiguous items (numbering is arbitrary),string,format has path to stimulus from experiment implementation,stims/3.png
+High4,image belonging to the group of (fully) ambiguous items (numbering is arbitrary),string,format has path to stimulus from experiment implementation,stims/4.png
+Medium1,in Experiment S1: image belonging to the group of partially ambiguous items (numbering is arbitrary),string,format has path to stimulus from experiment implementation,stims/1.png
+Medium2,in Experiment S1: image belonging to the group of partially ambiguous items (numbering is arbitrary),string,format has path to stimulus from experiment implementation,stims/2.png
+Medium3,in Experiment S1: image belonging to the group of partially ambiguous items (numbering is arbitrary),string,format has path to stimulus from experiment implementation,stims/3.png
+Medium4,in Experiment S1: image belonging to the group of partially ambiguous items (numbering is arbitrary),string,format has path to stimulus from experiment implementation,stims/4.png
+Low1,image belonging to the group of disambiguated items (numbering is arbitrary),string,format has path to stimulus from experiment implementation,stims/1.png
+Low2,image belonging to the group of disambiguated items (numbering is arbitrary),string,format has path to stimulus from experiment implementation,stims/2.png
+Low3,image belonging to the group of disambiguated items (numbering is arbitrary),string,format has path to stimulus from experiment implementation,stims/3.png
+Low4,image belonging to the group of disambiguated items (numbering is arbitrary),string,format has path to stimulus from experiment implementation,stims/4.png
+choice,"index of selected image (corresponds to image1-image8, indexed from 0-7) (adult experiments: Sampling Phase; child experiments: Sampling and Test Phase)",numeric,index from 0 (~ image1) to 7 (~ image8),0
+choiceImage,the image/ item selected by the participant,string,format has path to stimulus from experiment implementation,stims/penguin.png
+randomChoice,"Sampling Phase in adults experiments (Exp 1 and S1): index of selected image (corresponds to image1-image8, indexed from 0-7)",numeric,index from 0 (~ image1) to 7 (~ image8),0
+randomImage,on selection trials in adult studies: the image/ item selected at random to pair with the selected image during the Sampling Phase,string,format has path to stimulus from experiment implementation,stims/1.png
+learningLocationChoice,Sampling Phase: where the selected image appears,string,in adult experiments: left or right; in child experiments: center,right
+learningLocationRandom,Sampling Phase in adults experiments (Exp 1 and S1): where the randomly paired image appears,string,left or right,left
+choiceLabel,Label of the image chosen by the participant (on sampling and test trials),string,label,zeevo
+randomLabel,on selection trials in adult studies: the label for the image/ item selected at random to pair with the selected image during the Sampling Phase,string,label,beppo
+label,target label on test trials (adult experiments),string,label,noopy
+targetLabel,unique identifier for the target label on test trials,string,format has path to stimulus from experiment implementation,stims/find_penguin.m4a
+targetLocation,index of location of target stimulus (adult experiments),numeric,index from 0 (~top left) to 7 (~bottom right),0
+targetImage,On test trials: the target/ correct image,string,format has path to stimulus from experiment implementation,stims/1.png
+targetType,On test trials: the item type of the target image (adult experiments: whether the item was manipulated to be ambiguous during training; for familiarization test trials: whether image is a familiar or novel item),string,"high (ambiguous/fully ambiguous), medium (partially ambiguous), low (disambiguated/ mutual exclusivity); familiarization trials: familiar, novel",high
+choiceLocation,location of the selected item (adult experiments),string,pos1 (top left) - pos8 (bottom right),pos1
+choiceType,type of choice on sampling (ambiguity) and test trials (target or foil),string,"Sampling Trials: ambiguous, disambiguated, ME,familiar, novel; Test trials: target, foil",ambiguous
+selectionType,type of choice on sampling and test trials (degree of ambiguity classification) - alternative terminology,string,"Sampling Trials: high (ambiguous), medium (partially ambiguous), low (disambiguated), familiar, novel",high
+selectionHigh,"Sampling trials: whether the item selected was a fully ambiguous item (""high"") or not",numeric,0 (~selection was not ambiguous item) or 1 (~selection was ambiguous item),1
+isAmbiguous,"Sampling trials: whether the item selected was ambiguous (""high"" or ""medium"") or not",numeric,0 (~selection was not ambiguous item) or 1 (~selection was ambiguous item),1
+targetIsAmbiguous,Test trials: whether or not the target image is ambiguous,numeric,0 (target is not ambiguous) or 1 (target is ambiguous),1
+targetIsAmbiguousYN,Test trials: whether or not the target image is ambiguous (coded as factor/ string),numeric,no (target is not ambiguous) or yes (target is ambiguous),yes
+isRight,whether the response is correct or not,numeric,0 (incorrect) or 1 (correct),1
+rt,participants' reaction time (in ms),numeric,in milliseconds,3755
+choice_count,On test trials: how often the target item was chosen during the Sampling Phase,numeric,0-4,1
+chosen,On test trials: whether or not the target item was chosen during the Sampling Phase (binary),numeric,0 (not chosen) or 1 (chosen),0
+choice1,the image selected on the first sampling trial,string,format has path to stimulus from experiment implementation,stims/1.png
+choice2,the image selected on the second sampling trial,string,format has path to stimulus from experiment implementation,stims/1.png
+choice3,the image selected on the third sampling trial (if available),string,format has path to stimulus from experiment implementation,stims/1.png
+choice4,the image selected on the fourth sampling trial (if available),string,format has path to stimulus from experiment implementation,stims/1.png
+Exclude,whether the participant should be excluded,string,Y (exclude) or N (do not exclude),N
+Age,participants' age (in years - day count basis: US 30/360),numeric,months are rounded,4.2
+Gender,participants' self-reported gender,string,female or male,female
+hispanic,for children: Is the child is Hispanic or Latinx (as reported by parental guardian),string,Yes or No,Yes
+ethnicity,for children: ethinicity (as reported by parents),string,"Options: American Indian or Alaska Native, Asian, Native Hawaiian or Other Pacific Islander, Black or African American, White, Other. Parents checked all that applied (mutliple selections separated by a comma)","Black or African American,White"
+L1_english,whether participants' first language is English,string,English or Other,English
+L1_non_english,participants' self-reported first language (if not English),string,result from an open-ended text box entry,Mandarin
+languages_besides_english_yn,for children: whether the child speaks languages besides English,string,Yes or No,No
+L1,for children: first language children are exposed to/ hear,string,open format; can also list multiple languages if parents report two languages together,English
+L1percent,for children: percentage of time that children hear the first language,numeric,0-100,100
+L2,for children: second language children are exposed to/ hear,string,"open format; can also list multiple languages if parents report two languages together (e.g. Hindi, Gujarati",German
+L2percent,for children: percentage of time that children hear the second language,numeric,0-100,50
+L3,for children: third language children are exposed to/ hear,string,open format; can also list multiple languages if parents report two languages together,Spanish
+L3percent,for children: percentage of time that children hear the third language,numeric,0-100,2
+Education,participants' self-reported highest education level achieved,string,"Less than High School; High School / GED; Some College; Associate's Degree/technical school; Bachelor's Degree; Masters Degree; Doctoral/ Profession Degree (PhD, JD, MD)",Some College
+Experimenter,unique identifier for experimenter who guided child through study,string,two capital letters,TG
+response1,"Adult experiments: participants' responses to the question ""what strategy did you use to learn the names of aliens?""",string,result from an open-ended text box entry,
+response2,"Adult experiments: participants' responses to the question ""How did you decide which aliens to choose to learn about in part 2 of the study?""",string,result from an open-ended text box entry,
