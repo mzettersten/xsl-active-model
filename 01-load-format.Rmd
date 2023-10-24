@@ -1,0 +1,52 @@
+---
+title: "Modeling Developmental Active XSL"
+author: "George"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(tidyverse)
+
+source("R/helper.R")
+source("R/fitting.R")
+source("R/kachergis.R")
+```
+
+## Load data
+
+```{r cars}
+ad <- read_csv("data/act_data.csv")
+
+xd <- read_csv("data/crossact_data.csv")
+xd_code <- read_csv("data/Crossact_codebook.csv")
+```
+
+## Examine training
+
+```{r, echo=FALSE}
+ad_s <- ad %>% filter(subject=="p101")
+table(ad_s$trial_type)
+#  fam-learning familiar-test      learning          test 
+#            4             2            16            16 
+
+ad_fam_train <- ad %>% filter(trial_type=="fam-learning") # trial_index 1-4
+# available_image1 - 4
+ad_fam_train %>% select(starts_with('available_image')) # always bear cow penguin pig? 
+
+ad_fam_test <- ad %>% filter(trial_type=="familiar-test") # trial_index 5-6
+# choice_image, target_image, foil_image
+
+
+ad_learn <- ad %>% filter(trial_type=="learning")
+
+ad_test <- ad %>% filter(trial_type=="test") # trial_index 15-22, 31-38
+# choice_image, target_image, foil_image  (2AFC) -- and test_audio
+
+
+
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
