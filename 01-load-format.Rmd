@@ -18,10 +18,19 @@ source("R/kachergis.R")
 
 ```{r cars}
 # single-object exposure w frequency manipulation (mostly/all kids) - 
-ad <- read_csv("data/act_data.csv")
+ad <- read_csv("data/act_data.csv") %>%
+  filter(!startsWith(trial_type, "fam")) %>%
+  rename(image1 = available_image1,
+         image2 = available_image2,
+         image3 = available_image3,
+         image4 = available_image4) %>%
+  mutate(label1 = choice_audio)
+# eliminate: fam-learning familiar-test
 
 # cross-situational - also another 100 adult
-xd <- read_csv("data/crossact_data.csv")
+xd <- read_csv("data/crossact_data.csv") %>% 
+  filter(!startsWith(trial_type, "fam"))
+# eliminate: fam-learning  fam-selection  fam-test (task familiarization trials)
 xd_code <- read_csv("data/Crossact_codebook.csv")
 ```
 
@@ -30,24 +39,25 @@ xd_code <- read_csv("data/Crossact_codebook.csv")
 ```{r, echo=FALSE}
 ad_s <- ad %>% filter(subject=="p101")
 table(ad_s$trial_type)
-#  fam-learning familiar-test      learning          test 
-#            4             2            16            16 
+# learning          test 
+#       16            16 
 
-ad_fam_train <- ad %>% filter(trial_type=="fam-learning") # trial_index 1-4
+#ad_fam_train <- ad %>% filter(trial_type=="fam-learning") # trial_index 1-4
 # available_image1 - 4
-ad_fam_train %>% select(starts_with('available_image')) # always bear cow penguin pig? 
-
-ad_fam_test <- ad %>% filter(trial_type=="familiar-test") # trial_index 5-6
+#ad_fam_train %>% select(starts_with('available_image')) # always bear cow penguin pig? 
+#ad_fam_test <- ad %>% filter(trial_type=="familiar-test") # trial_index 5-6
 # choice_image, target_image, foil_image
 
 
 ad_learn <- ad %>% filter(trial_type=="learning")
-
 ad_test <- ad %>% filter(trial_type=="test") # trial_index 15-22, 31-38
 # choice_image, target_image, foil_image  (2AFC) -- and test_audio
 
 
-
+get_experiment_cooc_matrix(ad, "1") 
+get_experiment_cooc_matrix(ad, "2A") # exposure phase: choice_image and choice_audio <- passive (not active)
+get_experiment_cooc_matrix(ad, "2B") # ""
+get_experiment_cooc_matrix(ad, "2C") # ""
 
 ```
 
@@ -62,7 +72,7 @@ ad_test <- ad %>% filter(trial_type=="test") # trial_index 15-22, 31-38
 # "Experiment 1"  "Experiment S1" - have a randomly-selected XSL trial after selection?
 # randomized trial order - so use subject-specific training 
 
-xd_test <- xd %>% filter(trial_type=="test" | trial_type=="fam-test") %>% 
+xd_test <- xd %>% filter(trial_type=="test") %>%  # | trial_type=="fam-test"
   mutate(correct = ifelse(choice_image==target_image, 1, 0))
 
 xd_test %>% group_by(experiment_name, trial_type, age_group) %>%
@@ -71,17 +81,21 @@ xd_test %>% group_by(experiment_name, trial_type, age_group) %>%
   facet_wrap(. ~ experiment_name) + 
   geom_point() + ylim(0,1)
 
-xd_s <- xd %>% filter(subject=="Crossact1_p101")
-table(xd_s$trial_type) # 29 trials
-#  fam-learning fam-selection      fam-test      learning     selection          test 
-#            4             2             4             9             4             6 
 
-# let's just remove all fam- trials (training)
+# remove all fam- trials -- these are task familiarization trials with known objects
+xd_s <- xd %>% filter(subject=="Crossact1_p101", !startsWith(trial_type, "fam"))
+table(xd_s$trial_type) # 19 trials
+# learning     selection          test 
+#       9             4             6 
+
+
+# on trial_type=="selection", model should only learn choice_label -> choice_image
+# (on selection trials, image1 - image6 / image8 (adults) encode the available options)
 
 
 get_experiment_cooc_matrix <- function(dat, experiment_name) {
   xd_s <- subset(dat, experiment_name==experiment_name & subject==unique(dat$subject)[1])
-  voc = sort(na.omit(unique(c(xd_s$label1, xd_s$label2))))
+  voc = sort(na.omit(unique(unlist(xd_s %>% select(starts_with("label"))))))
   refs = sort(na.omit(unique(unlist(xd_s %>% select(starts_with("image"))))))
   coocs <- matrix(0, nrow=length(voc), ncol=length(refs))
   row.names(coocs) = voc
@@ -104,7 +118,39 @@ run_subject_trials <- function(xd_s) {
     labs = setdiff(unlist(xd_s[i,] %>% select(starts_with("label"))), NA)
     coocs[labs,refs] = coocs[labs,refs] + 1
   }
+  return(coocs)
 }
+
+run_subject_trials(xd_s)
+
+get_subject_trial_ordering <- function(xd_s) {
+  xd_train <- xd_s %>% filter(trial_type!="test")
+  voc = sort(na.omit(unique(unlist(xd_s %>% select(starts_with("label"))))))
+  refs = sort(na.omit(unique(unlist(xd_s %>% select(starts_with("image"))))))
+  w_inds = which(startsWith(names(xd_train), "label"))
+  o_inds = which(startsWith(names(xd_train), "image"))
+  words = list() # words per trial
+  objects = list() # objs per trial
+  for(i in 1:nrow(xd_train)) {
+    if(xd_train[i,]$trial_type=="learning") {
+      words[[i]] = na.omit(unlist(xd_train[i,w_inds]))
+      objects[[i]] = na.omit(unlist(xd_train[i,o_inds]))
+    } else if(xd_train[i,]$trial_type=="selection") {
+      words[[i]] = unlist(xd_train[i,]$choice_label)
+      objects[[i]] = unlist(xd_train[i,]$choice_image)
+    }
+  }
+  return(list(words = words, objs = objects, 
+              voc=voc, refs=refs)) # for indexing
+}
+
+ord <- get_subject_trial_ordering(xd_s)
+
+
+# run model
+
+
+# test function
 
 ```
 
