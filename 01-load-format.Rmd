@@ -30,14 +30,15 @@ ad <- read_csv("data/act_data.csv") %>%
          choice_label = sub("stims/", "", choice_image),
          image1 = sub("stims/", "", image1),
          image2 = sub("stims/", "", image2),
-         image3 = sub("stims/", "", image2),
+         image3 = sub("stims/", "", image3),
          image4 = sub("stims/", "", image4),
          target_image = sub("stims/", "", target_image),
          foil_image = sub("stims/", "", foil_image),
          test_label = sub("stims/", "", test_label)) %>%
   mutate(label1 = choice_label)
 
-# cross-situational - also another 100 adult
+# cross-situational;
+# Martin's adding another 110 adults - which have randomImage1 and randomImage2 for passive condition (where they didn't get to make a selection)
 xd <- read_csv("data/crossact_data.csv") %>% 
   filter(!startsWith(trial_type, "fam")) %>%
   mutate(choice_image = sub("stims/", "", choice_image),
@@ -45,12 +46,12 @@ xd <- read_csv("data/crossact_data.csv") %>%
          target_image = sub("stims/", "", target_image),
          image1 = sub("stims/", "", image1),
          image2 = sub("stims/", "", image2),
-         image3 = sub("stims/", "", image2),
+         image3 = sub("stims/", "", image3),
          image4 = sub("stims/", "", image4), 
-         image5 = sub("stims/", "", image4), 
-         image6 = sub("stims/", "", image4), 
-         image7 = sub("stims/", "", image4), 
-         image8 = sub("stims/", "", image4))
+         image5 = sub("stims/", "", image5), 
+         image6 = sub("stims/", "", image6), 
+         image7 = sub("stims/", "", image7), 
+         image8 = sub("stims/", "", image8))
 # eliminate: fam-learning  fam-selection  fam-test (task familiarization trials)
 xd_code <- read_csv("data/Crossact_codebook.csv")
 # Note: label1 label2 give the order of the labels, not the 'correct' label-image
@@ -123,10 +124,11 @@ table(xd_s$trial_type) # 19 trials
 # on trial_type=="selection", model should only learn choice_label -> choice_image
 # (on selection trials, image1 - image6 / image8 (adults) encode the available options)
 
-get_experiment_cooc_matrix(xd, "Experiment 1")
-get_experiment_cooc_matrix(xd, "Experiment 2")
-get_experiment_cooc_matrix(xd, "Experiment 3")
-get_experiment_cooc_matrix(xd, "Experiment S1")
+crossact_mats = list()
+crossact_mats[["Experiment 1"]] <- get_experiment_cooc_matrix(xd, "Experiment 1")
+crossact_mats[["Experiment 2"]] <- get_experiment_cooc_matrix(xd, "Experiment 2")
+crossact_mats[["Experiment 3"]] <- get_experiment_cooc_matrix(xd, "Experiment 3")
+crossact_mats[["Experiment S1"]] <- get_experiment_cooc_matrix(xd, "Experiment S1")
 
 run_subject_trials <- function(xd_s) {
   coocs <- get_experiment_cooc_matrix(xd_s, xd_s[1,]$experiment_name)
@@ -145,18 +147,19 @@ run_subject_trials(xd_s)
 
 
 ```{r}
+# specific to crossact
 get_subject_trial_ordering <- function(xd_s) {
   xd_train <- xd_s %>% filter(trial_type!="test")
   voc = sort(na.omit(unique(unlist(xd_s %>% select(starts_with("label"))))))
   refs = sort(na.omit(unique(unlist(xd_s %>% select(starts_with("image"))))))
-  w_inds = which(startsWith(names(xd_train), "label"))
-  o_inds = which(startsWith(names(xd_train), "image"))
+  w_inds = which(startsWith(names(xd_train), "label")) # columns with label info
+  o_inds = which(startsWith(names(xd_train), "image")) # columns with object info
   words = list() # words per trial
   objects = list() # objs per trial
   for(i in 1:nrow(xd_train)) {
     if(xd_train[i,]$trial_type=="learning") {
-      words[[i]] = na.omit(unlist(xd_train[i,w_inds]))
-      objects[[i]] = na.omit(unlist(xd_train[i,o_inds]))
+      words[[i]] = as.vector(unlist(xd_train[i,w_inds][which(!is.na(xd_train[i,w_inds]))]))
+      objects[[i]] = as.vector(unlist(xd_train[i,o_inds][which(!is.na(xd_train[i,o_inds]))]))
     } else if(xd_train[i,]$trial_type=="selection") {
       words[[i]] = unlist(xd_train[i,]$choice_label)
       objects[[i]] = unlist(xd_train[i,]$choice_image)
@@ -168,9 +171,23 @@ get_subject_trial_ordering <- function(xd_s) {
 
 ord <- get_subject_trial_ordering(xd_s)
 
+ords <- list()
+for(s in unique(xd$subject)) {
+  ords[[s]] <- get_subject_trial_ordering(xd %>% filter(subject==s))
+}
 
 # run model
+model(c(1,1,1), ord = ord)
 
+run_crossact_exp <- function(ords, model) {
+  crossact_mats$`Experiment 1`
+  for(s in names(ords)) {
+    res <- model(c(1,1,1), ord = ord, start_matrix = crossact_mats$`Experiment 1`)
+    
+    # test function
+  }
+  
+}
 
 # test function
 
