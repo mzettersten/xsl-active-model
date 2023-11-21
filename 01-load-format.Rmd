@@ -36,6 +36,7 @@ ad <- read_csv("data/act_data.csv") %>%
          foil_image = sub("stims/", "", foil_image),
          test_label = sub("stims/", "", test_label)) %>%
   mutate(label1 = choice_label)
+# is_right will be added 
 
 # cross-situational;
 # Martin's adding another 110 adults - which have randomImage1 and randomImage2 for passive condition (where they didn't get to make a selection)
@@ -44,6 +45,7 @@ xd <- read_csv("data/crossact_data.csv") %>%
   mutate(choice_image = sub("stims/", "", choice_image),
          choice_label = sub("stims/", "", choice_image),
          target_image = sub("stims/", "", target_image),
+         target_label = sub("stims/find_", "", sub(".m4a", "", target_label)),
          image1 = sub("stims/", "", image1),
          image2 = sub("stims/", "", image2),
          image3 = sub("stims/", "", image3),
@@ -76,8 +78,9 @@ ad_learn <- ad %>% filter(trial_type=="learning")
 ad_test <- ad %>% filter(trial_type=="test") # trial_index 15-22, 31-38
 # choice_image, target_image, foil_image  (2AFC) -- and test_audio
 
-get_experiment_cooc_matrix <- function(dat, experiment_name) {
-  xd_s <- subset(dat, experiment_name==experiment_name & subject==unique(dat$subject)[1])
+get_experiment_cooc_matrix <- function(dat, expt_name) {
+  this_exp = dat %>% filter(experiment_name==expt_name)
+  xd_s <- subset(this_exp, subject==unique(this_exp$subject)[1])
   voc = sort(na.omit(unique(unlist(xd_s %>% select(starts_with("label"))))))
   refs = sort(na.omit(unique(unlist(xd_s %>% select(starts_with("image"))))))
   coocs <- matrix(0, nrow=length(voc), ncol=length(refs))
@@ -105,7 +108,7 @@ get_experiment_cooc_matrix(ad, "2C") # ""
 # randomized trial order - so use subject-specific training 
 
 xd_test <- xd %>% filter(trial_type=="test") %>%  # | trial_type=="fam-test"
-  mutate(correct = ifelse(choice_image==target_image, 1, 0))
+  rename(correct = is_right)
 
 xd_test %>% group_by(experiment_name, trial_type, age_group) %>%
   summarise(correct = mean(correct)) %>%
@@ -113,6 +116,9 @@ xd_test %>% group_by(experiment_name, trial_type, age_group) %>%
   facet_wrap(. ~ experiment_name) + 
   geom_point() + ylim(0,1)
 
+# adult test: 8AFC
+# kids test: 6AFC - in expt2, all 6 options are novel
+# - expt 3: 4 are novel, 2 are familiar
 
 # remove all fam- trials -- these are task familiarization trials with known objects
 xd_s <- xd %>% filter(subject=="Crossact1_p101", !startsWith(trial_type, "fam"))
@@ -129,6 +135,7 @@ crossact_mats[["Experiment 1"]] <- get_experiment_cooc_matrix(xd, "Experiment 1"
 crossact_mats[["Experiment 2"]] <- get_experiment_cooc_matrix(xd, "Experiment 2")
 crossact_mats[["Experiment 3"]] <- get_experiment_cooc_matrix(xd, "Experiment 3")
 crossact_mats[["Experiment S1"]] <- get_experiment_cooc_matrix(xd, "Experiment S1")
+# empty matrices for each expt -- actually all the same?
 
 run_subject_trials <- function(xd_s) {
   coocs <- get_experiment_cooc_matrix(xd_s, xd_s[1,]$experiment_name)
@@ -149,7 +156,7 @@ run_subject_trials(xd_s)
 ```{r}
 # specific to crossact
 get_subject_trial_ordering <- function(xd_s) {
-  xd_train <- xd_s %>% filter(trial_type!="test")
+  xd_train <- xd_s %>% filter(trial_type=="learning") # remove "selection" and "test" trials
   voc = sort(na.omit(unique(unlist(xd_s %>% select(starts_with("label"))))))
   refs = sort(na.omit(unique(unlist(xd_s %>% select(starts_with("image"))))))
   w_inds = which(startsWith(names(xd_train), "label")) # columns with label info
@@ -179,17 +186,33 @@ for(s in unique(xd$subject)) {
 # run model
 model(c(1,1,1), ord = ord)
 
-run_crossact_exp <- function(ords, model) {
-  crossact_mats$`Experiment 1`
+parms = c(.5, 2, .95)
+
+run_crossact_exp <- function(xd, model, parms) {
+  # sapply per subject
+  xd_s <- xd %>% filter(subject=="p621758")
+  ord <- get_subject_trial_ordering(xd_s)
+  # loop over subjects, select their train and test data, 
   for(s in names(ords)) {
-    res <- model(c(1,1,1), ord = ord, start_matrix = crossact_mats$`Experiment 1`)
-    
+    res <- model(parms, ord = ord, start_matrix = crossact_mats[[xd_s$experiment_name[1]]])
     # test function
+    
+    # in expt 3: 4 words are novel, 2 are familiar (pig, dog) -- need to be given strong associations
   }
   
 }
 
+
+
+# correct mapping is randomized per subject (just same structure) -- 
+# ToDo: extract from target_label (is_right gives correctness)
+
 # test function
+test_model <- function(res, xd_s) {
+  #test_dat <- xd_s %>% filter(trial_type=="test")
+  perf = diag(res$matrix) / rowSums(res$matrix)
+  
+}
 
 ```
 
