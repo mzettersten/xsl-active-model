@@ -135,6 +135,11 @@ crossact_mats[["Experiment 1"]] <- get_experiment_cooc_matrix(xd, "Experiment 1"
 crossact_mats[["Experiment 2"]] <- get_experiment_cooc_matrix(xd, "Experiment 2")
 crossact_mats[["Experiment 3"]] <- get_experiment_cooc_matrix(xd, "Experiment 3")
 crossact_mats[["Experiment S1"]] <- get_experiment_cooc_matrix(xd, "Experiment S1")
+
+# in expt 3: 4 words are novel, 2 are familiar (pig, dog) -- need to be given strong associations
+crossact_mats[["Experiment 3"]]["dog","dog.png"] = 1
+crossact_mats[["Experiment 3"]]["pig","pig.png"] = 1
+
 # empty matrices for each expt -- actually all the same?
 
 run_subject_trials <- function(xd_s) {
@@ -176,7 +181,7 @@ get_subject_trial_ordering <- function(xd_s) {
               voc=voc, refs=refs)) # for indexing
 }
 
-ord <- get_subject_trial_ordering(xd_s)
+#ord <- get_subject_trial_ordering(xd_s)
 
 ords <- list()
 for(s in unique(xd$subject)) {
@@ -184,35 +189,49 @@ for(s in unique(xd$subject)) {
 }
 
 # run model
-model(c(1,1,1), ord = ord)
+model(c(1,1,1), ords[[1]])
 
-parms = c(.5, 2, .95)
+#parms = c(.5, 2, .95)
 
-run_crossact_exp <- function(xd, model, parms) {
-  # sapply per subject
-  xd_s <- xd %>% filter(subject=="p621758")
-  ord <- get_subject_trial_ordering(xd_s)
-  # loop over subjects, select their train and test data, 
-  for(s in names(ords)) {
-    res <- model(parms, ord = ord, start_matrix = crossact_mats[[xd_s$experiment_name[1]]])
-    # test function
-    
-    # in expt 3: 4 words are novel, 2 are familiar (pig, dog) -- need to be given strong associations
-  }
-  
+
+fit_model_to_group <- function() {
+  # run_model evaluates a given parameter value set on all subjects
 }
 
 
+fit_model_per_subject <- function(model_name, xd, lower, upper) {
+  source(paste0("R/",model_name,".R"))
+  # sapply across subjects, save best-fitting parameters, log-liks, and per-subj/-item predictions
+  for(s in names(ords)) { # s = "p621758"
+    xd_s <- xd %>% filter(subject==s)
+    testdat <- xd_s %>% filter(trial_type=="test")
+    fit = DEoptim::DEoptim(eval_model, lower=lower, upper=upper,
+                          DEoptim::DEoptim.control(reltol=.001, NP=100, itermax=100),
+                          ord = ords[[s]], testdat=testdat, logLik_only=T, # SSE_only=T
+                          start_matrix = crossact_mats[[xd_s$experiment_name[1]]]) 
+    # re-eval best fit
+    best_result <- model(parms, ord = ord, start_matrix = crossact_mats[[xd_s$experiment_name[1]]])
+  }
+  return(fit)
+}
+
+# test function - for crossact, it's all-AFC for adults and kids; need to do 2AFC version for act exp
+eval_model <- function(parms, testdat, ord, start_matrix, SSE_only=FALSE, logLik_only=FALSE) {
+  res <- model(parms, ord = ord, start_matrix = crossact_mats[[testdat$experiment_name[1]]])
+  mat <- res$matrix[testdat$target_label, testdat$target_image] # reorder matrix by correct mapping
+  mod_perf = tibble(target_label = rownames(mat), mod_perf = diag(mat) / rowSums(mat))
+  mp <- testdat %>% left_join(mod_perf, by="target_label") %>%
+    select(subject, experiment_name, age_group, age, trial_index, choice_label, target_image, target_label, is_right, mod_perf) 
+  if(SSE_only) return(sum((mp$is_right - mp$mod_perf)^2))
+  if(logLik_only) return( sum(mp$is_right * log(mp$mod_perf) + (1-mp$is_right) * log(1-mp$mod_perf)) )
+  return(mp)
+}
+
+fit_model_per_subject("kachergis", xd, lower=c(.001, .01, .5), upper=c(3, 12, 1))
 
 # correct mapping is randomized per subject (just same structure) -- 
-# ToDo: extract from target_label (is_right gives correctness)
 
-# test function
-test_model <- function(res, xd_s) {
-  #test_dat <- xd_s %>% filter(trial_type=="test")
-  perf = diag(res$matrix) / rowSums(res$matrix)
-  
-}
+
 
 ```
 
