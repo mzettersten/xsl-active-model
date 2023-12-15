@@ -248,9 +248,13 @@ eval_model <- function(parms, testdat, ord, start_matrix, SSE_only=FALSE, logLik
   return(mp)
 }
 
-ind_fits <- fit_model_per_subject("kachergis", xd, lower=c(.001, .01, .5), upper=c(3, 12, 1))
+ind_fits <- fit_model_per_subject("kachergis", xd %>% filter(subject!="Crossact1_p121"), lower=c(.001, .01, .5), upper=c(3, 12, 1))
 # Experiment S1 has 2 test trials for each target_label and target_image -- should we only compare the first one to the model? or average people's two responses? -- trials 37-44 are a second test after the sampling phase, so we should save those for when we're modeling sampling
+save(ind_fits, file="data/ind_fits_kachergis.Rdata")
 
+# "Crossact1_p121" (Exp 2) - Error in res$matrix[testdat$target_label, testdat$target_image] : 
+#  subscript out of bounds
+# the images in trial 24 are all NA...
 
 # correct mapping is randomized per subject (just same structure) 
 
