@@ -183,55 +183,76 @@ get_subject_trial_ordering <- function(xd_s) {
 
 #ord <- get_subject_trial_ordering(xd_s)
 
-ords <- list()
-for(s in unique(xd$subject)) {
-  ords[[s]] <- get_subject_trial_ordering(xd %>% filter(subject==s))
-}
-
 # run model
-model(c(1,1,1), ords[[1]])
-
-#parms = c(.5, 2, .95)
+#model(c(1,1,1), ords[[1]])
 
 
-fit_model_to_group <- function() {
-  # run_model evaluates a given parameter value set on all subjects
+fit_model_to_group <- function(model_name, experiment, xd, lower, upper) {
+  source(paste0("R/",model_name,".R"))
+  
+  ords <- list()
+  for(s in unique(xd$subject)) {
+    ords[[s]] <- get_subject_trial_ordering(xd %>% filter(subject==s))
+  }
+  
+  # run_model evaluates a given parameter value set on given group of subjects (and experiment) -- but needs to 
+  # iterate over subjects because word/referent pairings were randomized per subject
+  fit <- DEoptim::DEoptim(eval_model_group, lower=lower, upper=upper,
+                          DEoptim::DEoptim.control(reltol=.001, NP=100, itermax=100),
+                          ord = ords[[s]], testdat=testdat, logLik_only=T, # SSE_only=T
+                          start_matrix = crossact_mats[[xd_s$experiment_name[1]]]) 
 }
 
+eval_model_group <- function() {
+  # ToDo: apply given parameter values across subjects, aggregate results, calculate total logLik
+}
 
 fit_model_per_subject <- function(model_name, xd, lower, upper) {
   source(paste0("R/",model_name,".R"))
+  
+  ords <- list()
+  for(s in unique(xd$subject)) {
+    ords[[s]] <- get_subject_trial_ordering(xd %>% filter(subject==s))
+  }
+  
   # sapply across subjects, save best-fitting parameters, log-liks, and per-subj/-item predictions
+  sfits <- tibble()
+  fit_results <- tibble()
   for(s in names(ords)) { # s = "p621758"
     xd_s <- xd %>% filter(subject==s)
-    testdat <- xd_s %>% filter(trial_type=="test")
-    fit = DEoptim::DEoptim(eval_model, lower=lower, upper=upper,
+    testdat <- xd_s %>% filter(trial_type=="test", trial_index<37) # excludes 37-44; Experiment S1's post-sampling phase test trials
+    fit <- DEoptim::DEoptim(eval_model, lower=lower, upper=upper,
                           DEoptim::DEoptim.control(reltol=.001, NP=100, itermax=100),
                           ord = ords[[s]], testdat=testdat, logLik_only=T, # SSE_only=T
                           start_matrix = crossact_mats[[xd_s$experiment_name[1]]]) 
     # re-eval best fit
-    best_result <- model(parms, ord = ord, start_matrix = crossact_mats[[xd_s$experiment_name[1]]])
+    best_par <- fit$optim$bestmem
+    new_fit <- tibble(subject = s, neg_log_lik = fit$optim$bestval, chi = best_par[1], lambda = best_par[2], alpha = best_par[3])
+    print(new_fit)
+    sfits <- sfits %>% bind_rows(new_fit)
+    best_result <- eval_model(best_par, testdat, ords[[s]], crossact_mats[[xd_s$experiment_name[1]]])
+    fit_results <- fit_results %>% bind_rows(best_result)
   }
-  return(fit)
+  return(list(sfits=sfits, fit_results=fit_results))
 }
 
 # test function - for crossact, it's all-AFC for adults and kids; need to do 2AFC version for act exp
 eval_model <- function(parms, testdat, ord, start_matrix, SSE_only=FALSE, logLik_only=FALSE) {
-  res <- model(parms, ord = ord, start_matrix = crossact_mats[[testdat$experiment_name[1]]])
+  res <- model(parms, ord = ord, start_matrix = start_matrix)
   mat <- res$matrix[testdat$target_label, testdat$target_image] # reorder matrix by correct mapping
   mod_perf = tibble(target_label = rownames(mat), mod_perf = diag(mat) / rowSums(mat))
   mp <- testdat %>% left_join(mod_perf, by="target_label") %>%
     select(subject, experiment_name, age_group, age, trial_index, choice_label, target_image, target_label, is_right, mod_perf) 
-  if(SSE_only) return(sum((mp$is_right - mp$mod_perf)^2))
-  if(logLik_only) return( sum(mp$is_right * log(mp$mod_perf) + (1-mp$is_right) * log(1-mp$mod_perf)) )
+  if(SSE_only) return(sum((mp$is_right - mp$mod_perf)^2)) # minimize SSE
+  if(logLik_only) return(- sum(mp$is_right * log(mp$mod_perf) + (1-mp$is_right) * log(1-mp$mod_perf)) ) # minimize negative log-lik
   return(mp)
 }
 
-fit_model_per_subject("kachergis", xd, lower=c(.001, .01, .5), upper=c(3, 12, 1))
+ind_fits <- fit_model_per_subject("kachergis", xd, lower=c(.001, .01, .5), upper=c(3, 12, 1))
+# Experiment S1 has 2 test trials for each target_label and target_image -- should we only compare the first one to the model? or average people's two responses? -- trials 37-44 are a second test after the sampling phase, so we should save those for when we're modeling sampling
 
-# correct mapping is randomized per subject (just same structure) -- 
 
-
+# correct mapping is randomized per subject (just same structure) 
 
 ```
 
