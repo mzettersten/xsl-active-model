@@ -26,7 +26,7 @@ update_known <- function(m, tr_w, tr_o, startval = .01) {
 }
 
 
-model <- function(params, ord=c(), reps=1, test_noise=0) {
+model <- function(params, ord=c(), start_matrix=c(), reps=1, test_noise=0) {
 	X <- params[1] # associative weight to distribute
 	C <- params[2] # decay
 	
@@ -35,7 +35,11 @@ model <- function(params, ord=c(), reps=1, test_noise=0) {
 	voc_sz = length(voc) # vocabulary size
 	ref_sz = length(ref) # number of objects
 	traj = list()
-	m <- matrix(0, voc_sz, ref_sz) # association matrix
+	if(is.matrix(start_matrix)) {
+	  m <- start_matrix
+	} else {
+	  m <- matrix(0, voc_sz, ref_sz) # association matrix
+	}
 	perf = matrix(0, reps, voc_sz) # a row for each block
 	
 	colnames(m) = ref

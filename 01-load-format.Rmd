@@ -262,26 +262,60 @@ ind_fits <- fit_model_per_subject("kachergis", xd %>% filter(subject!="Crossact1
                                   lower=c(.001, .01, .5), upper=c(3, 12, 1))
 # Experiment S1 has 2 test trials for each target_label and target_image -- should we only compare the first one to the model? or average people's two responses? -- trials 37-44 are a second test after the sampling phase, so we should save those for when we're modeling sampling
 save(ind_fits, file="data/ind_fits_kachergis.Rdata")
+mean(ind_fits$sfits$neg_log_lik) # 2.72
+
+ind_fits <- fit_model_per_subject("strength", xd %>% filter(subject!="Crossact1_p121"), 
+                                  lower=c(.001, .5), upper=c(3, 1))
+save(ind_fits, file="data/ind_fits_strength.Rdata")
+mean(ind_fits$sfits$neg_log_lik) # 2.95 (lambda column contains alpha; there is no lambda in strength model)
+
+ind_fits1 <- fit_model_per_subject("kachergis", xd %>% filter(subject!="Crossact1_p121"), 
+                                  lower=c(.001, .01, .5), upper=c(1, 12, 1))
+save(ind_fits1, file="data/ind_fits_kachergis_chi1.Rdata")
+mean(ind_fits1$sfits$neg_log_lik) # 2.71 - slightly better fit with more constrained chi
+
+# further constrain lambda: do
+ind_fits <- fit_model_per_subject("kachergis", xd %>% filter(subject!="Crossact1_p121"), 
+                                  lower=c(.001, .01, .5), upper=c(1, 10, 1))
 ```
 
 
 ```{r}
 load("data/ind_fits_kachergis.Rdata")
 
-sfits <- ind_fits$sfits
-results <- ind_fits$fit_results
-
-results %>% 
+results <- ind_fits$fit_results %>% 
   mutate(age_years = ifelse(age<18, round(age), "adult"),
          age_years = ifelse(is.na(age_years), "adult", age_years)) %>% # 1 adult had NA age
-  group_by(experiment_name, age_years) %>%
+  group_by(experiment_name, age_years, subject, age) %>%
   summarise(Human = mean(is_right),
-            Model = mean(mod_perf),
-            mod_sd = sd(mod_perf)) %>%
+            Model = mean(mod_perf)) %>%
+  left_join(ind_fits$sfits) 
+
+results %>%
+  group_by(experiment_name, age_years) %>%
+  summarise(hum_sd = sd(Human), 
+            mod_sd = sd(Model),
+            Human = mean(Human),
+            Model = mean(Model)) %>%
   pivot_longer(cols = c(Human, Model), names_to = "group", values_to = "Accuracy") %>%
   ggplot(aes(x=age_years, y=Accuracy, color=group, shape=group)) + 
   facet_wrap(. ~ experiment_name) +
-  geom_point() + theme_classic() +
+  geom_point() + # geom_linerange(aes(ymin = )) + 
+  theme_classic() +
   ylim(0,1) + geom_hline(yintercept=1/8, linetype='dashed')
+```
+Look at parameters by age and performance.
+
+```{r, fig.width=10, fig.height=10}
+pairs(results[,c("Human","Model","chi","lambda","alpha","neg_log_lik")], pch = 19) # "age",
+```
+
+```{r}
+cor.test(results$age, results$chi) # .24 (stronger relation than age vs. performance)
+cor.test(results$age, results$lambda) # .19
+cor.test(results$age, results$alpha) # .02 - n.s.
+cor.test(results$age, results$Human) # .23
+
+cor.test(results$age, results$neg_log_lik) # n.s.
 ```
 
