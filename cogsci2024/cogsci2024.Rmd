@@ -6,18 +6,12 @@ document-params: "10pt, letterpaper"
 
 author-information: > 
     \author{{\large \bf George~Kachergis (kachergis@stanford.edu)} \\ Department of Psychology, Stanford University \\ Stanford, CA
-    \AND {\large \bf Martin Zettersten (FIXME@princeton.edu)} \\ Department of Psychology, Princeton University \\ Princeton, NJ}
+    \AND {\large \bf Martin~Zettersten (FIXME@princeton.edu)} \\ Department of Psychology, Princeton University \\ Princeton, NJ}
 
 abstract: >
-    Include no author information in the initial submission, to facilitate
-    blind review.  The abstract should be one paragraph, indented 1/8 inch on both sides,
-    in 9~point font with single spacing. The heading 'Abstract'
-    should be 10~point, bold, centered, with one line of space below
-    it. This one-paragraph abstract section is required only for standard
-    six page proceedings papers. Following the abstract should be a blank
-    line, followed by the header 'Keywords' and a list of
-    descriptive keywords separated by semicolons, all in 9~point font, as
-    shown below.
+    Word learning is a complex process, influenced not only by the words and referents 
+    in the language environment, but also by what learners selectively attend to,
+    which in turn is likely determined by their prior knowledge. 
     
 keywords: >
     active learning; cross-situational word learning; self-directed learning; uncertainty reduction
@@ -40,8 +34,22 @@ library(ggplot2)
 library(xtable)
 ```
 
+```{r, load-data, echo=F}
+load("data/cross_act_preprocessed.Rdata")
+
+N_per_exp <- xd %>% 
+  group_by(subject, experiment_name, age_group) %>%
+  summarise(n = n()) %>%
+  group_by(experiment_name, age_group) %>%
+  summarise(n = n())
+```
+
+
 # Introduction
 
+Early word learning is often thought of as largely determined by the learners'linguistic environment, where they can only learn what is present in the input.
+Increasingly, research is finding that learners--even at a young age--are involved in selecting and shaping their input, and that such self-directed, active learning can accelerate acquisition. 
+Understanding how learners choose their 
 
 # Method
 

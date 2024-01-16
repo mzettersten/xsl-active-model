@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 require(tidyverse)
+require(GGally)
 
 source("R/helper.R")
 source("R/fitting.R")
@@ -57,6 +58,13 @@ xd <- read_csv("data/crossact_data.csv") %>%
 # eliminate: fam-learning  fam-selection  fam-test (task familiarization trials)
 xd_code <- read_csv("data/Crossact_codebook.csv")
 # Note: label1 label2 give the order of the labels, not the 'correct' label-image
+
+save(xd, xd_code, file="data/cross_act_preprocessed.Rdata")
+
+xd %>% group_by(subject, experiment_name, age_group) %>%
+  summarise(n = n()) %>%
+  group_by(experiment_name, age_group) %>%
+  summarise(n = n())
 ```
 
 ## Examine training
@@ -187,24 +195,41 @@ get_subject_trial_ordering <- function(xd_s) {
 #model(c(1,1,1), ords[[1]])
 
 
+# fit an entire group of subjects with a single best-fitting set of parameters
 fit_model_to_group <- function(model_name, experiment, xd, lower, upper) {
-  source(paste0("R/",model_name,".R"))
+  source(paste0("R/", model_name, ".R"))
   
   ords <- list()
   for(s in unique(xd$subject)) {
-    ords[[s]] <- get_subject_trial_ordering(xd %>% filter(subject==s))
+    ords[[s]] <- get_subject_trial_ordering(xd %>% filter(subject == s))
   }
   
-  # run_model evaluates a given parameter value set on given group of subjects (and experiment) -- but needs to 
-  # iterate over subjects because word/referent pairings were randomized per subject
-  fit <- DEoptim::DEoptim(eval_model_group, lower=lower, upper=upper,
-                          DEoptim::DEoptim.control(reltol=.001, NP=100, itermax=100),
-                          ord = ords[[s]], testdat=testdat, logLik_only=T, # SSE_only=T
-                          start_matrix = crossact_mats[[xd_s$experiment_name[1]]]) 
+  testdat_group <- xd %>% filter(experiment_name == experiment, trial_type == "test", trial_index < 37)
+  
+  fit <- DEoptim::DEoptim(eval_model_group, lower = lower, upper = upper,
+                          DEoptim::DEoptim.control(reltol = .001, NP = 100, itermax = 100),
+                          ords = ords, testdat = testdat_group, logLik_only = TRUE,
+                          start_matrix = crossact_mats[[experiment]]) 
+  return(fit$optim$bestmem)
 }
 
-eval_model_group <- function() {
-  # ToDo: apply given parameter values across subjects, aggregate results, calculate total logLik
+
+
+eval_model_group <- function(parms, ords, testdat, start_matrix, logLik_only = TRUE) {
+  total_logLik <- 0
+  
+  for(s in names(ords)) {
+    testdat_s <- testdat %>% filter(subject == s)
+    res <- model(parms, ord = ords[[s]], start_matrix = start_matrix)
+    mat <- res$matrix[testdat_s$target_label, testdat_s$target_image]
+    mod_perf <- diag(mat) / rowSums(mat)
+    
+    is_right <- testdat_s$is_right
+    subject_logLik <- -sum(is_right * log(mod_perf) + (1 - is_right) * log(1 - mod_perf))
+    total_logLik <- total_logLik + subject_logLik
+  }
+  
+  return(total_logLik)
 }
 
 fit_model_per_subject <- function(model_name, xd, lower, upper) {
@@ -277,11 +302,18 @@ mean(ind_fits1$sfits$neg_log_lik) # 2.71 - slightly better fit with more constra
 # further constrain lambda: do
 ind_fits <- fit_model_per_subject("kachergis", xd %>% filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .01, .5), upper=c(1, 10, 1))
+
+
+ind_fits <- fit_model_per_subject("novelty", xd %>% filter(subject!="Crossact1_p121"), 
+                                  lower=c(.001, .01, .5), upper=c(1, 12, 1))
+save(ind_fits, file="data/ind_fits_novelty_chi1.Rdata")
+mean(ind_fits$sfits$neg_log_lik) # 2.91
 ```
 
 
 ```{r}
 load("data/ind_fits_kachergis.Rdata")
+load("data/ind_fits_kachergis_chi1.Rdata")
 
 results <- ind_fits$fit_results %>% 
   mutate(age_years = ifelse(age<18, round(age), "adult"),
@@ -306,8 +338,8 @@ results %>%
 ```
 Look at parameters by age and performance.
 
-```{r, fig.width=10, fig.height=10}
-pairs(results[,c("Human","Model","chi","lambda","alpha","neg_log_lik")], pch = 19) # "age",
+```{r, fig.width=8, fig.height=8}
+ggpairs(results[,c("Human","Model","chi","lambda","alpha","neg_log_lik")]) # "age",
 ```
 
 ```{r}
