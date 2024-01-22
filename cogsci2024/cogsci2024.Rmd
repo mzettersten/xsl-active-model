@@ -32,10 +32,11 @@ library(png)
 library(grid)
 library(ggplot2)
 library(xtable)
+require(tidyverse)
 ```
 
 ```{r, load-data, echo=F}
-load("data/cross_act_preprocessed.Rdata")
+load("../data/cross_act_preprocessed.Rdata")
 
 N_per_exp <- xd %>% 
   group_by(subject, experiment_name, age_group) %>%
@@ -47,18 +48,48 @@ N_per_exp <- xd %>%
 
 # Introduction
 
-Early word learning is often thought of as largely determined by the learners'linguistic environment, where they can only learn what is present in the input.
+Early word learning is often thought of as largely determined by the learners' linguistic environment, where they can only learn what is present in the input.
 Increasingly, research is finding that learners--even at a young age--are involved in selecting and shaping their input, and that such self-directed, active learning can accelerate acquisition. 
-Understanding how learners choose their 
+Understanding the strategies that learners use to shape their experience will help us build and improve theories of language.
+
+The goal of our current study is to test how well previously proposed models of cross-situational word learning can explain the observed results of active learning experiments from @Zettersten2021.
+Aside from assessing the ability of the models to account for the overall data, it is of particular interest whether particular model parameters are associated with individuals' 1) learning performance and 2) deployed active learning strategy.
+We will also investigate age-related changes in model parameters.
 
 # Method
+
+## Data
+
+
+
+## Models
 
 # Results
 
 
 ```{r 2-col-image, fig.env = "figure*", fig.pos = "h", fig.width=4, fig.height=2, fig.align = "center", set.cap.width=T, num.cols.cap=2, fig.cap = "This image spans both columns. And the caption text is limited to 0.8 of the width of the document."}
-img <- png::readPNG("figs/walrus.png")
-grid::grid.raster(img)
+load("../data/ind_fits_kachergis_chi1.Rdata")
+ind_fits <- ind_fits1
+
+results <- ind_fits$fit_results %>% 
+  mutate(age_years = ifelse(age<18, round(age), "adult"),
+         age_years = ifelse(is.na(age_years), "adult", age_years)) %>% # 1 adult had NA age
+  group_by(experiment_name, age_years, subject, age) %>%
+  summarise(Human = mean(is_right),
+            Model = mean(mod_perf)) %>%
+  left_join(ind_fits$sfits) 
+
+results %>% filter(is.element(experiment_name, c("Experiment 1","Experiment 2"))) %>%
+  group_by(age_years) %>%
+  summarise(hum_sd = sd(Human), 
+            mod_sd = sd(Model),
+            Human = mean(Human),
+            Model = mean(Model)) %>%
+  pivot_longer(cols = c(Human, Model), names_to = "group", values_to = "Accuracy") %>%
+  ggplot(aes(x=age_years, y=Accuracy, color=group, shape=group)) + 
+  geom_point() + # geom_linerange(aes(ymin = )) + 
+  theme_classic() + xlab("Age (years)") + 
+  ylim(0,1) + geom_hline(yintercept=1/8, linetype='dashed')
 ```
 
 ## One-column images
@@ -66,8 +97,7 @@ grid::grid.raster(img)
 Single column is the default option, but if you want set it explicitly, set `fig.env` to `figure`. Notice that the `num.cols` option for the caption width is set to `1`.
 
 ```{r image, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=2, fig.height=2, set.cap.width=T, num.cols.cap=1, fig.cap = "One column image."}
-img <- png::readPNG("figs/lab_logo_stanford.png")
-grid::grid.raster(img)
+
 ```
 
 
