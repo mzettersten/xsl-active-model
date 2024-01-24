@@ -60,9 +60,40 @@ We will also investigate age-related changes in model parameters.
 
 ## Data
 
+All data were taken from @Zettersten2021. 
+Data for our Study 1 were pooled from Experiment 1 (31 adults), Experiment 2 (40 children, 4-9 years of age), and adults in the Ambiguous Condition of Experiment S1 (FixMe adults), which had the same design as Experiments 1 and 2.
 
+Data for Study 2 come from Experiment 3, comprising 58 children of ages 3 to 8.
 
 ## Models
+
+We focused on analyzing data from the familiarity- and uncertainty-biased associative model [@Kachergis2012,@Kachergis2017], and variations of that model, described below.
+
+### Familiarity- and Uncertainty-biased Associative Model
+
+This model assumes that learners accumulate associations between all presented words and referents on each trial, but that their attention is biased more towards particular word-referent associations on the basis of prior experience.
+In particular, more attention (i.e. associative weight) is directed to associations between words and referents that have appeared together on earlier trials (i.e., a familiarity bias).
+In addition, more attention is directed to stimuli that have higher uncertainty (i.e. entropy, $H$) in their associations, whether because they are novel (and thus have no pre-existing associations) or because they have diffuse associations with several different stimuli.
+The model assumes learners knowledge grows trial-by-trial, and that a fixed amount of associative weight (learning rate $\chi$) is distributed among the presented word-referent associations on a given trial in proportion to the prior familiarity of the association and the uncertainty of the involved word and referent.
+The relative strength of the familiarity and uncertainty bias is governed by a parameter $\lambda$: for values of $\lambda>1$ the model focuses more attention on uncertain stimuli, while for values of $\lambda<1$ the model focuses more attention on familiar word-referent associations.
+Associations are also assumed to decay from trial to trial, at a rate governed by parameter $\alpha$. 
+The update rule for adjusting the association $M_{w,o}$ between word $w$ and referent $o$ on a given trial is
+
+(update equation)
+
+When tested on word $w$, the model assumes learners choose referent $o$ from the offered alternatives in proportion to their associative strength $M_{w,o}$ (i.e., Luce choice).
+
+The other models we tested are variations on this model.
+The strength-biased associative model implemented just the familiarity bias ...
+
+### Uncertainty-biased Associative Model
+
+### Novelty-biased Associative Model
+
+
+## Fitting Procedure
+
+We first fitted the model to each participant's data individually, 
 
 # Results
 
