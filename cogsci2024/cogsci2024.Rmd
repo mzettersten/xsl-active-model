@@ -32,6 +32,7 @@ library(png)
 library(grid)
 library(ggplot2)
 library(xtable)
+require(ggpubr)
 require(tidyverse)
 ```
 
@@ -97,8 +98,7 @@ We first fitted the model to each participant's data individually,
 
 # Results
 
-
-```{r 2-col-image, fig.env = "figure*", fig.pos = "h", fig.width=4, fig.height=2, fig.align = "center", set.cap.width=T, num.cols.cap=2, fig.cap = "This image spans both columns. And the caption text is limited to 0.8 of the width of the document."}
+```{r}
 load("../data/ind_fits_kachergis_chi1.Rdata")
 ind_fits <- ind_fits1
 
@@ -110,6 +110,93 @@ results <- ind_fits$fit_results %>%
             Model = mean(mod_perf)) %>%
   left_join(ind_fits$sfits) 
 
+perf_vs_chi = cor.test(results$Human, results$chi) # .65 p<.001
+perf_vs_lambda = cor.test(results$Human, results$lambda) # .15 p=.04
+perf_vs_alpha= cor.test(results$Human, results$alpha) # -.46 p<.001
+
+require(report)
+age_vs_chi = cor.test(results$age, results$chi) # .20 p<.01
+age_vs_lambda = cor.test(results$age, results$lambda) # .20 p<.01
+age_vs_alpha = cor.test(results$age, results$alpha) # .05 n.s.
+
+#psych::corr.test(results$age, results$alpha)
+# median(results$chi) # .034
+# median(results$lambda) # 9.25
+# median(results$alpha) # .56
+```
+
+In the individual fits, the median value of $\chi = $`r round(median(results$chi),2)`, the median value of $\lambda = $`r round(median(results$lambda),2)`, and the median value of $\alpha = $`r round(median(results$alpha),2)`.
+
+The
+
+```{r 2-col-image, fig.env = "figure*", fig.pos = "h", fig.width=4, fig.height=2, fig.align = "center", set.cap.width=T, num.cols.cap=2, fig.cap = "This image spans both columns. And the caption text is limited to 0.8 of the width of the document."}
+
+# cor.test(results$neg_log_lik, results$alpha) # .35 - higher alpha = worse fit??
+# cor.test(results$neg_log_lik, results$chi) # -.37 - lower chi = worse fit
+
+p1 <- results %>%
+  filter(is.element(experiment_name, c("Experiment 1", "Experiment 2"))) %>%
+  pivot_longer(cols = c(Human, Model), names_to = "group", values_to = "value") %>%
+  group_by(age_years, group) %>%
+  summarise(mean = mean(value), sd = sd(value), n = n(), se = sd / sqrt(n)) %>%
+  ungroup() %>%
+  ggplot(aes(x = age_years, y = mean, color = group, shape = group)) +
+    geom_point(position = position_dodge(width = 0.2)) +
+    geom_errorbar(aes(ymin = mean - 1.96 * se, 
+                      ymax = mean + 1.96 * se), width = 0.1, position = position_dodge(width = 0.2)) +
+    theme_classic() + xlab("Age (years)") + ylab("Proportion Correct") + ylim(0, 1) +
+    geom_hline(yintercept = 1/8, linetype = 'dashed')
+
+p2 <- results %>%
+  filter(is.element(experiment_name, c("Experiment 1", "Experiment 2"))) %>%
+  group_by(age_years) %>%
+  summarise(mean = mean(chi), sd = sd(chi), n = n(), se = sd / sqrt(n)) %>%
+  ungroup() %>%
+  ggplot(aes(x = age_years, y = mean, color = group, shape = group)) +
+    geom_point(position = position_dodge(width = 0.2)) +
+    geom_errorbar(aes(ymin = mean - 1.96 * se, 
+                      ymax = mean + 1.96 * se), width = 0.1, position = position_dodge(width = 0.2)) +
+    theme_classic() + xlab("Age (years)") + ylab("Chi (learning rate)") + ylim(0, 1) +
+    geom_hline(yintercept = 1/8, linetype = 'dashed')
+
+
+p2 <- results %>%
+  filter(is.element(experiment_name, c("Experiment 1", "Experiment 2"))) %>%
+  group_by(age_years) %>%
+  summarise(mean = mean(chi), sd = sd(chi), n = n(), se = sd / sqrt(n)) %>%
+  ungroup() %>%
+  ggplot(aes(x = age_years, y = mean)) +
+    geom_point() +
+    geom_linerange(aes(ymin = mean - 1.96 * se, 
+                      ymax = mean + 1.96 * se)) +
+    theme_classic() + xlab("Age (years)") + ylab("Chi (learning rate)") 
+
+p3 <- results %>%
+  filter(is.element(experiment_name, c("Experiment 1", "Experiment 2"))) %>%
+  group_by(age_years) %>%
+  summarise(mean = mean(lambda), sd = sd(lambda), n = n(), se = sd / sqrt(n)) %>%
+  ungroup() %>%
+  ggplot(aes(x = age_years, y = mean)) +
+    geom_point() +
+    geom_linerange(aes(ymin = mean - 1.96 * se, 
+                      ymax = mean + 1.96 * se)) +
+    theme_classic() + xlab("Age (years)") + ylab("Lambda (attn to uncertainty)") 
+
+p4 <- results %>%
+  filter(is.element(experiment_name, c("Experiment 1", "Experiment 2"))) %>%
+  group_by(age_years) %>%
+  summarise(mean = mean(alpha), sd = sd(alpha), n = n(), se = sd / sqrt(n)) %>%
+  ungroup() %>%
+  ggplot(aes(x = age_years, y = mean)) +
+    geom_point() +
+    geom_linerange(aes(ymin = mean - 1.96 * se, 
+                      ymax = mean + 1.96 * se)) +
+    theme_classic() + xlab("Age (years)") + ylab("Alpha (memory fidelity)") 
+
+ggarrange(p1, p2, p3, p4, nrow=2)
+```
+
+```{r}
 results %>% filter(is.element(experiment_name, c("Experiment 1","Experiment 2"))) %>%
   group_by(age_years) %>%
   summarise(hum_sd = sd(Human), 
@@ -123,9 +210,9 @@ results %>% filter(is.element(experiment_name, c("Experiment 1","Experiment 2"))
   ylim(0,1) + geom_hline(yintercept=1/8, linetype='dashed')
 ```
 
+
 ## One-column images
 
-Single column is the default option, but if you want set it explicitly, set `fig.env` to `figure`. Notice that the `num.cols` option for the caption width is set to `1`.
 
 ```{r image, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=2, fig.height=2, set.cap.width=T, num.cols.cap=1, fig.cap = "One column image."}
 
