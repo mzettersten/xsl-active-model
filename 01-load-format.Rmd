@@ -196,27 +196,28 @@ get_subject_trial_ordering <- function(xd_s) {
 
 
 # fit an entire group of subjects with a single best-fitting set of parameters
-fit_model_to_group <- function(model_name, experiment, xd, lower, upper) {
+fit_model_to_group <- function(model_name, exp_name, xd, lower, upper) {
   source(paste0("R/", model_name, ".R"))
-  
+  xd_exp <- xd %>% filter(experiment_name == exp_name)
   ords <- list()
-  for(s in unique(xd$subject)) {
-    ords[[s]] <- get_subject_trial_ordering(xd %>% filter(subject == s))
+  for(s in unique(xd_exp$subject)) {
+    ords[[s]] <- get_subject_trial_ordering(xd_exp %>% filter(subject == s))
   }
   
-  testdat_group <- xd %>% filter(experiment_name == experiment, trial_type == "test", trial_index < 37)
+  testdat_group <- xd %>% filter(experiment_name == exp_name, 
+                                 trial_type == "test", trial_index < 37)
   
   fit <- DEoptim::DEoptim(eval_model_group, lower = lower, upper = upper,
                           DEoptim::DEoptim.control(reltol = .001, NP = 100, itermax = 100),
                           ords = ords, testdat = testdat_group, logLik_only = TRUE,
-                          start_matrix = crossact_mats[[experiment]]) 
+                          start_matrix = crossact_mats[[exp_name]]) 
   return(fit$optim$bestmem)
 }
 
 
 
 eval_model_group <- function(parms, ords, testdat, start_matrix, logLik_only = TRUE) {
-  total_logLik <- 0
+  total_logLik = 0
   
   for(s in names(ords)) {
     testdat_s <- testdat %>% filter(subject == s)
@@ -231,6 +232,7 @@ eval_model_group <- function(parms, ords, testdat, start_matrix, logLik_only = T
   
   return(total_logLik)
 }
+
 
 fit_model_per_subject <- function(model_name, xd, lower, upper) {
   source(paste0("R/",model_name,".R"))
@@ -262,14 +264,19 @@ fit_model_per_subject <- function(model_name, xd, lower, upper) {
 }
 
 # test function - for crossact, it's all-AFC for adults and kids; need to do 2AFC version for act exp
-eval_model <- function(parms, testdat, ord, start_matrix, SSE_only=FALSE, logLik_only=FALSE) {
+eval_model <- function(parms, testdat, ord, start_matrix, SSE_only=FALSE, logLik_only=FALSE, par_priors = NULL) {
   res <- model(parms, ord = ord, start_matrix = start_matrix)
   mat <- res$matrix[testdat$target_label, testdat$target_image] # reorder matrix by correct mapping
   mod_perf = tibble(target_label = rownames(mat), mod_perf = diag(mat) / rowSums(mat))
   mp <- testdat %>% left_join(mod_perf, by="target_label") %>%
     select(subject, experiment_name, age_group, age, trial_index, choice_label, target_image, target_label, is_right, mod_perf) 
+  logLik_value = -sum(mp$is_right * log(mp$mod_perf) + (1-mp$is_right) * log(1-mp$mod_perf)) 
+  if (!is.null(par_priors)) {
+    penalty <- sum(.004*(parms - par_priors)^2) # weak Gaussian regularization (penalize deviation from priors)
+    logLik_value <- logLik_value + penalty
+  }
   if(SSE_only) return(sum((mp$is_right - mp$mod_perf)^2)) # minimize SSE
-  if(logLik_only) return(- sum(mp$is_right * log(mp$mod_perf) + (1-mp$is_right) * log(1-mp$mod_perf)) ) # minimize negative log-lik
+  if(logLik_only) return(logLik_value) # minimize negative log-lik
   return(mp)
 }
 
@@ -283,6 +290,20 @@ eval_model <- function(parms, testdat, ord, start_matrix, SSE_only=FALSE, logLik
 
 
 ```{r, eval=F}
+exp1_fit <- fit_model_to_group("kachergis", "Experiment 1", xd %>% filter(subject!="Crossact1_p121"), 
+                                  lower=c(.001, .01, .5), upper=c(3, 12, 1))
+
+exp2_fit <- fit_model_to_group("kachergis", "Experiment 2", xd %>% filter(subject!="Crossact1_p121"), 
+                                  lower=c(.001, .01, .5), upper=c(3, 12, 1))
+
+exp3_fit <- fit_model_to_group("kachergis", "Experiment 3", xd %>% filter(subject!="Crossact1_p121"), 
+                                  lower=c(.001, .01, .5), upper=c(3, 12, 1))
+
+expS1_fit <- fit_model_to_group("kachergis", "Experiment S1", xd %>% filter(subject!="Crossact1_p121"), 
+                                  lower=c(.001, .01, .5), upper=c(3, 12, 1))
+
+save(exp1_fit, exp2_fit, exp3_fit, expS1_fit, file="data/exp_fits_kachergis.Rdata")
+
 ind_fits <- fit_model_per_subject("kachergis", xd %>% filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .01, .5), upper=c(3, 12, 1))
 # Experiment S1 has 2 test trials for each target_label and target_image -- should we only compare the first one to the model? or average people's two responses? -- trials 37-44 are a second test after the sampling phase, so we should save those for when we're modeling sampling
