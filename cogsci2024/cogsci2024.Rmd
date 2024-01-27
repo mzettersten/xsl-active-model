@@ -114,7 +114,6 @@ perf_vs_chi = cor.test(results$Human, results$chi) # .65 p<.001
 perf_vs_lambda = cor.test(results$Human, results$lambda) # .15 p=.04
 perf_vs_alpha= cor.test(results$Human, results$alpha) # -.46 p<.001
 
-require(report)
 age_vs_chi = cor.test(results$age, results$chi) # .20 p<.01
 age_vs_lambda = cor.test(results$age, results$lambda) # .20 p<.01
 age_vs_alpha = cor.test(results$age, results$alpha) # .05 n.s.
@@ -125,15 +124,11 @@ age_vs_alpha = cor.test(results$age, results$alpha) # .05 n.s.
 # median(results$alpha) # .56
 ```
 
-In the individual fits, the median value of $\chi = $`r round(median(results$chi),2)`, the median value of $\lambda = $`r round(median(results$lambda),2)`, and the median value of $\alpha = $`r round(median(results$alpha),2)`.
+In the individual fits, the median value of $\chi=$ `r round(median(results$chi),2)`, the median value of $\lambda=$ `r round(median(results$lambda),2)`, and the median value of $\alpha=$ `r round(median(results$alpha),2)`.
 
 The
 
-```{r 2-col-image, fig.env = "figure*", fig.pos = "h", fig.width=4, fig.height=2, fig.align = "center", set.cap.width=T, num.cols.cap=2, fig.cap = "This image spans both columns. And the caption text is limited to 0.8 of the width of the document."}
-
-# cor.test(results$neg_log_lik, results$alpha) # .35 - higher alpha = worse fit??
-# cor.test(results$neg_log_lik, results$chi) # -.37 - lower chi = worse fit
-
+```{r fig1-perf, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3, fig.height=3.5, set.cap.width=T, num.cols.cap=1, fig.cap = "One column image."}
 p1 <- results %>%
   filter(is.element(experiment_name, c("Experiment 1", "Experiment 2"))) %>%
   pivot_longer(cols = c(Human, Model), names_to = "group", values_to = "value") %>%
@@ -146,19 +141,13 @@ p1 <- results %>%
                       ymax = mean + 1.96 * se), width = 0.1, position = position_dodge(width = 0.2)) +
     theme_classic() + xlab("Age (years)") + ylab("Proportion Correct") + ylim(0, 1) +
     geom_hline(yintercept = 1/8, linetype = 'dashed')
+```
 
-p2 <- results %>%
-  filter(is.element(experiment_name, c("Experiment 1", "Experiment 2"))) %>%
-  group_by(age_years) %>%
-  summarise(mean = mean(chi), sd = sd(chi), n = n(), se = sd / sqrt(n)) %>%
-  ungroup() %>%
-  ggplot(aes(x = age_years, y = mean, color = group, shape = group)) +
-    geom_point(position = position_dodge(width = 0.2)) +
-    geom_errorbar(aes(ymin = mean - 1.96 * se, 
-                      ymax = mean + 1.96 * se), width = 0.1, position = position_dodge(width = 0.2)) +
-    theme_classic() + xlab("Age (years)") + ylab("Chi (learning rate)") + ylim(0, 1) +
-    geom_hline(yintercept = 1/8, linetype = 'dashed')
 
+
+```{r fig2-parms, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3, fig.height=5, set.cap.width=T, num.cols.cap=1, fig.cap = "One column image."}
+# cor.test(results$neg_log_lik, results$alpha) # .35 - higher alpha = worse fit??
+# cor.test(results$neg_log_lik, results$chi) # -.37 - lower chi = worse fit
 
 p2 <- results %>%
   filter(is.element(experiment_name, c("Experiment 1", "Experiment 2"))) %>%
@@ -166,10 +155,12 @@ p2 <- results %>%
   summarise(mean = mean(chi), sd = sd(chi), n = n(), se = sd / sqrt(n)) %>%
   ungroup() %>%
   ggplot(aes(x = age_years, y = mean)) +
-    geom_point() +
-    geom_linerange(aes(ymin = mean - 1.96 * se, 
-                      ymax = mean + 1.96 * se)) +
-    theme_classic() + xlab("Age (years)") + ylab("Chi (learning rate)") 
+    geom_point(position = position_dodge(width = 0.2)) +
+    geom_errorbar(aes(ymin = mean - 1.96 * se, 
+                      ymax = mean + 1.96 * se), width = 0.1, position = position_dodge(width = 0.2)) +
+    theme_classic() + xlab("Age (years)") + ylab("Chi (learning rate)") + ylim(0, 1) +
+    geom_hline(yintercept = 1/8, linetype = 'dashed')
+
 
 p3 <- results %>%
   filter(is.element(experiment_name, c("Experiment 1", "Experiment 2"))) %>%
@@ -193,29 +184,7 @@ p4 <- results %>%
                       ymax = mean + 1.96 * se)) +
     theme_classic() + xlab("Age (years)") + ylab("Alpha (memory fidelity)") 
 
-ggarrange(p1, p2, p3, p4, nrow=2)
-```
-
-```{r}
-results %>% filter(is.element(experiment_name, c("Experiment 1","Experiment 2"))) %>%
-  group_by(age_years) %>%
-  summarise(hum_sd = sd(Human), 
-            mod_sd = sd(Model),
-            Human = mean(Human),
-            Model = mean(Model)) %>%
-  pivot_longer(cols = c(Human, Model), names_to = "group", values_to = "Accuracy") %>%
-  ggplot(aes(x=age_years, y=Accuracy, color=group, shape=group)) + 
-  geom_point() + # geom_linerange(aes(ymin = )) + 
-  theme_classic() + xlab("Age (years)") + 
-  ylim(0,1) + geom_hline(yintercept=1/8, linetype='dashed')
-```
-
-
-## One-column images
-
-
-```{r image, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=2, fig.height=2, set.cap.width=T, num.cols.cap=1, fig.cap = "One column image."}
-
+ggarrange(p2, p3, p4, ncol=1)
 ```
 
 
