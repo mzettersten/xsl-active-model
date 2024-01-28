@@ -62,7 +62,11 @@ We will also investigate age-related changes in model parameters.
 ## Data
 
 All data were taken from @Zettersten2021. 
-Data for our Study 1 were pooled from Experiment 1 (31 adults), Experiment 2 (40 children, 4-9 years of age), and adults in the Ambiguous Condition of Experiment S1 (FixMe adults), which had the same design as Experiments 1 and 2.
+Data for our Study 1 were pooled from Experiment 1 (31 adults), Experiment 2 (40 children, 4-9 years of age), and adults in the Ambiguous Condition of Experiment S1 (FixMe adults), which had the same design as Experiments 1 and 2. <!-- Martin, where is condition info in Exp S1? -->
+
+The training phase of Study 1 contained 16 FixMe-second training trials, each comprised of 2 referents and 2 words. 
+The particular words and referents involved in each pairing were randomized per participant, but the same training trial sequence--and thus co-occurrence statistics--were experienced by all participants. 
+The accumulated word-referent co-occurrences are shown in Figure 1.
 
 Data for Study 2 come from Experiment 3, comprising 58 children of ages 3 to 8.
 
@@ -80,7 +84,10 @@ The relative strength of the familiarity and uncertainty bias is governed by a p
 Associations are also assumed to decay from trial to trial, at a rate governed by parameter $\alpha$. 
 The update rule for adjusting the association $M_{w,o}$ between word $w$ and referent $o$ on a given trial is
 
-(update equation)
+\begin{equation}
+M_{w,o} =  \alpha M_{w,o} + \frac{ \chi \cdot e^{ \lambda \cdot (H(w) + H(o)) } \cdot M_{w,o}  }{  \sum_{w\in W} \sum_{o\in O} e^{ \lambda \cdot (H(w) + H(o)) } \cdot M_{w,o} }
+\label{eq:fullmodel}
+\end{equation}
 
 When tested on word $w$, the model assumes learners choose referent $o$ from the offered alternatives in proportion to their associative strength $M_{w,o}$ (i.e., Luce choice).
 
@@ -94,7 +101,9 @@ The strength-biased associative model implemented just the familiarity bias ...
 
 ## Fitting Procedure
 
-We first fitted the model to each participant's data individually, 
+We first fitted each model to each participant's data individually.
+We then fitted the model simultaneously to all participants in each study.
+Finally, we again fitted individuals separately, but included a quadratic regularization term in the objective, penalizing parameter values that fell far from the optimal values for the group, approximating a weakly-informative Gaussian prior (-.004..)
 
 # Results
 
@@ -125,6 +134,8 @@ age_vs_alpha = cor.test(results$age, results$alpha) # .05 n.s.
 ```
 
 In the individual fits, the median value of $\chi=$ `r round(median(results$chi),2)`, the median value of $\lambda=$ `r round(median(results$lambda),2)`, and the median value of $\alpha=$ `r round(median(results$alpha),2)`.
+
+In the group fit, the best-fitting parameter values were $\chi=0.0323$, $\lambda=3.436$, and $\alpha=0.895$.
 
 The
 

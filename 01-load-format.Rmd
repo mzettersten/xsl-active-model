@@ -86,7 +86,7 @@ ad_learn <- ad %>% filter(trial_type=="learning")
 ad_test <- ad %>% filter(trial_type=="test") # trial_index 15-22, 31-38
 # choice_image, target_image, foil_image  (2AFC) -- and test_audio
 
-get_experiment_cooc_matrix <- function(dat, expt_name) {
+get_experiment_cooc_matrix <- function(dat, expt_name, iterations=0) {
   this_exp = dat %>% filter(experiment_name==expt_name)
   xd_s <- subset(this_exp, subject==unique(this_exp$subject)[1])
   voc = sort(na.omit(unique(unlist(xd_s %>% select(starts_with("label"))))))
@@ -94,6 +94,13 @@ get_experiment_cooc_matrix <- function(dat, expt_name) {
   coocs <- matrix(0, nrow=length(voc), ncol=length(refs))
   row.names(coocs) = voc
   colnames(coocs) = refs
+  if(iterations>0) {
+    for(i in 1:iterations) {
+      words <- xd_s[i,] %>% select(starts_with("label"))
+      refs <- xd_s[i,] %>% select(starts_with("image"))
+      coocs[words,refs] = coocs[words,refs] + 1
+    }
+  }
   return(coocs)
 }
 
@@ -102,6 +109,7 @@ get_experiment_cooc_matrix(ad, "2A") # exposure phase: choice_image and choice_a
 get_experiment_cooc_matrix(ad, "2B") # ""
 get_experiment_cooc_matrix(ad, "2C") # ""
 
+exp1_mat <- get_experiment_cooc_matrix(xd, "Experiment 1") 
 ```
 
 # Cross-situational
@@ -208,12 +216,11 @@ fit_model_to_group <- function(model_name, exp_name, xd, lower, upper) {
                                  trial_type == "test", trial_index < 37)
   
   fit <- DEoptim::DEoptim(eval_model_group, lower = lower, upper = upper,
-                          DEoptim::DEoptim.control(reltol = .001, NP = 100, itermax = 100),
+                          DEoptim::DEoptim.control(reltol = .001, NP = 200, itermax = 200),
                           ords = ords, testdat = testdat_group, logLik_only = TRUE,
                           start_matrix = crossact_mats[[exp_name]]) 
   return(fit$optim$bestmem)
 }
-
 
 
 eval_model_group <- function(parms, ords, testdat, start_matrix, logLik_only = TRUE) {
@@ -234,7 +241,7 @@ eval_model_group <- function(parms, ords, testdat, start_matrix, logLik_only = T
 }
 
 
-fit_model_per_subject <- function(model_name, xd, lower, upper) {
+fit_model_per_subject <- function(model_name, xd, lower, upper, par_priors=NULL) {
   source(paste0("R/",model_name,".R"))
   
   ords <- list()
@@ -248,7 +255,7 @@ fit_model_per_subject <- function(model_name, xd, lower, upper) {
   for(s in names(ords)) { # s = "p621758"
     xd_s <- xd %>% filter(subject==s)
     testdat <- xd_s %>% filter(trial_type=="test", trial_index<37) # excludes 37-44; Experiment S1's post-sampling phase test trials
-    fit <- DEoptim::DEoptim(eval_model, lower=lower, upper=upper,
+    fit <- DEoptim::DEoptim(eval_model, lower=lower, upper=upper, par_priors=par_priors,
                           DEoptim::DEoptim.control(reltol=.001, NP=100, itermax=100),
                           ord = ords[[s]], testdat=testdat, logLik_only=T, # SSE_only=T
                           start_matrix = crossact_mats[[xd_s$experiment_name[1]]]) 
@@ -292,17 +299,30 @@ eval_model <- function(parms, testdat, ord, start_matrix, SSE_only=FALSE, logLik
 ```{r, eval=F}
 exp1_fit <- fit_model_to_group("kachergis", "Experiment 1", xd %>% filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .01, .5), upper=c(3, 12, 1))
-
+# logLik = 171.4043 parms = c(0.032338, 3.435991, 0.895025)
 exp2_fit <- fit_model_to_group("kachergis", "Experiment 2", xd %>% filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .01, .5), upper=c(3, 12, 1))
-
+# logLik = 159.697490 parms = c(0.036741, 2.679146, 1.000000) 
+# same LL with lambda = 3.021478, 1.453844, 7.052054, 10.207910, 0.979101 ...
 exp3_fit <- fit_model_to_group("kachergis", "Experiment 3", xd %>% filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .01, .5), upper=c(3, 12, 1))
-
+# logLik = 202.944558 parms = c(0.002033, 0.355762, 0.500000)
 expS1_fit <- fit_model_to_group("kachergis", "Experiment S1", xd %>% filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .01, .5), upper=c(3, 12, 1))
+# logLik = 275.737849 parms = c(0.176909, 2.241018, 0.961075)
 
 save(exp1_fit, exp2_fit, exp3_fit, expS1_fit, file="data/exp_fits_kachergis.Rdata")
+
+# fit individuals with exp1 group par priors:
+ind_fits <- fit_model_per_subject("kachergis", xd %>% filter(subject!="Crossact1_p121"), 
+                                  lower=c(.001, .01, .5), upper=c(3, 12, 1), 
+                                  par_priors = exp1_fit) # c(0.03233805, 3.43599139, 0.89502461)
+save(ind_fits, file="data/ind_fits_kachergis_exp1_group_regularized.Rdata")
+
+# fit individuals with no priors:
+ind_fits <- fit_model_per_subject("rescorla-wagner", xd %>% filter(subject!="Crossact1_p121"), 
+                                  lower=c(.001, .001, .01), upper=c(1, 1, 2))
+save(ind_fits, file="data/ind_fits_rescorla-wagner.Rdata")
 
 ind_fits <- fit_model_per_subject("kachergis", xd %>% filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .01, .5), upper=c(3, 12, 1))
