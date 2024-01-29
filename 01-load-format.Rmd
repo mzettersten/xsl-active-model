@@ -96,8 +96,9 @@ get_experiment_cooc_matrix <- function(dat, expt_name, iterations=0) {
   colnames(coocs) = refs
   if(iterations>0) {
     for(i in 1:iterations) {
-      words <- xd_s[i,] %>% select(starts_with("label"))
-      refs <- xd_s[i,] %>% select(starts_with("image"))
+      words <- na.omit(unlist(xd_s[i,] %>% select(starts_with("label"))))
+      refs <- unlist(xd_s[i,] %>% select(starts_with("image")))
+      refs <- refs[which(!is.na(refs))]
       coocs[words,refs] = coocs[words,refs] + 1
     }
   }
@@ -109,7 +110,17 @@ get_experiment_cooc_matrix(ad, "2A") # exposure phase: choice_image and choice_a
 get_experiment_cooc_matrix(ad, "2B") # ""
 get_experiment_cooc_matrix(ad, "2C") # ""
 
-exp1_mat <- get_experiment_cooc_matrix(xd, "Experiment 1") 
+exp1_mat <- get_experiment_cooc_matrix(xd, "Experiment 1", iterations=24) 
+heatmap(exp1_mat, scale="none")
+
+expS1_mat <- get_experiment_cooc_matrix(xd, "Experiment S1", iterations=24) 
+heatmap(expS1_mat)
+
+exp2_mat <- get_experiment_cooc_matrix(xd, "Experiment 2", iterations=24) 
+heatmap(exp2_mat)
+
+exp3_mat <- get_experiment_cooc_matrix(xd, "Experiment 3", iterations=24) 
+heatmap(exp3_mat)
 ```
 
 # Cross-situational

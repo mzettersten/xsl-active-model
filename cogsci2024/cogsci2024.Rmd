@@ -1,5 +1,5 @@
 ---
-title: "Testing Mechanistic "
+title: "Towards a Model-based Understanding of Active Cross-situational Word Learning"
 bibliography: library.bib
 csl: apa6.csl
 document-params: "10pt, letterpaper"
@@ -64,19 +64,25 @@ We will also investigate age-related changes in model parameters.
 All data were taken from @Zettersten2021. 
 Data for our Study 1 were pooled from Experiment 1 (31 adults), Experiment 2 (40 children, 4-9 years of age), and adults in the Ambiguous Condition of Experiment S1 (FixMe adults), which had the same design as Experiments 1 and 2. <!-- Martin, where is condition info in Exp S1? -->
 
-The training phase of Study 1 contained 16 FixMe-second training trials, each comprised of 2 referents and 2 words. 
+The training phase of Study 1 contained 24 FixMe-second training trials, each comprised of 2 referents and 2 words. 
 The particular words and referents involved in each pairing were randomized per participant, but the same training trial sequence--and thus co-occurrence statistics--were experienced by all participants. 
 The accumulated word-referent co-occurrences are shown in Figure 1.
 
 Data for Study 2 come from Experiment 3, comprising 58 children of ages 3 to 8.
 
+```{r fig-exp-one, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.2, fig.height=3.2, set.cap.width=T, num.cols.cap=1, fig.cap = "Word-referent co-occurrence matrix for Study (Experiment 1, Zettersten and Saffran, 2020)."}
+img <- png::readPNG("figs/exp1-cooccurrences.png")
+grid::grid.raster(img)
+```
+
+
 ## Models
 
 We focused on analyzing data from the familiarity- and uncertainty-biased associative model [@Kachergis2012,@Kachergis2017], and variations of that model, described below.
 
-### Familiarity- and Uncertainty-biased Associative Model
+### Familiarity- and Uncertainty-biased Associative Model (FUAM)
 
-This model assumes that learners accumulate associations between all presented words and referents on each trial, but that their attention is biased more towards particular word-referent associations on the basis of prior experience.
+The FUAM assumes that learners accumulate associations between all presented words and referents on each trial, but that their attention is biased more towards particular word-referent associations on the basis of prior experience.
 In particular, more attention (i.e. associative weight) is directed to associations between words and referents that have appeared together on earlier trials (i.e., a familiarity bias).
 In addition, more attention is directed to stimuli that have higher uncertainty (i.e. entropy, $H$) in their associations, whether because they are novel (and thus have no pre-existing associations) or because they have diffuse associations with several different stimuli.
 The model assumes learners knowledge grows trial-by-trial, and that a fixed amount of associative weight (learning rate $\chi$) is distributed among the presented word-referent associations on a given trial in proportion to the prior familiarity of the association and the uncertainty of the involved word and referent.
@@ -92,12 +98,18 @@ M_{w,o} =  \alpha M_{w,o} + \frac{ \chi \cdot e^{ \lambda \cdot (H(w) + H(o)) } 
 When tested on word $w$, the model assumes learners choose referent $o$ from the offered alternatives in proportion to their associative strength $M_{w,o}$ (i.e., Luce choice).
 
 The other models we tested are variations on this model.
-The strength-biased associative model implemented just the familiarity bias ...
 
-### Uncertainty-biased Associative Model
+### Familiarity-biased Associative Model (SAM)
 
-### Novelty-biased Associative Model
+The familiarity-biased associative model (SAM) implemented just the familiarity bias of the FUAM, without the uncertainty bias term, and thus only implements a bias for already-strong associations, using learning rate ($\chi$) and decay $\alpha$ parameters.
 
+### Uncertainty-biased Associative Model (UAM)
+
+The uncertainty-biased associative model (UAM) implemented only the uncertainty bias of the FUAM, without the familiarity bias term, and uses the same three parameters as the FUAM.
+
+### Novelty-biased Associative Model (NAM)
+
+The novelty-biased associative model (NAM), like the UAM, has no familiarity bias, but instead of the entropy terms ($H(w)$ and $H(o)$) uses novelty (e.g., $1/(frequency(w)+1)$).
 
 ## Fitting Procedure
 
@@ -156,7 +168,7 @@ p1 <- results %>%
 
 
 
-```{r fig2-parms, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3, fig.height=5, set.cap.width=T, num.cols.cap=1, fig.cap = "One column image."}
+```{r fig2-parms, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.2, fig.height=6, set.cap.width=T, num.cols.cap=1, fig.cap = "One column image."}
 # cor.test(results$neg_log_lik, results$alpha) # .35 - higher alpha = worse fit??
 # cor.test(results$neg_log_lik, results$chi) # -.37 - lower chi = worse fit
 
@@ -167,10 +179,9 @@ p2 <- results %>%
   ungroup() %>%
   ggplot(aes(x = age_years, y = mean)) +
     geom_point(position = position_dodge(width = 0.2)) +
-    geom_errorbar(aes(ymin = mean - 1.96 * se, 
+    geom_linerange(aes(ymin = mean - 1.96 * se, 
                       ymax = mean + 1.96 * se), width = 0.1, position = position_dodge(width = 0.2)) +
-    theme_classic() + xlab("Age (years)") + ylab("Chi (learning rate)") + ylim(0, 1) +
-    geom_hline(yintercept = 1/8, linetype = 'dashed')
+    theme_classic() + xlab("Age (years)") + ylab("Chi (learning rate)")  
 
 
 p3 <- results %>%
