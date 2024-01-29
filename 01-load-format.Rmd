@@ -318,6 +318,34 @@ ind_fits <- fit_model_per_subject("kachergis", xd %>% filter(subject!="Crossact1
                                   lower=c(.001, .01, .5), upper=c(3, 12, 1), 
                                   par_priors = exp1_fit) # c(0.03233805, 3.43599139, 0.89502461)
 save(ind_fits, file="data/ind_fits_kachergis_exp1_group_regularized.Rdata")
+cor.test(ind_fits$sfits$chi, ind_fits$sfits$lambda) # -.32
+cor.test(ind_fits$sfits$chi, ind_fits$sfits$alpha) # -.21
+cor.test(ind_fits$sfits$alpha, ind_fits$sfits$lambda) # -.21
+
+exp1_str_fit <- fit_model_to_group("strength", "Experiment 1", xd %>% filter(subject!="Crossact1_p121"), 
+                                  lower=c(.001, .5), upper=c(3, 1))
+# logLik = 172.430055 parms = c(0.058560, 0.934179)
+exp1_nov_fit <- fit_model_to_group("novelty", "Experiment 1", xd %>% filter(subject!="Crossact1_p121"), 
+                                  lower=c(.001, .01, .5), upper=c(3, 12, 1))
+# logLik = 171.703926 parms = c(0.125845, 3.202186, 1.0)
+save(exp1_str_fit, exp1_nov_fit, file="data/exp1_str_nov_fits.Rdata")
+
+
+str_fits_reg <- fit_model_per_subject("strength", xd %>% filter(subject!="Crossact1_p121"), 
+                                  lower=c(.001, .5), upper=c(3, 1), 
+                                  par_priors = exp1_str_fit) # c(0.058560, 0.934179)
+nov_fits_reg <- fit_model_per_subject("novelty", xd %>% filter(subject!="Crossact1_p121"), 
+                                  lower=c(.001, .01, .5), upper=c(3, 12, 1), 
+                                  par_priors = exp1_nov_fit) # c(0.125845, 3.202186, 1.0)
+save(str_fits_reg, nov_fits_reg, file="data/ind_fits_str_nov_exp1_group_regularized.Rdata")
+cor.test(str_fits_reg$sfits$chi, str_fits_reg$sfits$lambda) # -.34 (but lambda is actually alpha)
+
+cor.test(nov_fits_reg$sfits$chi, nov_fits_reg$sfits$lambda) # -.09 n.s.
+cor.test(nov_fits_reg$sfits$chi, nov_fits_reg$sfits$alpha) # -.36
+cor.test(nov_fits_reg$sfits$alpha, nov_fits_reg$sfits$lambda) # .13 n.s.
+
+sum(nov_fits_reg$sfits$neg_log_lik) # 556.23
+sum(str_fits_reg$sfits$neg_log_lik) # 561.78
 
 # fit individuals with no priors:
 ind_fits <- fit_model_per_subject("rescorla-wagner", xd %>% filter(subject!="Crossact1_p121"), 
@@ -340,9 +368,6 @@ ind_fits1 <- fit_model_per_subject("kachergis", xd %>% filter(subject!="Crossact
 save(ind_fits1, file="data/ind_fits_kachergis_chi1.Rdata")
 mean(ind_fits1$sfits$neg_log_lik) # 2.71 - slightly better fit with more constrained chi
 
-# further constrain lambda: do
-ind_fits <- fit_model_per_subject("kachergis", xd %>% filter(subject!="Crossact1_p121"), 
-                                  lower=c(.001, .01, .5), upper=c(1, 10, 1))
 
 
 ind_fits <- fit_model_per_subject("novelty", xd %>% filter(subject!="Crossact1_p121"), 
