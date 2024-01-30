@@ -61,7 +61,7 @@ Past work has shown that both children and adults are active word learners, syst
 Yet what types of active learners are children about word meanings, exactly?
 While work has begun to characterize a variety of strategies that learners pursue when encountering novel words [@Kachergis2013; @zettersten_active_2023], we lack a formal understanding of the specific sampling strategies that word learners use [@Settles2012; though see @gelderloos_active_2020; @Keijser2019].
 Recent work has documented broad changes in the sampling strategies that children and adolescents deploy across development across several cognitive domains, e.g. casual learning tasks [@nussenbaum_causal_2019] and foraging tasks [@nussenbaum_novelty_2023; @meder_directed_2021].
-In the current work, we therefore explore what sampling decision rules best explain both children and adults' information-seeking behavior when learning novel word-referent associations.
+In the current work, we therefore explore what sampling decision rules best explain both children's and adults' information-seeking behavior when learning novel word-referent associations.
 
 ```{r fig-exp-one, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.2, fig.height=3.2, set.cap.width=T, num.cols.cap=1, fig.cap = "Word-referent co-occurrence matrix for Study (Experiment 1, Zettersten and Saffran, 2020)."}
 img <- png::readPNG("figs/exp1-cooccurrences.png")
