@@ -1,0 +1,488 @@
+% Template for Cogsci submission with R Markdown
+
+% Stuff changed from original Markdown PLOS Template
+\documentclass[10pt, letterpaper]{article}
+
+\usepackage{cogsci}
+\usepackage{pslatex}
+\usepackage{float}
+\usepackage{caption}
+
+% amsmath package, useful for mathematical formulas
+\usepackage{amsmath}
+
+% amssymb package, useful for mathematical symbols
+\usepackage{amssymb}
+
+% hyperref package, useful for hyperlinks
+\usepackage{hyperref}
+
+% graphicx package, useful for including eps and pdf graphics
+% include graphics with the command \includegraphics
+\usepackage{graphicx}
+
+% Sweave(-like)
+\usepackage{fancyvrb}
+\DefineVerbatimEnvironment{Sinput}{Verbatim}{fontshape=sl}
+\DefineVerbatimEnvironment{Soutput}{Verbatim}{}
+\DefineVerbatimEnvironment{Scode}{Verbatim}{fontshape=sl}
+\newenvironment{Schunk}{}{}
+\DefineVerbatimEnvironment{Code}{Verbatim}{}
+\DefineVerbatimEnvironment{CodeInput}{Verbatim}{fontshape=sl}
+\DefineVerbatimEnvironment{CodeOutput}{Verbatim}{}
+\newenvironment{CodeChunk}{}{}
+
+% cite package, to clean up citations in the main text. Do not remove.
+\usepackage{apacite}
+
+% KM added 1/4/18 to allow control of blind submission
+
+
+\usepackage{color}
+
+% Use doublespacing - comment out for single spacing
+%\usepackage{setspace}
+%\doublespacing
+
+
+% % Text layout
+% \topmargin 0.0cm
+% \oddsidemargin 0.5cm
+% \evensidemargin 0.5cm
+% \textwidth 16cm
+% \textheight 21cm
+
+\title{Towards a Model-based Understanding of Active Cross-situational
+Word Learning}
+
+
+\author{{\large \bf George~Kachergis (kachergis@stanford.edu)} \\ Department of Psychology, Stanford University \\ Stanford, CA \AND {\large \bf Martin~Zettersten (FIXME@princeton.edu)} \\ Department of Psychology, Princeton University \\ Princeton, NJ}
+
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newenvironment{CSLReferences}%
+  {}%
+  {\par}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Word learning is a complex process, influenced not only by the words and
+referents in the language environment, but also by what learners
+selectively attend to, which in turn is likely determined by their prior
+knowledge.
+
+\textbf{Keywords:}
+active learning; cross-situational word learning; self-directed
+learning; uncertainty reduction
+\end{abstract}
+
+\hypertarget{introduction}{%
+\section{Introduction}\label{introduction}}
+
+Early word learning is often thought of as largely determined by the
+learners' linguistic environment, where they can only learn what is
+present in the input. Increasingly, research is finding that
+learners--even at a young age--are involved in selecting and shaping
+their input, and that such self-directed, active learning can accelerate
+acquisition. Understanding the strategies that learners use to shape
+their experience will help us build and improve theories of language.
+
+The goal of our current study is to test how well previously proposed
+models of cross-situational word learning can explain the observed
+results of active learning experiments from Zettersten \& Saffran
+(2021). Aside from assessing the ability of the models to account for
+the overall data, it is of particular interest whether particular model
+parameters are associated with individuals' 1) learning performance and
+2) deployed active learning strategy. We will also investigate
+age-related changes in model parameters.
+
+Past work has shown that both children and adults are active word
+learners, systematically seeking new information word meanings
+{[}Hembacher, DeMayo, \& Frank (2020); Janakiefski et al. (2022);
+Zettersten \& Saffran (2021); other refs{]}, with important implications
+for understanding how we are able to quickly build rich vocabularies
+(Hidaka, Torii, \& Kachergis, 2017). Yet what types of active learners
+are children about word meanings, exactly? While work has begun to
+characterize a variety of strategies that learners pursue when
+encountering novel words (George Kachergis, Yu, \& Shiffrin, 2013;
+Zettersten, Cutler, \& Lew-Williams, 2023), we lack a formal
+understanding of the specific sampling strategies that word learners use
+(Settles, 2012; though see Gelderloos, Mahmoudi Kamelabad, \& Alishahi,
+2020; Keijser, Gelderloos, \& Alishahi, 2019). Recent work has
+documented broad changes in the sampling strategies that children and
+adolescents deploy across development across several cognitive domains,
+e.g.~casual learning tasks (Nussenbaum et al., 2019) and foraging tasks
+(Meder, Wu, Schulz, \& Ruggeri, 2021; Nussenbaum et al., 2023). In the
+current work, we therefore explore what sampling decision rules best
+explain both children and adults' information-seeking behavior when
+learning novel word-referent associations.
+
+\begin{CodeChunk}
+\begin{figure}[H]
+
+{\centering \includegraphics{figs/fig-exp-one-1} 
+
+}
+
+\caption[Word-referent co-occurrence matrix for Study (Experiment 1, Zettersten and Saffran, 2020)]{Word-referent co-occurrence matrix for Study (Experiment 1, Zettersten and Saffran, 2020).}\label{fig:fig-exp-one}
+\end{figure}
+\end{CodeChunk}
+
+\hypertarget{method}{%
+\section{Method}\label{method}}
+
+\hypertarget{data}{%
+\subsection{Data}\label{data}}
+
+All data were taken from Zettersten \& Saffran (2021). Data for our
+Study 1 were pooled from Experiment 1 (31 adults), Experiment 2 (40
+children, 4-9 years of age), and adults in the Ambiguous Condition of
+Experiment S1 (FixMe adults), which had the same design as Experiments 1
+and 2.
+
+The training phase of Study 1 contained 24 FixMe-second training trials,
+each comprised of 2 referents and 2 words. The particular words and
+referents involved in each pairing were randomized per participant, but
+the same training trial sequence--and thus co-occurrence
+statistics--were experienced by all participants. The accumulated
+word-referent co-occurrences are shown in Figure 1.
+
+Data for Study 2 come from Experiment 3, comprising 58 children of ages
+3 to 8.
+
+\hypertarget{models}{%
+\subsection{Models}\label{models}}
+
+We focused on analyzing data from the familiarity- and
+uncertainty-biased associative model G. Kachergis, Yu, \& Shiffrin
+(2016), and variations of that model, described below.
+
+\hypertarget{familiarity--and-uncertainty-biased-associative-model-fuam}{%
+\subsubsection{Familiarity- and Uncertainty-biased Associative Model
+(FUAM)}\label{familiarity--and-uncertainty-biased-associative-model-fuam}}
+
+The FUAM assumes that learners accumulate associations between all
+presented words and referents on each trial, but that their attention is
+biased more towards particular word-referent associations on the basis
+of prior experience. In particular, more attention (i.e.~associative
+weight) is directed to associations between words and referents that
+have appeared together on earlier trials (i.e., a familiarity bias). In
+addition, more attention is directed to stimuli that have higher
+uncertainty (i.e.~entropy, \(H\)) in their associations, whether because
+they are novel (and thus have no pre-existing associations) or because
+they have diffuse associations with several different stimuli. The model
+assumes learners knowledge grows trial-by-trial, and that a fixed amount
+of associative weight (learning rate \(\chi\)) is distributed among the
+presented word-referent associations on a given trial in proportion to
+the prior familiarity of the association and the uncertainty of the
+involved word and referent. The relative strength of the familiarity and
+uncertainty bias is governed by a parameter \(\lambda\): for values of
+\(\lambda>1\) the model focuses more attention on uncertain stimuli,
+while for values of \(\lambda<1\) the model focuses more attention on
+familiar word-referent associations. Associations are also assumed to
+decay from trial to trial, at a rate governed by parameter \(\alpha\).
+The update rule for adjusting the association \(M_{w,o}\) between word
+\(w\) and referent \(o\) on a given trial is
+
+\begin{equation}
+M_{w,o} =  \alpha M_{w,o} + \frac{ \chi \cdot e^{ \lambda \cdot (H(w) + H(o)) } \cdot M_{w,o}  }{  \sum_{w\in W} \sum_{o\in O} e^{ \lambda \cdot (H(w) + H(o)) } \cdot M_{w,o} }
+\label{eq:fullmodel}
+\end{equation}
+
+When tested on word \(w\), the model assumes learners choose referent
+\(o\) from the offered alternatives in proportion to their associative
+strength \(M_{w,o}\) (i.e., Luce choice).
+
+The other models we tested are variations on this model.
+
+\hypertarget{familiarity-biased-associative-model-sam}{%
+\subsubsection{Familiarity-biased Associative Model
+(SAM)}\label{familiarity-biased-associative-model-sam}}
+
+The familiarity-biased associative model (SAM) implemented just the
+familiarity bias of the FUAM, without the uncertainty bias term, and
+thus only implements a bias for already-strong associations, using
+learning rate (\(\chi\)) and decay \(\alpha\) parameters.
+
+\hypertarget{uncertainty-biased-associative-model-uam}{%
+\subsubsection{Uncertainty-biased Associative Model
+(UAM)}\label{uncertainty-biased-associative-model-uam}}
+
+The uncertainty-biased associative model (UAM) implemented only the
+uncertainty bias of the FUAM, without the familiarity bias term, and
+uses the same three parameters as the FUAM.
+
+\hypertarget{novelty-biased-associative-model-nam}{%
+\subsubsection{Novelty-biased Associative Model
+(NAM)}\label{novelty-biased-associative-model-nam}}
+
+The novelty-biased associative model (NAM), like the UAM, has no
+familiarity bias, but instead of the entropy terms (\(H(w)\) and
+\(H(o)\)) uses novelty (e.g., \(1/(frequency(w)+1)\)).
+
+\hypertarget{fitting-procedure}{%
+\subsection{Fitting Procedure}\label{fitting-procedure}}
+
+We first fitted each model to each participant's data individually. We
+then fitted the model simultaneously to all participants in each study.
+Finally, we again fitted individuals separately, but included a
+quadratic regularization term in the objective, penalizing parameter
+values that fell far from the optimal values for the group,
+approximating a weakly-informative Gaussian prior (-.004..)
+
+\hypertarget{modeling-sampling-choices}{%
+\subsection{Modeling Sampling Choices}\label{modeling-sampling-choices}}
+
+Next, we used the best-fit models of participants' learning to
+investigate participants' search strategies in the sampling phase of the
+experiment. We considered three sampling decision rules commonly
+attested in the information-seeking literature to explain active
+choices: maximizing entropy reduction (information gain), maximizing the
+probability associated with labels (probability gain), and margin
+sampling.
+
+\hypertarget{maximizing-entropy-reduction.}{%
+\subsubsection{Maximizing entropy
+reduction.}\label{maximizing-entropy-reduction.}}
+
+In this decision rule, the model's goal is to maximally reduce the
+entropy of the object-label probability distribution across objects
+(Nelson, 2005; Settles, 2012). Sampling choices are modeled based on
+comparing the relative entropy reduction provided by making a given
+sampling selection of a referent \(s_o\) (across the labels \(w\)):
+
+\begin{equation}
+\max_{s_o,w}({H(w)-H(w|s_o)})
+\label{eq:entropy_reduction}
+\end{equation}
+
+Modeling selections were made by determining, on any given trial for a
+participant, which object maximally reduced entropy (averaging across
+all possible random distractors that could be chosen in the case of the
+adult data).
+
+\hypertarget{margin-sampling.}{%
+\subsubsection{Margin sampling.}\label{margin-sampling.}}
+
+An alternative strategy documented in describing active sampling
+strategies is focusing on reducing uncertainty for a more constrained
+set of items (Markant, Settles, \& Gureckis, 2016). This strategy can be
+formalized as \emph{margin sampling}, in which the model focuses only on
+the boundary between two alternative options. Margin sampling predicts
+that learners will focus on instances where there is highest ambiguity
+between the two most likely labels for a given referent. Formally, if
+the distribution of labels (\(\{l_1,l_2,...,l_n\}\)) for a given
+referent \(o\) are ordered from most (\(p_1\)) to least (\(p_n\))
+likely, \(\{p_1,p_2,...,p_n\}\), the margin between labels is given by
+
+\begin{equation}
+LM(x) = 1 - (p_1 - p_2)
+\label{eq:margin_sampling}
+\end{equation}
+
+In other words, the model selects the object that has the greatest
+ambiguity or competition between its two strongest associates.
+
+\hypertarget{maximizing-probability-gain.}{%
+\subsubsection{Maximizing probability
+gain.}\label{maximizing-probability-gain.}}
+
+In this decision rule, the model's goal is to maximally increase the
+probability associated between a random label and its object (Nelson,
+McKenzie, Cottrell, \& Sejnowski, 2010). Selection choices are modeled
+based on determining the increase in (correct) association strength
+provided by a each potential object selection. The final object was
+selected that led to the largest increase in association strength
+(averaging across all possible distractors that could be chosen in the
+case of the adult data).
+
+\begin{equation}
+\max_{s_o,w}({M_{w,s_o})- \max_{w,o}(M_{w,o}})
+\label{eq:probability_gain}
+\end{equation}
+
+\hypertarget{alternative-strategies.}{%
+\subsubsection{Alternative strategies.}\label{alternative-strategies.}}
+
+We also explored several additional strategies. First, we also
+considered a \emph{maximum certainty} (or confirmatory) strategy.
+Learners may gravitate towards confirming choices they already have high
+certainty for {[}Wason, 1960; Zettersten et al. (2023){]}. Second, we
+considered a \emph{novelty-based} strategy in which the model based its
+choices on the relative novelty (or familiarity) of the choice options.
+
+\hypertarget{results}{%
+\section{Results}\label{results}}
+
+In the individual fits, the median value of \(\chi=\) 0.03, the median
+value of \(\lambda=\) 9.25, and the median value of \(\alpha=\) 0.56.
+
+In the group fit, the best-fitting parameter values were
+\(\chi=0.0323\), \(\lambda=3.436\), and \(\alpha=0.895\).
+
+The
+
+\begin{CodeChunk}
+\begin{figure}[H]
+
+{\centering \includegraphics{figs/fig2-parms-1} 
+
+}
+
+\caption[One column image]{One column image.}\label{fig:fig2-parms}
+\end{figure}
+\end{CodeChunk}
+
+\hypertarget{tables}{%
+\subsection{Tables}\label{tables}}
+
+Number tables consecutively; place the table number and title (in 10
+point) above the table with one line space above the caption and one
+line space below it, as in Table 1. You may float tables to the top or
+bottom of a column, set wide tables across both columns.
+
+You can use the xtable function in the xtable package.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{rrrrr}
+  \hline
+ & Estimate & Std. Error & t value & Pr($>$$|$t$|$) \\ 
+  \hline
+(Intercept) & -0.06 & 0.11 & -0.5 & 0.59 \\ 
+  x & 1.86 & 0.10 & 17.9 & 0.00 \\ 
+   \hline
+\end{tabular}
+\caption{This table prints across one column.} 
+\end{table}
+
+\hypertarget{discussion}{%
+\section{Discussion}\label{discussion}}
+
+\hypertarget{acknowledgements}{%
+\section{Acknowledgements}\label{acknowledgements}}
+
+Place acknowledgments (including funding information) in a section at
+the end of the paper.
+
+\hypertarget{references}{%
+\section{References}\label{references}}
+
+\setlength{\parindent}{-0.1in} 
+\setlength{\leftskip}{0.125in}
+
+\noindent
+
+\hypertarget{refs}{}
+\begin{CSLReferences}{1}{0}
+\leavevmode\vadjust pre{\hypertarget{ref-gelderloos_active_2020}{}}%
+Gelderloos, L., Mahmoudi Kamelabad, A., \& Alishahi, A. (2020). Active
+word learning through self-supervision. In S. Denison, M. Mack, Y. Xu,
+\& B. C. Armstrong (Eds.), \emph{Proceedings for the 42nd {Annual}
+{Meeting} of the {Cognitive} {Science} {Society}} (pp. 1050--1056).
+Cognitive Science Society.
+
+\leavevmode\vadjust pre{\hypertarget{ref-hembacher_childrens_2020}{}}%
+Hembacher, E., DeMayo, B., \& Frank, M. C. (2020). Children's social
+information seeking is sensitive to referential ambiguity. \emph{Child
+Development}, \emph{91}(6), e1178--e1193.
+http://doi.org/\href{https://doi.org/10.1111/cdev.13427}{10.1111/cdev.13427}
+
+\leavevmode\vadjust pre{\hypertarget{ref-Hidaka2017}{}}%
+Hidaka, S., Torii, T., \& Kachergis, G. (2017). Quantifying the impact
+of active choice in word learning. In G. Gunzelmann, A. Howes, T.
+Tenbrink, \& E. Davelaar (Eds.), \emph{Proceedings of the 39th {Annual}
+{Meeting} of the {Cognitive} {Science} {Society}} (pp. 519--525).
+Austion, TX: Cognitive Science Society.
+
+\leavevmode\vadjust pre{\hypertarget{ref-janakiefski_gaining_2022}{}}%
+Janakiefski, L., Tippenhauer, N., Liu, Q., Green, M., Loughmiller, S.,
+\& Saylor, M. M. (2022). Gaining access to the unknown: {Preschoolers}
+privilege unknown information as the target of their questions about
+verbs. \emph{Journal of Experimental Child Psychology}, \emph{217},
+105358.
+http://doi.org/\href{https://doi.org/10.1016/j.jecp.2021.105358}{10.1016/j.jecp.2021.105358}
+
+\leavevmode\vadjust pre{\hypertarget{ref-Kachergis2013}{}}%
+Kachergis, George, Yu, C., \& Shiffrin, R. M. (2013). Actively learning
+object names across ambiguous situations. \emph{Topics in Cognitive
+Science}, \emph{5}(1), 200--13.
+http://doi.org/\href{https://doi.org/10.1111/tops.12008}{10.1111/tops.12008}
+
+\leavevmode\vadjust pre{\hypertarget{ref-Kachergis2017}{}}%
+Kachergis, G., Yu, C., \& Shiffrin, R. M. (2016). A bootstrapping model
+of frequency and contextual diversity effects in word learning.
+\emph{Cognitive Science}, \emph{41}(3).
+
+\leavevmode\vadjust pre{\hypertarget{ref-Kachergis2012}{}}%
+Kachergis, Y., G. (2012). An associative model of adaptive inference for
+learning word--referent mappings. \emph{Psychonomic Bulletin and
+Review}, \emph{19}(2), 317--324.
+
+\leavevmode\vadjust pre{\hypertarget{ref-Keijser2019}{}}%
+Keijser, D., Gelderloos, L., \& Alishahi, A. (2019). Curious topics: {A}
+curiosity-based model of first language word learning. In
+\emph{Proceedings of the 41st {Annual} {Conference} of the {Cognitive}
+{Science} {Society}} (pp. 1991--1997). Montreal, QB: Cognitive Science
+Society.
+
+\leavevmode\vadjust pre{\hypertarget{ref-markant_self-directed_2016}{}}%
+Markant, D. B., Settles, B., \& Gureckis, T. M. (2016). Self-directed
+learning favors local, rather than global, uncertainty. \emph{Cognitive
+Science}, \emph{40}(1), 100--120.
+http://doi.org/\href{https://doi.org/10.1111/cogs.12220}{10.1111/cogs.12220}
+
+\leavevmode\vadjust pre{\hypertarget{ref-meder_directed_2021}{}}%
+Meder, B., Wu, M. C., Schulz, E., \& Ruggeri, A. (2021).
+\href{https://www.ncbi.nlm.nih.gov/pubmed/25246403}{Directed and random
+exploration in children}. \emph{Preprint}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-Nelson2005}{}}%
+Nelson, J. D. (2005). Finding useful questions: {On} {Bayesian}
+diagnosticity, probability, impact, and information. \emph{Psychological
+Review}, \emph{112}(4), 979--999.
+
+\leavevmode\vadjust pre{\hypertarget{ref-nelson_experience_2010}{}}%
+Nelson, J. D., McKenzie, C. R. M., Cottrell, G. W., \& Sejnowski, T. J.
+(2010). Experience {Matters}: {Information} {Acquisition} {Optimizes}
+{Probability} {Gain}. \emph{Psychological Science}, \emph{21}(7),
+960--969.
+http://doi.org/\href{https://doi.org/10.1177/0956797610372637}{10.1177/0956797610372637}
+
+\leavevmode\vadjust pre{\hypertarget{ref-nussenbaum_causal_2019}{}}%
+Nussenbaum, K., Cohen, A. O., Davis, Z., Halpern, D., Gureckis, T., \&
+Hartley, C. (2019). Causal information-seeking strategies change across
+childhood and adolescence,\emph{ April 12}, 1--18.
+http://doi.org/\href{https://doi.org/10.31234/OSF.IO/QUKAC}{10.31234/OSF.IO/QUKAC}
+
+\leavevmode\vadjust pre{\hypertarget{ref-nussenbaum_novelty_2023}{}}%
+Nussenbaum, K., Martin, R. E., Maulhardt, S., Yang, Y. J.,
+Bizzell-Hatcher, G., Bhatt, N. S., \ldots{} Cockburn, J. (2023). Novelty
+and uncertainty differentially drive exploration across development.
+\emph{Elife}, \emph{12}, e84260. Retrieved from
+\url{https://elifesciences.org/articles/84260}
+
+\leavevmode\vadjust pre{\hypertarget{ref-Settles2012}{}}%
+Settles, B. (2012). \emph{Active {Learning}} (Vol. 6).
+http://doi.org/\href{https://doi.org/10.2200/S00429ED1V01Y201207AIM018}{10.2200/S00429ED1V01Y201207AIM018}
+
+\leavevmode\vadjust pre{\hypertarget{ref-zettersten_active_2023}{}}%
+Zettersten, M., Cutler, M., \& Lew-Williams, C. (2023). \emph{Active
+information-seeking in support of learning extensions of novel words}
+(preprint). PsyArXiv. Retrieved from \url{https://osf.io/ecq85}
+
+\leavevmode\vadjust pre{\hypertarget{ref-Zettersten2021}{}}%
+Zettersten, M., \& Saffran, J. R. (2021). Sampling to learn words:
+Adults and children sample words that reduce referential ambiguity.
+\emph{Developmental Science}, \emph{24}(3).
+http://doi.org/\href{https://doi.org/10.1111/desc.13064}{10.1111/desc.13064}
+
+\end{CSLReferences}
+
+\bibliographystyle{apacite}
+
+
+\end{document}

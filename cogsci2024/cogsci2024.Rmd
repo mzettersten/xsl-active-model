@@ -57,6 +57,17 @@ The goal of our current study is to test how well previously proposed models of 
 Aside from assessing the ability of the models to account for the overall data, it is of particular interest whether particular model parameters are associated with individuals' 1) learning performance and 2) deployed active learning strategy.
 We will also investigate age-related changes in model parameters.
 
+Past work has shown that both children and adults are active word learners, systematically seeking new information word meanings [@hembacher_childrens_2020; @janakiefski_gaining_2022; @Zettersten2021; other refs], with important implications for understanding how we are able to quickly build rich vocabularies [@Hidaka2017].
+Yet what types of active learners are children about word meanings, exactly?
+While work has begun to characterize a variety of strategies that learners pursue when encountering novel words [@Kachergis2013; @zettersten_active_2023], we lack a formal understanding of the specific sampling strategies that word learners use [@Settles2012; though see @gelderloos_active_2020; @Keijser2019].
+Recent work has documented broad changes in the sampling strategies that children and adolescents deploy across development across several cognitive domains, e.g. casual learning tasks [@nussenbaum_causal_2019] and foraging tasks [@nussenbaum_novelty_2023; @meder_directed_2021].
+In the current work, we therefore explore what sampling decision rules best explain both children and adults' information-seeking behavior when learning novel word-referent associations.
+
+```{r fig-exp-one, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.2, fig.height=3.2, set.cap.width=T, num.cols.cap=1, fig.cap = "Word-referent co-occurrence matrix for Study (Experiment 1, Zettersten and Saffran, 2020)."}
+img <- png::readPNG("figs/exp1-cooccurrences.png")
+grid::grid.raster(img)
+```
+
 # Method
 
 ## Data
@@ -69,11 +80,6 @@ The particular words and referents involved in each pairing were randomized per 
 The accumulated word-referent co-occurrences are shown in Figure 1.
 
 Data for Study 2 come from Experiment 3, comprising 58 children of ages 3 to 8.
-
-```{r fig-exp-one, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.2, fig.height=3.2, set.cap.width=T, num.cols.cap=1, fig.cap = "Word-referent co-occurrence matrix for Study (Experiment 1, Zettersten and Saffran, 2020)."}
-img <- png::readPNG("figs/exp1-cooccurrences.png")
-grid::grid.raster(img)
-```
 
 
 ## Models
@@ -116,6 +122,45 @@ The novelty-biased associative model (NAM), like the UAM, has no familiarity bia
 We first fitted each model to each participant's data individually.
 We then fitted the model simultaneously to all participants in each study.
 Finally, we again fitted individuals separately, but included a quadratic regularization term in the objective, penalizing parameter values that fell far from the optimal values for the group, approximating a weakly-informative Gaussian prior (-.004..)
+
+## Modeling Sampling Choices
+
+Next, we used the best-fit models of participants' learning to investigate participants' search strategies in the sampling phase of the experiment. We considered three sampling decision rules commonly attested in the information-seeking literature to explain active choices: maximizing entropy reduction (information gain), maximizing the probability associated with labels (probability gain), and margin sampling.
+
+### Maximizing entropy reduction.
+
+In this decision rule, the model’s goal is to maximally reduce the entropy of the object-label probability distribution across objects [@Settles2012;@Nelson2005]. Sampling choices are modeled based on comparing the relative entropy reduction provided by making a given sampling selection of a referent $s_o$ (across the labels $w$):
+
+\begin{equation}
+\max_{s_o,w}({H(w)-H(w|s_o)})
+\label{eq:entropy_reduction}
+\end{equation}
+
+Modeling selections were made by determining, on any given trial for a participant, which object maximally reduced entropy (averaging across all possible random distractors that could be chosen in the case of the adult data).
+
+### Margin sampling.
+
+An alternative strategy documented in describing active sampling strategies is focusing on reducing uncertainty for a more constrained set of items [@markant_self-directed_2016]. This strategy can be formalized as *margin sampling*, in which the model focuses only on the boundary between two alternative options. Margin sampling predicts that learners will focus on instances where there is highest ambiguity between the two most likely labels for a given referent. Formally, if the distribution of labels ($\{l_1,l_2,...,l_n\}$) for a given referent $o$ are ordered from most ($p_1$) to least ($p_n$) likely, $\{p_1,p_2,...,p_n\}$, the margin between labels is given by
+
+\begin{equation}
+LM(x) = 1 - (p_1 - p_2)
+\label{eq:margin_sampling}
+\end{equation}
+
+In other words, the model selects the object that has the greatest ambiguity or competition between its two strongest associates.
+
+### Maximizing probability gain.
+
+In this decision rule, the model’s goal is to maximally increase the probability associated between a random label and its object [@nelson_experience_2010]. Selection choices are modeled based on determining the increase in (correct) association strength provided by a each potential object selection. The final object was selected that led to the largest increase in association strength (averaging across all possible distractors that could be chosen in the case of the adult data).
+
+\begin{equation}
+\max_{s_o,w}({M_{w,s_o})- \max_{w,o}(M_{w,o}})
+\label{eq:probability_gain}
+\end{equation}
+
+### Alternative strategies.
+
+We also explored several additional strategies. First, we also considered a *maximum certainty* (or confirmatory) strategy. Learners may gravitate towards confirming choices they already have high certainty for [Wason, 1960; @zettersten_active_2023]. Second, we considered a *novelty-based* strategy in which the model based its choices on the relative novelty (or familiarity) of the choice options.
 
 # Results
 
@@ -232,6 +277,10 @@ tab1 <- xtable::xtable(summary(out)$coef, digits=c(0, 2, 2, 1, 2),
 
 print(tab1, type="latex", comment = F, table.placement = "H")
 ```
+
+# Discussion
+
+
 
 # Acknowledgements
 
