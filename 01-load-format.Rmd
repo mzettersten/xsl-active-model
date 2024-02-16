@@ -54,7 +54,8 @@ xd <- read_csv("data/crossact_data.csv") %>%
          image5 = sub("stims/", "", image5), 
          image6 = sub("stims/", "", image6), 
          image7 = sub("stims/", "", image7), 
-         image8 = sub("stims/", "", image8))
+         image8 = sub("stims/", "", image8),
+         random_image = sub("stims/", "", random_image))
 # eliminate: fam-learning  fam-selection  fam-test (task familiarization trials)
 xd_code <- read_csv("data/Crossact_codebook.csv")
 # Note: label1 label2 give the order of the labels, not the 'correct' label-image
@@ -235,6 +236,27 @@ fit_model_to_group <- function(model_name, exp_name, xd, lower, upper) {
 
 
 eval_model_group <- function(parms, ords, testdat, start_matrix, logLik_only = TRUE) {
+  total_logLik = 0
+  
+  for(s in names(ords)) {
+    testdat_s <- testdat %>% filter(subject == s)
+    res <- model(parms, ord = ords[[s]], start_matrix = start_matrix)
+    mat <- res$matrix[testdat_s$target_label, testdat_s$target_image]
+    mod_perf <- diag(mat) / rowSums(mat)
+    
+    is_right <- testdat_s$is_right
+    subject_logLik <- -sum(is_right * log(mod_perf) + (1 - is_right) * log(1 - mod_perf))
+    total_logLik <- total_logLik + subject_logLik
+  }
+  
+  return(total_logLik)
+}
+
+
+#compare_selection_rule_to_subject_matrix <- function()
+
+# iterates through participants, gets their
+eval_selection_trials_group <- function(parms, ords, testdat, start_matrix, logLik_only = TRUE) {
   total_logLik = 0
   
   for(s in names(ords)) {
