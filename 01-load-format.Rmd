@@ -265,32 +265,41 @@ testing <- function() {
 }
 
 # take a single subject's selection trials and their association matrix, and evaluate given selection strategy
-active_selection <- function(mat, selections, strategy) {
-  logLik = 0
+eval_selection_strategy <- function(mat, selections, strategy) {
+  nlogLik = 0
   probOfSelections = rep(NA, nrow(selections))
-  # 'learning progress' strat would consider how much entropy is reduced if each item is picked
-  if(strategy=="entropy") { 
-    for(i in 1:nrow(selections)) {
-      selection_entropy = apply(mat, 2, shannon.entropy)
+  # 'learning progress' strat would consider how much entropy is reduced if each item is picked, and maximize
+  for(i in 1:nrow(selections)) {
+    if(strategy=="entropy") {
+      selection_entropy = apply(mat, 2, shannon.entropy) # entropy of each referent's associates
       predictedSelections = selection_entropy / sum(selection_entropy) # could do exponentiated Luce choice (softmax)
       actual_selection_prob = as.numeric(predictedSelections[selections[i,]$choice_image])
-      other_selections_prob = 1-actual_selection_prob
-      logLik = logLik - (log(actual_selection_prob) + log(other_selections_prob)) # FIXME? binomial log likelihood for 1 trial
-      probOfSelections[i] = actual_selection_prob
-      # need to update co-occurrences!
-      mat[selections[i,]$choice_label, selections[i,]$choice_image] = 
-        mat[selections[i,]$choice_label, selections[i,]$choice_image] + 1
+    } else if(strategy=="random") {
+      actual_selection_prob = 1/ncol(mat) # baseline: choose referent randomly
+    } else if(strategy=="margin") {
+      # select the referent that has the two strongest associates
+      #for(ref in 1:ncol(mat)) 
+    } else if(strategy=="confirmatory") {
+      max_frequency = apply(mat, 2, max)
+      predictedSelections = max_frequency / sum(max_frequency)
+      actual_selection_prob = as.numeric(predictedSelections[selections[i,]$choice_image])
+    } else if(strategy=="novelty") {
+      ref_novelty = 1/apply(mat, 2, max) # inverse max frequency (problem if 0..)
+      predictedSelections = ref_novelty / sum(ref_novelty)
+      actual_selection_prob = as.numeric(predictedSelections[selections[i,]$choice_image])
     }
-  } else if(strategy=="next") {
-    
+    other_selections_prob = 1-actual_selection_prob
+    nlogLik = nlogLik - (log(actual_selection_prob) + log(other_selections_prob)) 
+    probOfSelections[i] = actual_selection_prob
+    # need to update co-occurrences!
+    mat[selections[i,]$choice_label, selections[i,]$choice_image] = 
+      mat[selections[i,]$choice_label, selections[i,]$choice_image] + 1
   }
-  return(list(logLik = logLik, probOfSelections = probOfSelections))
+  return(list(nlogLik = nlogLik, probOfSelections = probOfSelections, mat = mat))
 }
 
-active_selection(mat, selections, strategy="entropy")
-
 # iterates through participants, gets their model-based association matrix,
-eval_selection_trials_group <- function(ords, xd, start_matrix, logLik_only = TRUE) {
+eval_selection_trials_group <- function(ords, xd, strategy) {
   total_logLik = 0
   for(s in names(ords)) {
     #testdat_s <- testdat %>% filter(subject == s)
@@ -298,22 +307,25 @@ eval_selection_trials_group <- function(ords, xd, start_matrix, logLik_only = TR
     # test evaluation
     #mat <- res$matrix[testdat_s$target_label, testdat_s$target_image]
     #mod_perf <- diag(mat) / rowSums(mat)
+    # s = "Crossact1_p101"
     mat <- create_cooc_matrix(ords[[s]]) # training co-occurrences - want to eventually use model association matrix
     
-    
     # evaluate selection strategy
-    sel <- active_selection(mat, xd %>% filter(subject==s, trial_type=="selection"))
+    sel <- eval_selection_strategy(mat, xd %>% filter(subject==s, trial_type=="selection"), strategy=strategy)
     
-    #is_right <- testdat_s$is_right
-    #subject_logLik <- -sum(is_right * log(mod_perf) + (1 - is_right) * log(1 - mod_perf))
-    total_logLik <- total_logLik + subject_logLik
+    # matrix after selections 
+    post_selection_mat <- sel$mat
+    
+    total_logLik <- total_logLik + sel$nlogLik
   }
   
   return(total_logLik)
 }
 
-eval_selection_trials_group(ords, )
-
+eval_selection_trials_group(ords, xd, "entropy") # 1395.59
+eval_selection_trials_group(ords, xd, "confirmatory") # 1384.43
+eval_selection_trials_group(ords, xd, "random") # 1368.07
+eval_selection_trials_group(ords, xd, "novelty") # 1355.55
 
 fit_model_per_subject <- function(model_name, xd, lower, upper, par_priors=NULL) {
   source(paste0("R/",model_name,".R"))
