@@ -334,11 +334,11 @@ eval_selection_trials_group <- function(ords, xd, strategy) {
   return(total_logLik)
 }
 
-# ToDo: create 'ords'
+
 ords <- list()
-  for(s in unique(xd$subject)) {
-    ords[[s]] <- get_subject_trial_ordering(xd %>% filter(subject==s))
-  }
+for(s in unique(xd$subject)) {
+  ords[[s]] <- get_subject_trial_ordering(xd %>% filter(subject==s))
+}
 
 
 eval_selection_trials_group(ords, xd, "entropy") # 1395.59
