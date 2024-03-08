@@ -266,19 +266,28 @@ testing <- function() {
 
 # take a single subject's selection trials and their association matrix, and evaluate given selection strategy
 eval_selection_strategy <- function(mat, selections, strategy) {
+  # mat could be model-based association matrix 
   nlogLik = 0
   probOfSelections = rep(NA, nrow(selections))
   # 'learning progress' strat would consider how much entropy is reduced if each item is picked, and maximize
-  for(i in 1:nrow(selections)) {
+  for(i in 1:nrow(selections)) { # each selection trial
     if(strategy=="entropy") {
       selection_entropy = apply(mat, 2, shannon.entropy) # entropy of each referent's associates
+      # vector of model-based (predicted) probabilities of choosing each referent on this selection trial
       predictedSelections = selection_entropy / sum(selection_entropy) # could do exponentiated Luce choice (softmax)
-      actual_selection_prob = as.numeric(predictedSelections[selections[i,]$choice_image])
+      # Model-based Prob of choosing referent that was actually selected:
+      actual_selection_prob = as.numeric(predictedSelections[selections[i,]$choice_image]) 
     } else if(strategy=="random") {
-      actual_selection_prob = 1/ncol(mat) # baseline: choose referent randomly
+      actual_selection_prob = 1/ncol(mat) # baseline: choose referent randomly G: should this be predictedSelections ??
     } else if(strategy=="margin") {
-      # select the referent that has the two strongest associates
-      #for(ref in 1:ncol(mat)) 
+      # for each label, find two strongest associates; choose with probability proportional to minimal difference between those strengths
+      predictedSelections = rep(NA, ncol(mat))
+      for(o in 1:ncol(mat)) {
+        top2 = sort(mat[,o], decreasing = T)[1:2]
+        predictedSelections[o] = 1-(top2[1]-top2[2])
+      }
+      predictedSelections = predictedSelections / sum(predictedSelections) # this assumes probabilistic choice based on relative margin difference
+      actual_selection_prob = as.numeric(predictedSelections[selections[i,]$choice_image]) 
     } else if(strategy=="confirmatory") {
       max_frequency = apply(mat, 2, max)
       predictedSelections = max_frequency / sum(max_frequency)
@@ -297,6 +306,9 @@ eval_selection_strategy <- function(mat, selections, strategy) {
   }
   return(list(nlogLik = nlogLik, probOfSelections = probOfSelections, mat = mat))
 }
+
+# right now, this evaluates selection strategies - 
+# want to jointly evaluate selection strategy + accuracy, given particular model (and parameters)
 
 # iterates through participants, gets their model-based association matrix,
 eval_selection_trials_group <- function(ords, xd, strategy) {
@@ -322,10 +334,18 @@ eval_selection_trials_group <- function(ords, xd, strategy) {
   return(total_logLik)
 }
 
+# ToDo: create 'ords'
+ords <- list()
+  for(s in unique(xd$subject)) {
+    ords[[s]] <- get_subject_trial_ordering(xd %>% filter(subject==s))
+  }
+
+
 eval_selection_trials_group(ords, xd, "entropy") # 1395.59
 eval_selection_trials_group(ords, xd, "confirmatory") # 1384.43
 eval_selection_trials_group(ords, xd, "random") # 1368.07
 eval_selection_trials_group(ords, xd, "novelty") # 1355.55
+eval_selection_trials_group(ords, xd, "margin") # NA: ToDo: think through logic - 'object-perspective is correct'
 
 fit_model_per_subject <- function(model_name, xd, lower, upper, par_priors=NULL) {
   source(paste0("R/",model_name,".R"))

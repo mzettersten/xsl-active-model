@@ -157,7 +157,7 @@ In other words, the model selects the object that has the greatest ambiguity or 
 ### Maximizing probability gain.
 
 In this decision rule, the model’s goal is to maximally increase the probability associated between a random label and its object [@nelson_experience_2010]. Selection choices are modeled based on determining the increase in (correct) association strength provided by a each potential object selection. The final object was selected that led to the largest increase in association strength (averaging across all possible distractors that could be chosen in the case of the adult data).
-- is this the same as Oudeyer's 'learning progress' ? - pick the thing that results in the strongest association
+- is this the same as Oudeyer's 'learning progress' ? - pick the thing that results in the strongest association (and same as information gain?)
 
 \begin{equation}
 \max_{s_o,w}({M_{w,s_o})- \max_{w,o}(M_{w,o}})
