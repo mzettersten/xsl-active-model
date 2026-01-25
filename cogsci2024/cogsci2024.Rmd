@@ -40,10 +40,10 @@ require(tidyboot)
 ```{r, load-data, echo=F}
 load("../data/cross_act_preprocessed.Rdata")
 
-N_per_exp <- xd %>% 
-  group_by(subject, experiment_name, age_group) %>%
-  summarise(n = n()) %>%
-  group_by(experiment_name, age_group) %>%
+N_per_exp <- xd |> 
+  group_by(subject, experiment_name, age_group) |>
+  summarise(n = n()) |>
+  group_by(experiment_name, age_group) |>
   summarise(n = n())
 ```
 
@@ -69,6 +69,16 @@ img <- png::readPNG("figs/exp1-cooccurrences.png")
 grid::grid.raster(img)
 ```
 
+
+GK: we can also test this based on best-fitting model parameters:
+"Intriguingly, we found that participants’ sampling behavior was correlated with their test accuracy: participants who chose more ambiguous items during the Sampling Phase also more accurately identified object-label associations. However, the directionality of this correlation is unclear. One possibility is that learners were more accurate on the test because 
+they sampled more ambiguous items. Another possibility is that success fully learning novel words during training makes it more likely that learners will subsequently focus on ambiguous items during the Sampling Phase. In the supplementary in-lab replication experiment (see S1 for further details), we found preliminary evidence supporting the latter explanation– as 
+participants become more successful at learning the novel label-object associations, they also become more likely to seek out information about ambiguous items."
+
+for the ambiguous items, during training there is never any disconfirming evidence: a hypothesis-testing model's guesses will be confirmed on the subsequent appearances. No published hypothesis-testing model would predict that these would be selected during the sampling phase. 
+
+- kids weren't more likely to sample the ambiguous referents: either they are hypothesis testers (and saw no disconfirming evidence), or maybe they have less of a focus on uncertainty (and perhaps slower learning rate..and how does memory influence sampling choice? recency bias if worse memory?)
+
 # Method
 
 ## Data
@@ -82,7 +92,7 @@ The training phase of Study 1 contained 24 FixMe-second training trials, each co
 The particular words and referents involved in each pairing were randomized per participant, but the same training trial sequence--and thus co-occurrence statistics--were experienced by all participants. 
 The accumulated word-referent co-occurrences are shown in Figure 1.
 
-Data for Study 2 come from Experiment 3, comprising 58 children of ages 3 to 8.
+Data for Study 2 come from Experiment 3, comprising 58 children, 3 to 8 years of age.
 
 Selection trials for kids differ slightly from adults in that there was no random label given. 
 <!-- "Pick which of Teddy's friends you want to learn about. When you tap one of Teddy's friends you will hear their name." -->
@@ -110,9 +120,9 @@ When tested on word $w$, the model assumes learners choose referent $o$ from the
 
 The other models we tested are variations on this model.
 
-### Familiarity-biased Associative Model (SAM)
+### Familiarity-biased Associative Model (FAM)
 
-The familiarity-biased associative model (SAM) implemented just the familiarity bias of the FUAM, without the uncertainty bias term, and thus only implements a bias for already-strong associations, using learning rate ($\chi$) and decay $\alpha$ parameters.
+The familiarity-biased associative model (FAM) implemented just the familiarity bias of the FUAM, without the uncertainty bias term, and thus only implements a bias for already-strong associations, using learning rate ($\chi$) and decay $\alpha$ parameters.
 
 ### Uncertainty-biased Associative Model (UAM)
 
@@ -174,12 +184,12 @@ We also explored several additional strategies. First, we also considered a *max
 load("../data/ind_fits_kachergis_chi1.Rdata")
 ind_fits <- ind_fits1
 
-results <- ind_fits$fit_results %>% 
+results <- ind_fits$fit_results |>
   mutate(age_years = ifelse(age<18, round(age), "adult"),
-         age_years = ifelse(is.na(age_years), "adult", age_years)) %>% # 1 adult had NA age
-  group_by(experiment_name, age_years, subject, age) %>%
+         age_years = ifelse(is.na(age_years), "adult", age_years)) |> # 1 adult had NA age
+  group_by(experiment_name, age_years, subject, age) |>
   summarise(Human = mean(is_right),
-            Model = mean(mod_perf)) %>%
+            Model = mean(mod_perf)) |>
   left_join(ind_fits$sfits) 
 
 perf_vs_chi = cor.test(results$Human, results$chi) # .65 p<.001
@@ -203,12 +213,12 @@ In the group fit, the best-fitting parameter values were $\chi=0.0323$, $\lambda
 The
 
 ```{r fig1-perf, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3, fig.height=3.5, set.cap.width=T, num.cols.cap=1, fig.cap = "One column image."}
-p1 <- results %>%
-  filter(is.element(experiment_name, c("Experiment 1", "Experiment 2"))) %>%
-  pivot_longer(cols = c(Human, Model), names_to = "group", values_to = "value") %>%
-  group_by(age_years, group) %>%
-  summarise(mean = mean(value), sd = sd(value), n = n(), se = sd / sqrt(n)) %>%
-  ungroup() %>%
+p1 <- results |>
+  filter(is.element(experiment_name, c("Experiment 1", "Experiment 2"))) |>
+  pivot_longer(cols = c(Human, Model), names_to = "group", values_to = "value") |>
+  group_by(age_years, group) |>
+  summarise(mean = mean(value), sd = sd(value), n = n(), se = sd / sqrt(n)) |>
+  ungroup() |>
   ggplot(aes(x = age_years, y = mean, color = group, shape = group)) +
     geom_point(position = position_dodge(width = 0.2)) +
     geom_errorbar(aes(ymin = mean - 1.96 * se, 
@@ -223,11 +233,11 @@ p1 <- results %>%
 # cor.test(results$neg_log_lik, results$alpha) # .35 - higher alpha = worse fit??
 # cor.test(results$neg_log_lik, results$chi) # -.37 - lower chi = worse fit
 
-p2 <- results %>%
-  filter(is.element(experiment_name, c("Experiment 1", "Experiment 2"))) %>%
-  group_by(age_years) %>%
-  summarise(mean = mean(chi), sd = sd(chi), n = n(), se = sd / sqrt(n)) %>%
-  ungroup() %>%
+p2 <- results |>
+  filter(is.element(experiment_name, c("Experiment 1", "Experiment 2"))) |>
+  group_by(age_years) |>
+  summarise(mean = mean(chi), sd = sd(chi), n = n(), se = sd / sqrt(n)) |>
+  ungroup() |>
   ggplot(aes(x = age_years, y = mean)) +
     geom_point(position = position_dodge(width = 0.2)) +
     geom_linerange(aes(ymin = mean - 1.96 * se, 
@@ -235,22 +245,22 @@ p2 <- results %>%
     theme_classic() + xlab("Age (years)") + ylab("Chi (learning rate)")  
 
 
-p3 <- results %>%
-  filter(is.element(experiment_name, c("Experiment 1", "Experiment 2"))) %>%
-  group_by(age_years) %>%
-  summarise(mean = mean(lambda), sd = sd(lambda), n = n(), se = sd / sqrt(n)) %>%
-  ungroup() %>%
+p3 <- results |>
+  filter(is.element(experiment_name, c("Experiment 1", "Experiment 2"))) |>
+  group_by(age_years) |>
+  summarise(mean = mean(lambda), sd = sd(lambda), n = n(), se = sd / sqrt(n)) |>
+  ungroup() |>
   ggplot(aes(x = age_years, y = mean)) +
     geom_point() +
     geom_linerange(aes(ymin = mean - 1.96 * se, 
                       ymax = mean + 1.96 * se)) +
     theme_classic() + xlab("Age (years)") + ylab("Lambda (attn to uncertainty)") 
 
-p4 <- results %>%
-  filter(is.element(experiment_name, c("Experiment 1", "Experiment 2"))) %>%
-  group_by(age_years) %>%
-  summarise(mean = mean(alpha), sd = sd(alpha), n = n(), se = sd / sqrt(n)) %>%
-  ungroup() %>%
+p4 <- results |>
+  filter(is.element(experiment_name, c("Experiment 1", "Experiment 2"))) |>
+  group_by(age_years) |>
+  summarise(mean = mean(alpha), sd = sd(alpha), n = n(), se = sd / sqrt(n)) |>
+  ungroup() |>
   ggplot(aes(x = age_years, y = mean)) +
     geom_point() +
     geom_linerange(aes(ymin = mean - 1.96 * se, 
@@ -262,27 +272,6 @@ ggarrange(p2, p3, p4, ncol=1)
 
 
 
-## Tables
-
-Number tables consecutively; place the table number and title (in
-10 point) above the table with one line space above the caption and
-one line space below it, as in Table 1. You may float
-tables to the top or bottom of a column, set wide tables across both
-columns.
-
-You can use the xtable function in the xtable package.
-
-```{r xtable, results="asis"}
-n <- 100
-x <- rnorm(n)
-y <- 2*x + rnorm(n)
-out <- lm(y ~ x)
-
-tab1 <- xtable::xtable(summary(out)$coef, digits=c(0, 2, 2, 1, 2), 
-                       caption = "This table prints across one column.")
-
-print(tab1, type="latex", comment = F, table.placement = "H")
-```
 
 # Discussion
 

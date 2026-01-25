@@ -69,7 +69,7 @@ xd %>% group_by(subject, experiment_name, age_group) %>%
 ## Examine training
 
 ```{r, echo=FALSE}
-ad_s <- ad %>% filter(subject=="p101")
+ad_s <- ad |> filter(subject=="p101")
 table(ad_s$trial_type)
 # learning          test 
 #       16            16 
@@ -511,14 +511,48 @@ results %>%
 Look at parameters by age and performance.
 
 ```{r, fig.width=8, fig.height=8}
-ggpairs(results[,c("Human","Model","chi","lambda","alpha","neg_log_lik")]) # "age",
+#require(GGally)
+#ggpairs(results[,c("Human","Model","chi","lambda","alpha","neg_log_lik")]) # "age",
+
+require(corrplot)
+corrplot(results |> ungroup() |>
+           filter(subject!="p745776") |> select(Human,Model,chi,lambda,alpha,neg_log_lik)) # "age"
 ```
 
 ```{r}
+require(rgl)
+
+col_palette <- colorRampPalette(c("blue", "red"))(10)
+plot3d( 
+  x=results$chi, y=results$lambda, z=results$alpha, 
+  colvar = results$Human, col = col_palette, 
+  type = 'p', size = 5,
+  xlab="chi", ylab="lambda", zlab="alpha")
+
+
+#require(car)
+#scatter3d( 
+#  x=results$chi, y=results$lambda, z=results$alpha, 
+#  colvar = results$Human, col = col_palette, 
+#  type = 'p', size = 5, xlab="chi", ylab="lambda", zlab="alpha", colkey=TRUE)
+
+htmlwidgets::saveWidget(rglwidget(width = 520, height = 520), 
+                        file = "HtmlWidget/3d-params.html",
+                        libdir = "libs",
+                        selfcontained = FALSE
+                        )
+```
+
+
+```{r}
 cor.test(results$age, results$chi) # .24 (stronger relation than age vs. performance)
-cor.test(results$age, results$lambda) # .19
+cor.test(results$age, results$lambda) # .19 # older -> greater focus on uncertainty (and thus sampling of ambiguous refs)
 cor.test(results$age, results$alpha) # .02 - n.s.
 cor.test(results$age, results$Human) # .23
+
+cor.test(results$Human, results$lambda) # .15 p=.04
+cor.test(results$Human, results$chi) # .65 p<.001
+cor.test(results$Human, results$alpha) # -.46
 
 cor.test(results$age, results$neg_log_lik) # n.s.
 ```
