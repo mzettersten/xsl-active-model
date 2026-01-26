@@ -13,20 +13,21 @@ require(GGally)
 source("R/helper.R")
 source("R/fitting.R")
 source("R/kachergis.R")
+source("R/experiment_helpers.R")
 ```
 
 ## Load data
 
-```{r cars}
+```{r load-data, eval=F}
 # single-object exposure w frequency manipulation (mostly/all kids) - 
-ad <- read_csv("data/act_data.csv") %>%
-  filter(!startsWith(trial_type, "fam")) %>% # eliminate: fam-learning familiar-test
+ad <- read_csv("data/act_data.csv") |>
+  filter(!startsWith(trial_type, "fam")) |> # eliminate: fam-learning familiar-test
   rename(image1 = available_image1,
          image2 = available_image2,
          image3 = available_image3,
          image4 = available_image4,
          choice_label = choice_audio,
-         test_label = test_audio) %>%
+         test_label = test_audio) |>
   mutate(choice_image = sub("stims/", "", choice_image),
          image1 = sub("stims/", "", image1),
          image2 = sub("stims/", "", image2),
@@ -34,14 +35,16 @@ ad <- read_csv("data/act_data.csv") %>%
          image4 = sub("stims/", "", image4),
          target_image = sub("stims/", "", target_image),
          foil_image = sub("stims/", "", foil_image),
-         test_label = sub("stims/", "", test_label)) %>%
+         test_label = sub("stims/", "", test_label)) |>
   mutate(label1 = choice_label)
 # is_right will be added 
 
+save(ad, file="data/act_data_preprocessed.Rdata")
+
 # cross-situational;
 # Martin's adding another 110 adults - which have randomImage1 and randomImage2 for passive condition (where they didn't get to make a selection)
-xd <- read_csv("data/crossact_data.csv") %>% 
-  filter(!startsWith(trial_type, "fam")) %>%
+xd <- read_csv("data/crossact_data.csv") |> 
+  filter(!startsWith(trial_type, "fam")) |>
   mutate(choice_image = sub("stims/", "", choice_image),
          target_image = sub("stims/", "", target_image),
          target_label = sub("stims/find_", "", sub(".m4a", "", target_label)),
@@ -59,56 +62,46 @@ xd_code <- read_csv("data/Crossact_codebook.csv")
 # Note: label1 label2 give the order of the labels, not the 'correct' label-image
 
 save(xd, xd_code, file="data/cross_act_preprocessed.Rdata")
+```
 
-xd %>% group_by(subject, experiment_name, age_group) %>%
-  summarise(n = n()) %>%
-  group_by(experiment_name, age_group) %>%
+```{r load-cross-act-data}
+load("data/act_data_preprocessed.Rdata") # ad
+load("data/cross_act_preprocessed.Rdata")
+
+xd |> group_by(subject, experiment_name, age_group) |>
+  summarise(n = n()) |>
+  group_by(experiment_name, age_group) |>
   summarise(n = n())
 ```
 
+
 ## Examine training
 
-```{r, echo=FALSE}
+```{r act-data, eval=F}
 ad_s <- ad |> filter(subject=="p101")
 table(ad_s$trial_type)
 # learning          test 
 #       16            16 
 
-#ad_fam_train <- ad %>% filter(trial_type=="fam-learning") # trial_index 1-4
+#ad_fam_train <- ad |> filter(trial_type=="fam-learning") # trial_index 1-4
 # available_image1 - 4
-#ad_fam_train %>% select(starts_with('available_image')) # always bear cow penguin pig? 
-#ad_fam_test <- ad %>% filter(trial_type=="familiar-test") # trial_index 5-6
+#ad_fam_train |> select(starts_with('available_image')) # always bear cow penguin pig? 
+#ad_fam_test <- ad |> filter(trial_type=="familiar-test") # trial_index 5-6
 # choice_image, target_image, foil_image
 
 
-ad_learn <- ad %>% filter(trial_type=="learning")
-ad_test <- ad %>% filter(trial_type=="test") # trial_index 15-22, 31-38
+ad_learn <- ad |> filter(trial_type=="learning")
+ad_test <- ad |> filter(trial_type=="test") # trial_index 15-22, 31-38
 # choice_image, target_image, foil_image  (2AFC) -- and test_audio
-
-get_experiment_cooc_matrix <- function(dat, expt_name, iterations=0) {
-  this_exp = dat %>% filter(experiment_name==expt_name)
-  xd_s <- subset(this_exp, subject==unique(this_exp$subject)[1])
-  voc = sort(na.omit(unique(unlist(xd_s %>% select(starts_with("label"))))))
-  refs = sort(na.omit(unique(unlist(xd_s %>% select(starts_with("image"))))))
-  coocs <- matrix(0, nrow=length(voc), ncol=length(refs))
-  row.names(coocs) = voc
-  colnames(coocs) = refs
-  if(iterations>0) {
-    for(i in 1:iterations) {
-      words <- na.omit(unlist(xd_s[i,] %>% select(starts_with("label"))))
-      refs <- unlist(xd_s[i,] %>% select(starts_with("image")))
-      refs <- refs[which(!is.na(refs))]
-      coocs[words,refs] = coocs[words,refs] + 1
-    }
-  }
-  return(coocs)
-}
 
 get_experiment_cooc_matrix(ad, "1") 
 get_experiment_cooc_matrix(ad, "2A") # exposure phase: choice_image and choice_audio <- passive (not active)
 get_experiment_cooc_matrix(ad, "2B") # ""
 get_experiment_cooc_matrix(ad, "2C") # ""
+```
 
+
+```{r, echo=FALSE}
 exp1_mat <- get_experiment_cooc_matrix(xd, "Experiment 1", iterations=24) 
 heatmap(exp1_mat, scale="none")
 
@@ -133,11 +126,11 @@ heatmap(exp3_mat)
 # "Experiment 1"  "Experiment S1" - have a randomly-selected XSL trial after selection?
 # randomized trial order - so use subject-specific training 
 
-xd_test <- xd %>% filter(trial_type=="test") %>%  # | trial_type=="fam-test"
+xd_test <- xd |> filter(trial_type=="test") |>  # | trial_type=="fam-test"
   rename(correct = is_right)
 
-xd_test %>% group_by(experiment_name, trial_type, age_group) %>%
-  summarise(correct = mean(correct)) %>%
+xd_test |> group_by(experiment_name, trial_type, age_group) |>
+  summarise(correct = mean(correct)) |>
   ggplot(aes(x=age_group, y=correct, color=trial_type)) +
   facet_wrap(. ~ experiment_name) + 
   geom_point() + ylim(0,1)
@@ -147,7 +140,7 @@ xd_test %>% group_by(experiment_name, trial_type, age_group) %>%
 # - expt 3: 4 are novel, 2 are familiar
 
 # remove all fam- trials -- these are task familiarization trials with known objects
-xd_s <- xd %>% filter(subject=="Crossact1_p101", !startsWith(trial_type, "fam"))
+xd_s <- xd |> filter(subject=="Crossact1_p101", !startsWith(trial_type, "fam"))
 table(xd_s$trial_type) # 19 trials
 # learning     selection          test 
 #       9             4             6 
@@ -168,97 +161,21 @@ crossact_mats[["Experiment 3"]]["pig","pig.png"] = 1
 
 # empty matrices for each expt -- actually all the same?
 
-run_subject_trials <- function(xd_s) {
-  coocs <- get_experiment_cooc_matrix(xd_s, xd_s[1,]$experiment_name)
-  # iterate over trials, handle training and selection/test trials
-  for(i in 1:nrow(xd_s)) {
-    # should ignore 
-    refs = setdiff(unlist(xd_s[i,] %>% select(starts_with("image"))), NA)
-    labs = setdiff(unlist(xd_s[i,] %>% select(starts_with("label"))), NA)
-    coocs[labs,refs] = coocs[labs,refs] + 1
-  }
-  return(coocs)
-}
-
+# iterate over trials, handle training and selection/test trials
 run_subject_trials(xd_s)
 ```
 
 
-```{r}
-# specific to crossact
-get_subject_trial_ordering <- function(xd_s, keep_selection_trials = FALSE) {
-  if(keep_selection_trials) {
-    xd_train <- xd_s %>% filter(trial_type!="test") # can result in a 1x1 learning trial - break any models?
-  } else {
-    xd_train <- xd_s %>% filter(trial_type=="learning") # remove "selection" and "test" trials
-  }
-  voc = sort(na.omit(unique(unlist(xd_s %>% select(starts_with("label"))))))
-  refs = sort(na.omit(unique(unlist(xd_s %>% select(starts_with("image"))))))
-  w_inds = which(startsWith(names(xd_train), "label")) # columns with label info
-  o_inds = which(startsWith(names(xd_train), "image")) # columns with object info
-  words = list() # words per trial
-  objects = list() # objs per trial
-  for(i in 1:nrow(xd_train)) {
-    if(xd_train[i,]$trial_type=="learning") {
-      words[[i]] = as.vector(unlist(xd_train[i,w_inds][which(!is.na(xd_train[i,w_inds]))]))
-      objects[[i]] = as.vector(unlist(xd_train[i,o_inds][which(!is.na(xd_train[i,o_inds]))]))
-    } else if(xd_train[i,]$trial_type=="selection") {
-      words[[i]] = unlist(xd_train[i,]$choice_label)
-      objects[[i]] = unlist(xd_train[i,]$choice_image)
-    }
-  }
-  return(list(words = words, objs = objects, 
-              voc=voc, refs=refs)) # for indexing
-}
-
+```{r fitting}
 #ord <- get_subject_trial_ordering(xd_s)
 
 # run model
 #model(c(1,1,1), ords[[1]])
 
-
-# fit an entire group of subjects with a single best-fitting set of parameters
-fit_model_to_group <- function(model_name, exp_name, xd, lower, upper) {
-  source(paste0("R/", model_name, ".R"))
-  xd_exp <- xd %>% filter(experiment_name == exp_name)
-  ords <- list()
-  for(s in unique(xd_exp$subject)) {
-    ords[[s]] <- get_subject_trial_ordering(xd_exp %>% filter(subject == s))
-  }
-  
-  testdat_group <- xd %>% filter(experiment_name == exp_name, 
-                                 trial_type == "test", trial_index < 37)
-  
-  fit <- DEoptim::DEoptim(eval_model_group, lower = lower, upper = upper,
-                          DEoptim::DEoptim.control(reltol = .001, NP = 200, itermax = 200),
-                          ords = ords, testdat = testdat_group, logLik_only = TRUE,
-                          start_matrix = crossact_mats[[exp_name]]) 
-  return(fit$optim$bestmem)
-}
-
-
-eval_model_group <- function(parms, ords, testdat, start_matrix, logLik_only = TRUE) {
-  total_logLik = 0
-  
-  for(s in names(ords)) {
-    testdat_s <- testdat %>% filter(subject == s)
-    res <- model(parms, ord = ords[[s]], start_matrix = start_matrix)
-    mat <- res$matrix[testdat_s$target_label, testdat_s$target_image]
-    mod_perf <- diag(mat) / rowSums(mat)
-    
-    is_right <- testdat_s$is_right
-    subject_logLik <- -sum(is_right * log(mod_perf) + (1 - is_right) * log(1 - mod_perf))
-    total_logLik <- total_logLik + subject_logLik
-  }
-  
-  return(total_logLik)
-}
-
-
 #compare_selection_rule_to_subject_matrix <- function()
 
 # tests a model for one subject
-testing <- function() {
+test_run_model_per_subject <- function() {
   s = names(ords)[[1]]
   source("R/baseline.R") # source("R/kachergis.R")
   res <- model(c(), ords[[1]], start_matrix = crossact_mats$`Experiment 2`)
@@ -314,7 +231,7 @@ eval_selection_strategy <- function(mat, selections, strategy) {
 eval_selection_trials_group <- function(ords, xd, strategy) {
   total_logLik = 0
   for(s in names(ords)) {
-    #testdat_s <- testdat %>% filter(subject == s)
+    #testdat_s <- testdat |> filter(subject == s)
     #res <- model(parms, ord = ords[[s]], start_matrix = start_matrix)
     # test evaluation
     #mat <- res$matrix[testdat_s$target_label, testdat_s$target_image]
@@ -323,7 +240,7 @@ eval_selection_trials_group <- function(ords, xd, strategy) {
     mat <- create_cooc_matrix(ords[[s]]) # training co-occurrences - want to eventually use model association matrix
     
     # evaluate selection strategy
-    sel <- eval_selection_strategy(mat, xd %>% filter(subject==s, trial_type=="selection"), strategy=strategy)
+    sel <- eval_selection_strategy(mat, xd |> filter(subject==s, trial_type=="selection"), strategy=strategy)
     
     # matrix after selections 
     post_selection_mat <- sel$mat
@@ -337,7 +254,7 @@ eval_selection_trials_group <- function(ords, xd, strategy) {
 
 ords <- list()
 for(s in unique(xd$subject)) {
-  ords[[s]] <- get_subject_trial_ordering(xd %>% filter(subject==s))
+  ords[[s]] <- get_subject_trial_ordering(xd |> filter(subject==s))
 }
 
 
@@ -352,15 +269,15 @@ fit_model_per_subject <- function(model_name, xd, lower, upper, par_priors=NULL)
   
   ords <- list()
   for(s in unique(xd$subject)) {
-    ords[[s]] <- get_subject_trial_ordering(xd %>% filter(subject==s))
+    ords[[s]] <- get_subject_trial_ordering(xd |> filter(subject==s))
   }
   
   # sapply across subjects, save best-fitting parameters, log-liks, and per-subj/-item predictions
   sfits <- tibble()
   fit_results <- tibble()
   for(s in names(ords)) { # s = "p621758"
-    xd_s <- xd %>% filter(subject==s)
-    testdat <- xd_s %>% filter(trial_type=="test", trial_index<37) # excludes 37-44; Experiment S1's post-sampling phase test trials
+    xd_s <- xd |> filter(subject==s)
+    testdat <- xd_s |> filter(trial_type=="test", trial_index<37) # excludes 37-44; Experiment S1's post-sampling phase test trials
     fit <- DEoptim::DEoptim(eval_model, lower=lower, upper=upper, par_priors=par_priors,
                           DEoptim::DEoptim.control(reltol=.001, NP=100, itermax=100),
                           ord = ords[[s]], testdat=testdat, logLik_only=T, # SSE_only=T
@@ -369,9 +286,9 @@ fit_model_per_subject <- function(model_name, xd, lower, upper, par_priors=NULL)
     best_par <- fit$optim$bestmem
     new_fit <- tibble(subject = s, neg_log_lik = fit$optim$bestval, chi = best_par[1], lambda = best_par[2], alpha = best_par[3])
     print(new_fit)
-    sfits <- sfits %>% bind_rows(new_fit)
+    sfits <- sfits |> bind_rows(new_fit)
     best_result <- eval_model(best_par, testdat, ords[[s]], crossact_mats[[xd_s$experiment_name[1]]])
-    fit_results <- fit_results %>% bind_rows(best_result)
+    fit_results <- fit_results |> bind_rows(best_result)
   }
   return(list(sfits=sfits, fit_results=fit_results))
 }
@@ -381,7 +298,7 @@ eval_model <- function(parms, testdat, ord, start_matrix, SSE_only=FALSE, logLik
   res <- model(parms, ord = ord, start_matrix = start_matrix)
   mat <- res$matrix[testdat$target_label, testdat$target_image] # reorder matrix by correct mapping
   mod_perf = tibble(target_label = rownames(mat), mod_perf = diag(mat) / rowSums(mat))
-  mp <- testdat %>% left_join(mod_perf, by="target_label") %>%
+  mp <- testdat |> left_join(mod_perf, by="target_label") |>
     select(subject, experiment_name, age_group, age, trial_index, choice_label, target_image, target_label, is_right, mod_perf) 
   logLik_value = -sum(mp$is_right * log(mp$mod_perf) + (1-mp$is_right) * log(1-mp$mod_perf)) 
   if (!is.null(par_priors)) {
@@ -403,24 +320,24 @@ eval_model <- function(parms, testdat, ord, start_matrix, SSE_only=FALSE, logLik
 
 
 ```{r, eval=F}
-exp1_fit <- fit_model_to_group("kachergis", "Experiment 1", xd %>% filter(subject!="Crossact1_p121"), 
+exp1_fit <- fit_model_to_group("kachergis", "Experiment 1", xd |> filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .01, .5), upper=c(3, 12, 1))
 # logLik = 171.4043 parms = c(0.032338, 3.435991, 0.895025)
-exp2_fit <- fit_model_to_group("kachergis", "Experiment 2", xd %>% filter(subject!="Crossact1_p121"), 
+exp2_fit <- fit_model_to_group("kachergis", "Experiment 2", xd |> filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .01, .5), upper=c(3, 12, 1))
 # logLik = 159.697490 parms = c(0.036741, 2.679146, 1.000000) 
 # same LL with lambda = 3.021478, 1.453844, 7.052054, 10.207910, 0.979101 ...
-exp3_fit <- fit_model_to_group("kachergis", "Experiment 3", xd %>% filter(subject!="Crossact1_p121"), 
+exp3_fit <- fit_model_to_group("kachergis", "Experiment 3", xd |> filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .01, .5), upper=c(3, 12, 1))
 # logLik = 202.944558 parms = c(0.002033, 0.355762, 0.500000)
-expS1_fit <- fit_model_to_group("kachergis", "Experiment S1", xd %>% filter(subject!="Crossact1_p121"), 
+expS1_fit <- fit_model_to_group("kachergis", "Experiment S1", xd |> filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .01, .5), upper=c(3, 12, 1))
 # logLik = 275.737849 parms = c(0.176909, 2.241018, 0.961075)
 
 save(exp1_fit, exp2_fit, exp3_fit, expS1_fit, file="data/exp_fits_kachergis.Rdata")
 
 # fit individuals with exp1 group par priors:
-ind_fits <- fit_model_per_subject("kachergis", xd %>% filter(subject!="Crossact1_p121"), 
+ind_fits <- fit_model_per_subject("kachergis", xd |> filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .01, .5), upper=c(3, 12, 1), 
                                   par_priors = exp1_fit) # c(0.03233805, 3.43599139, 0.89502461)
 save(ind_fits, file="data/ind_fits_kachergis_exp1_group_regularized.Rdata")
@@ -428,19 +345,19 @@ cor.test(ind_fits$sfits$chi, ind_fits$sfits$lambda) # -.32
 cor.test(ind_fits$sfits$chi, ind_fits$sfits$alpha) # -.21
 cor.test(ind_fits$sfits$alpha, ind_fits$sfits$lambda) # -.21
 
-exp1_str_fit <- fit_model_to_group("strength", "Experiment 1", xd %>% filter(subject!="Crossact1_p121"), 
+exp1_str_fit <- fit_model_to_group("strength", "Experiment 1", xd |> filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .5), upper=c(3, 1))
 # logLik = 172.430055 parms = c(0.058560, 0.934179)
-exp1_nov_fit <- fit_model_to_group("novelty", "Experiment 1", xd %>% filter(subject!="Crossact1_p121"), 
+exp1_nov_fit <- fit_model_to_group("novelty", "Experiment 1", xd |> filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .01, .5), upper=c(3, 12, 1))
 # logLik = 171.703926 parms = c(0.125845, 3.202186, 1.0)
 save(exp1_str_fit, exp1_nov_fit, file="data/exp1_str_nov_fits.Rdata")
 
 
-str_fits_reg <- fit_model_per_subject("strength", xd %>% filter(subject!="Crossact1_p121"), 
+str_fits_reg <- fit_model_per_subject("strength", xd |> filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .5), upper=c(3, 1), 
                                   par_priors = exp1_str_fit) # c(0.058560, 0.934179)
-nov_fits_reg <- fit_model_per_subject("novelty", xd %>% filter(subject!="Crossact1_p121"), 
+nov_fits_reg <- fit_model_per_subject("novelty", xd |> filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .01, .5), upper=c(3, 12, 1), 
                                   par_priors = exp1_nov_fit) # c(0.125845, 3.202186, 1.0)
 save(str_fits_reg, nov_fits_reg, file="data/ind_fits_str_nov_exp1_group_regularized.Rdata")
@@ -454,60 +371,125 @@ sum(nov_fits_reg$sfits$neg_log_lik) # 556.23
 sum(str_fits_reg$sfits$neg_log_lik) # 561.78
 
 # fit individuals with no priors:
-ind_fits <- fit_model_per_subject("rescorla-wagner", xd %>% filter(subject!="Crossact1_p121"), 
+ind_fits <- fit_model_per_subject("rescorla-wagner", xd |> filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .001, .01), upper=c(1, 1, 2))
 save(ind_fits, file="data/ind_fits_rescorla-wagner.Rdata")
 
-ind_fits <- fit_model_per_subject("kachergis", xd %>% filter(subject!="Crossact1_p121"), 
+ind_fits <- fit_model_per_subject("kachergis", xd |> filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .01, .5), upper=c(3, 12, 1))
 # Experiment S1 has 2 test trials for each target_label and target_image -- should we only compare the first one to the model? or average people's two responses? -- trials 37-44 are a second test after the sampling phase, so we should save those for when we're modeling sampling
 save(ind_fits, file="data/ind_fits_kachergis.Rdata")
 mean(ind_fits$sfits$neg_log_lik) # 2.72
 
-ind_fits <- fit_model_per_subject("strength", xd %>% filter(subject!="Crossact1_p121"), 
+ind_fits <- fit_model_per_subject("strength", xd |> filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .5), upper=c(3, 1))
 save(ind_fits, file="data/ind_fits_strength.Rdata")
 mean(ind_fits$sfits$neg_log_lik) # 2.95 (lambda column contains alpha; there is no lambda in strength model)
 
-ind_fits1 <- fit_model_per_subject("kachergis", xd %>% filter(subject!="Crossact1_p121"), 
+ind_fits1 <- fit_model_per_subject("kachergis", xd |> filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .01, .5), upper=c(1, 12, 1))
 save(ind_fits1, file="data/ind_fits_kachergis_chi1.Rdata")
 mean(ind_fits1$sfits$neg_log_lik) # 2.71 - slightly better fit with more constrained chi
 
 
+ind_fits <- fit_model_per_subject("kachergis", xd |> filter(subject!="Crossact1_p121"), 
+                                  lower=c(.001, .01, .9), upper=c(3, 12, 1))
+save(ind_fits, file="data/ind_fits_kachergis_alpha_p9-1.Rdata")
+mean(ind_fits$sfits$neg_log_lik) # 2.98
+cor(ind_fits$sfits |> select(-subject))
 
-ind_fits <- fit_model_per_subject("novelty", xd %>% filter(subject!="Crossact1_p121"), 
+ind_fits <- fit_model_per_subject("novelty", xd |> filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .01, .5), upper=c(1, 12, 1))
 save(ind_fits, file="data/ind_fits_novelty_chi1.Rdata")
 mean(ind_fits$sfits$neg_log_lik) # 2.91
+
+
+fit_model_per_subject("kachergis_reparam", xd |> 
+                                    filter(subject=="Crossact2_p131"), # 
+                                  lower=c(.001, .001, .1), upper=c(1, 0.999, 1))
+
+ind_fits <- fit_model_per_subject("kachergis_reparam", xd |> 
+                                    filter(subject!="Crossact1_p121", subject!="Crossact2_p101"), # 
+                                  lower=c(.01, .01, .1), upper=c(.5, 0.99, 1))
+save(ind_fits, file="data/ind_fits_kachergis_reparam.Rdata")
+mean(ind_fits$sfits$neg_log_lik) # 
+
+# last one that works: Crossact1_p141
+# broken one -> "Crossact2_p101"
+# Crossact2_p130 -> "Crossact2_p131"
 ```
 
 
 ```{r}
-load("data/ind_fits_kachergis.Rdata")
-load("data/ind_fits_kachergis_chi1.Rdata")
+load("data/ind_fits_kachergis.Rdata") # unconstrained
+load("data/ind_fits_kachergis_chi1.Rdata") # chi constrained to 0-1
+load("data/ind_fits_kachergis_alpha_p9-1.Rdata") # alpha constrained to 0.9 - 1.0
 
-results <- ind_fits$fit_results %>% 
+results <- ind_fits$fit_results |> 
   mutate(age_years = ifelse(age<18, round(age), "adult"),
-         age_years = ifelse(is.na(age_years), "adult", age_years)) %>% # 1 adult had NA age
-  group_by(experiment_name, age_years, subject, age) %>%
+         age_years = ifelse(is.na(age_years), "adult", age_years)) |> # 1 adult had NA age
+  group_by(experiment_name, age_years, subject, age) |>
   summarise(Human = mean(is_right),
-            Model = mean(mod_perf)) %>%
+            Model = mean(mod_perf)) |>
   left_join(ind_fits$sfits) 
 
-results %>%
-  group_by(experiment_name, age_years) %>%
+results |>
+  group_by(experiment_name, age_years) |>
   summarise(hum_sd = sd(Human), 
             mod_sd = sd(Model),
             Human = mean(Human),
-            Model = mean(Model)) %>%
-  pivot_longer(cols = c(Human, Model), names_to = "group", values_to = "Accuracy") %>%
+            Model = mean(Model)) |>
+  pivot_longer(cols = c(Human, Model), names_to = "group", values_to = "Accuracy") |>
   ggplot(aes(x=age_years, y=Accuracy, color=group, shape=group)) + 
   facet_wrap(. ~ experiment_name) +
   geom_point() + # geom_linerange(aes(ymin = )) + 
   theme_classic() +
   ylim(0,1) + geom_hline(yintercept=1/8, linetype='dashed')
 ```
+```{r select-k, eval=F}
+library(cluster)
+
+param_df <- results |> ungroup() |>
+  select(chi, lambda, alpha) |>
+  scale()
+
+wcss <- numeric(10)
+for (k in 1:10) {
+  set.seed(42) 
+  kmeans_model <- kmeans(param_df, centers=k, nstart=10)
+  wcss[k] <- kmeans_model$tot.withinss
+}
+plot(1:10, wcss, type="b", xlab="Number of clusters (k)", ylab="WCSS", 
+     main="Elbow Method for Optimal k")
+```
+
+
+```{r}
+library(cluster)
+
+param_df <- results |> ungroup() |>
+  select(chi, lambda, alpha) |>
+  scale() |>
+  kmeans(centers = 3)
+
+results$cluster <- param_df$cluster
+
+results |> group_by(cluster) |>
+  summarise(n = n(),
+            age = mean(age, na.rm=T),
+            lambda = mean(lambda),
+            alpha = mean(alpha),
+            chi = mean(chi), 
+            Human = mean(Human),
+            Model = mean(Model))
+
+# Do different "learning styles" show different sampling patterns?
+results |>
+  ggplot(aes(x = factor(cluster), y = Human)) +
+  geom_boxplot() + geom_point(aes(color = age))
+```
+
+
 Look at parameters by age and performance.
 
 ```{r, fig.width=8, fig.height=8}
@@ -555,5 +537,149 @@ cor.test(results$Human, results$chi) # .65 p<.001
 cor.test(results$Human, results$alpha) # -.46
 
 cor.test(results$age, results$neg_log_lik) # n.s.
+```
+
+
+## Relationships between model parameters and performance
+
+```{r}
+library(lme4)
+
+results_clean <- results |>
+  filter(!is.na(age)) |>
+  mutate(age_centered = scale(age, center = TRUE, scale = FALSE))
+
+# Does chi predict performance above and beyond age?
+m1 <- lmer(Human ~ age_centered + (1|experiment_name), data = results_clean)
+m2 <- lmer(Human ~ age_centered + chi + (1|experiment_name), data = results_clean)
+m3 <- lmer(Human ~ age_centered + chi + lambda + (1|experiment_name), data = results_clean)
+m4 <- lmer(Human ~ age_centered + chi + lambda + alpha + (1|experiment_name), data = results_clean)
+
+anova(m1, m2, m3, m4)
+```
+
+
+```{r}
+# Does lambda predict performance above and beyond age?
+m1 <- lmer(Human ~ age_centered + (1|experiment_name), data = results_clean)
+m2 <- lmer(Human ~ age_centered + lambda + (1|experiment_name), data = results_clean)
+m3 <- lmer(Human ~ age_centered + lambda + chi + (1|experiment_name), data = results_clean)
+m4 <- lmer(Human ~ age_centered + lambda + chi + alpha + (1|experiment_name), data = results_clean)
+
+anova(m1, m2, m3, m4)
+```
+
+```{r}
+results_clean |>
+  mutate(age_group = cut(age, breaks = c(0, 5, 7, 100), 
+                         labels = c("3-5 years", "5-7 years", "Adults"))) |>
+  ggplot(aes(x=age_group, y=lambda)) +
+  geom_violin() + geom_point(alpha = 0.6) +
+  labs(x = "Age group", 
+       y = "Lambda (uncertainty vs. familiarity focus)") +
+  theme_classic()
+```
+
+
+```{r}
+results_clean |>
+  mutate(age_group = cut(age, breaks = c(0, 5, 7, 100), 
+                         labels = c("3-5 years", "5-7 years", "Adults"))) |>
+  ggplot(aes(x = chi, y = Human, color = age_group)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(x = "Chi (learning rate)", 
+       y = "Test Accuracy") +
+  theme_classic()
+```
+
+
+
+## Sampling behavior analysis
+
+Need to extract relative entropy for each chosen referent on selection trials.
+
+```{r}
+# Extract sampling data
+sampling_data <- xd |>
+  filter(trial_type == "selection") |>
+  left_join(results |> select(subject, chi, lambda, alpha, Human, age))
+
+# Create ambiguity scores based on model predictions
+# For each selection trial, calculate entropy of chosen vs. unchosen items
+
+get_selection_ambiguity <- function(subject_id, selection_trial_idx, ords, parms) {
+  #ord <- ords[[subject_id]]
+  xd_s <- xd |> filter(subject == subject_id) # and experiment?
+  ord <- get_subject_trial_ordering(xd_s)
+  # Run model up to selection point
+  res <- model(parms, ord = ord, iterations = selection_trial_idx - 1,
+               start_matrix = crossact_mats[[xd |> filter(subject==subject_id) |>
+                                              pull(experiment_name) |> first()]])
+  
+  # Calculate entropy for each available referent
+  mat <- res$matrix
+  entropies <- apply(mat, 2, shannon.entropy)
+  
+  # Get actual choice
+  choice_img <- xd |> 
+    filter(subject == subject_id, trial_index == selection_trial_idx) |>
+    pull(choice_image)
+  
+  return(list(
+    choice_entropy = entropies[choice_img],
+    mean_entropy = mean(entropies),
+    max_entropy = max(entropies),
+    chose_max = choice_img == names(which.max(entropies))
+  ))
+}
+
+# Apply to all subjects and selection trials
+sampling_analysis <- sampling_data |>
+  group_by(subject) |>
+  mutate(selection_num = row_number()) |>
+  rowwise() |>
+  mutate(
+    # This requires fitting - use best-fit params from ind_fits
+    parms = list(ind_fits$sfits |> filter(subject == !!subject) |> 
+                  select(chi, lambda, alpha) |> as.numeric())
+  )
+```
+
+## Selection Strategy Evaluation
+
+```{r}
+# Evaluate each strategy for each age group
+selection_strategies <- c("entropy", "confirmatory", "random", "novelty", "margin")
+
+strategy_fits <- expand_grid(
+  experiment = unique(xd$experiment_name),
+  age_group = c("child", "adult"),
+  strategy = selection_strategies
+) |>
+  rowwise() |>
+  mutate(
+    nlogLik = eval_selection_trials_group(
+      ords |> keep(~{
+        subj <- names(ords)[which(names(ords) == .x)]
+        exp_match <- xd |> filter(subject == subj) |> 
+          pull(experiment_name) |> first() == experiment
+        age_match <- xd |> filter(subject == subj) |>
+          pull(age_group) |> first() == age_group
+        exp_match & age_match
+      }),
+      xd |> filter(experiment_name == experiment, age_group == age_group),
+      strategy = strategy
+    )
+  )
+
+# Visualize best-fitting strategies by age/experiment
+strategy_fits |>
+  ggplot(aes(x = age_group, y = -nlogLik, fill = strategy)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~experiment) +
+  labs(title = "Selection strategy fits by age and experiment",
+       y = "Log Likelihood") +
+  theme_classic()
 ```
 
