@@ -22,9 +22,13 @@ run_subject_trials <- function(xd_s) {
   coocs <- get_experiment_cooc_matrix(xd_s, xd_s[1,]$experiment_name)
   # iterate over trials, handle training and selection/test trials
   for(i in 1:nrow(xd_s)) {
-    # should ignore
-    refs = setdiff(unlist(xd_s[i,] |> select(starts_with("image"))), NA)
-    labs = setdiff(unlist(xd_s[i,] |> select(starts_with("label"))), NA)
+    if(xd_s[i,]$trial_type=="selection") {
+      refs = na.omit(c(xd_s[i,]$choice_image, xd_s[i,]$random_image))
+      labs = na.omit(c(xd_s[i,]$choice_label, xd_s[i,]$random_label))
+    } else {
+      refs = setdiff(unlist(xd_s[i,] |> select(starts_with("image"))), NA)
+      labs = setdiff(unlist(xd_s[i,] |> select(starts_with("label"))), NA)
+    }
     coocs[labs,refs] = coocs[labs,refs] + 1
   }
   return(coocs)
@@ -32,7 +36,7 @@ run_subject_trials <- function(xd_s) {
 
 
 # specific to crossact
-get_subject_trial_ordering <- function(xd_s, keep_selection_trials = FALSE) {
+get_subject_trial_ordering <- function(xd_s, keep_selection_trials = TRUE) {
   if(keep_selection_trials) {
     xd_train <- xd_s |> filter(trial_type!="test") # can result in a 1x1 learning trial - break any models?
   } else {
@@ -49,8 +53,8 @@ get_subject_trial_ordering <- function(xd_s, keep_selection_trials = FALSE) {
       words[[i]] = as.vector(unlist(xd_train[i,w_inds][which(!is.na(xd_train[i,w_inds]))]))
       objects[[i]] = as.vector(unlist(xd_train[i,o_inds][which(!is.na(xd_train[i,o_inds]))]))
     } else if(xd_train[i,]$trial_type=="selection") {
-      words[[i]] = unlist(xd_train[i,]$choice_label)
-      objects[[i]] = unlist(xd_train[i,]$choice_image)
+      words[[i]] = na.omit(c(xd_train[i,]$choice_label, xd_train[i,]$random_label))
+      objects[[i]] = na.omit(c(xd_train[i,]$choice_image, xd_train[i,]$random_image))
     }
   }
   return(list(words = words, objs = objects,

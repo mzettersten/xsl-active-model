@@ -379,7 +379,7 @@ ind_fits <- fit_model_per_subject("kachergis", xd |> filter(subject!="Crossact1_
                                   lower=c(.001, .01, .5), upper=c(3, 12, 1))
 # Experiment S1 has 2 test trials for each target_label and target_image -- should we only compare the first one to the model? or average people's two responses? -- trials 37-44 are a second test after the sampling phase, so we should save those for when we're modeling sampling
 save(ind_fits, file="data/ind_fits_kachergis.Rdata")
-mean(ind_fits$sfits$neg_log_lik) # 2.72
+mean(ind_fits$sfits$neg_log_lik) # 2.72 wo selection, 2.50 with selection!
 
 ind_fits <- fit_model_per_subject("strength", xd |> filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .5), upper=c(3, 1))
@@ -404,26 +404,35 @@ save(ind_fits, file="data/ind_fits_novelty_chi1.Rdata")
 mean(ind_fits$sfits$neg_log_lik) # 2.91
 
 
-fit_model_per_subject("kachergis_reparam", xd |> 
-                                    filter(subject=="Crossact2_p131"), # 
-                                  lower=c(.001, .001, .1), upper=c(1, 0.999, 1))
+# group pars: $\chi=0.0323$, $\lambda=3.436$, and $\alpha=0.895$
+ind_fits <- fit_model_per_subject("kachergis", xd |> filter(subject!="Crossact1_p121"), 
+                                  lower=c(.001, .01, .5), upper=c(1, 12, 1), 
+                                  par_priors = c(0.0323, 3.436, 0.895))
+save(ind_fits, file="data/ind_fits_kachergis_regularized.Rdata")
+mean(ind_fits$sfits$neg_log_lik) # 2.76
+
 
 ind_fits <- fit_model_per_subject("kachergis_reparam", xd |> 
-                                    filter(subject!="Crossact1_p121", subject!="Crossact2_p101"), # 
+                                    filter(subject!="Crossact1_p121", subject!="Crossact2_p101"),  
                                   lower=c(.01, .01, .1), upper=c(.5, 0.99, 1))
 save(ind_fits, file="data/ind_fits_kachergis_reparam.Rdata")
-mean(ind_fits$sfits$neg_log_lik) # 
+mean(ind_fits$sfits$neg_log_lik) # 3.52
 
-# last one that works: Crossact1_p141
-# broken one -> "Crossact2_p101"
-# Crossact2_p130 -> "Crossact2_p131"
+
+ind_fits <- fit_model_per_subject("kachergis", xd |> filter(subject!="Crossact1_p121"),  
+                                  lower=c(.001, .01, .8), upper=c(.5, 8, 1))
+save(ind_fits, file="data/ind_fits_kachergis.Rdata")
+mean(ind_fits$sfits$neg_log_lik) # 2.94
+
+# broken for some param combos -> "Crossact2_p101"
+#  "Crossact2_p131"
 ```
 
 
 ```{r}
 load("data/ind_fits_kachergis.Rdata") # unconstrained
-load("data/ind_fits_kachergis_chi1.Rdata") # chi constrained to 0-1
-load("data/ind_fits_kachergis_alpha_p9-1.Rdata") # alpha constrained to 0.9 - 1.0
+#load("data/ind_fits_kachergis_chi1.Rdata") # chi constrained to 0-1
+#load("data/ind_fits_kachergis_alpha_p9-1.Rdata") # alpha constrained to 0.9 - 1.0
 
 results <- ind_fits$fit_results |> 
   mutate(age_years = ifelse(age<18, round(age), "adult"),
@@ -486,7 +495,7 @@ results |> group_by(cluster) |>
 # Do different "learning styles" show different sampling patterns?
 results |>
   ggplot(aes(x = factor(cluster), y = Human)) +
-  geom_boxplot() + geom_point(aes(color = age))
+  geom_boxplot() + geom_point(aes(color = age)) + theme_classic()
 ```
 
 
