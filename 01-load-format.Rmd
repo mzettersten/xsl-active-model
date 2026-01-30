@@ -312,25 +312,7 @@ best_strategies <- subject_strategy_fits |>
   slice_min(nlogLik, n = 1) |>
   ungroup()
 
-# Summary: How many subjects best fit each strategy?
-best_strategies |>
-  count(strategy) |>
-  arrange(desc(n)) |>
-  mutate(proportion = n / sum(n))
-
-# By age group
-best_strategies |>
-  count(age_group, strategy) |>
-  group_by(age_group) |>
-  mutate(proportion = n / sum(n)) |>
-  arrange(age_group, desc(n))
-
-# By experiment
-best_strategies |>
-  count(experiment_name, strategy) |>
-  group_by(experiment_name) |>
-  mutate(proportion = n / sum(n)) |>
-  arrange(experiment_name, desc(n))
+best_strategies |> write_csv("data/likely_selection_strategy.csv")
 ```
 
 
@@ -453,7 +435,7 @@ save(ind_fits, file="data/ind_fits_kachergis.Rdata")
 mean(ind_fits$sfits$neg_log_lik) # 2.72 wo selection, 2.50 with selection!
 
 ind_fits <- fit_model_per_subject("strength", xd |> filter(subject!="Crossact1_p121"), 
-                                  lower=c(.001, .5), upper=c(3, 1))
+                                  lower=c(.001, .5), upper=c(1, 1))
 save(ind_fits, file="data/ind_fits_strength.Rdata")
 mean(ind_fits$sfits$neg_log_lik) # 2.95 (lambda column contains alpha; there is no lambda in strength model)
 

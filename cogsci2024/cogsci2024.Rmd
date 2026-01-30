@@ -45,6 +45,9 @@ N_per_exp <- xd |>
   summarise(n = n()) |>
   group_by(experiment_name, age_group) |>
   summarise(n = n())
+
+best_strategies <- read_csv("data/likely_selection_strategy.csv")
+
 ```
 
 
@@ -270,6 +273,30 @@ p4 <- results |>
 ggarrange(p2, p3, p4, ncol=1)
 ```
 
+
+## Selection Strategies
+
+```{r}
+# Summary: How many subjects best fit each strategy?
+best_strategies |>
+  count(strategy) |>
+  arrange(desc(n)) |>
+  mutate(proportion = n / sum(n))
+
+# By age group
+best_strategies |>
+  count(age_group, strategy) |>
+  group_by(age_group) |>
+  mutate(proportion = n / sum(n)) |>
+  arrange(age_group, desc(n))
+
+# By experiment
+best_strategies |>
+  count(experiment_name, strategy) |>
+  group_by(experiment_name) |>
+  mutate(proportion = n / sum(n)) |>
+  arrange(experiment_name, desc(n))
+```
 
 
 
