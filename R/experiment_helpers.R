@@ -99,3 +99,162 @@ eval_model_group <- function(parms, ords, testdat, start_matrix, logLik_only = T
 
   return(total_logLik)
 }
+
+
+# take a single subject's selection trials and their association matrix, and evaluate given selection strategy
+eval_selection_strategy <- function(mat, selections, strategy, temperature = 1.0) {
+  # mat: current association matrix (words x objects)
+  # selections: data frame with choice_image and choice_label columns
+  # strategy: which selection strategy to evaluate
+  # temperature: softmax temperature (higher = more random)
+
+  nlogLik = 0
+  probOfSelections = rep(NA, nrow(selections))
+
+  for(i in 1:nrow(selections)) {
+    # Get available options (all objects in matrix)
+    available_objects = colnames(mat)
+    n_options = length(available_objects)
+
+    # Calculate selection probabilities based on strategy
+    if(strategy == "entropy") {
+      # Choose objects with highest entropy (most uncertain associations)
+      selection_scores = apply(mat, 2, shannon.entropy)
+
+      # Handle NAs and zeros
+      selection_scores[is.na(selection_scores)] = 0
+
+      if(sum(selection_scores) == 0) {
+        # If no entropy anywhere, choose uniformly
+        predictedSelections = rep(1/n_options, n_options)
+      } else {
+        # Softmax over entropy scores
+        predictedSelections = exp(selection_scores / temperature)
+        predictedSelections = predictedSelections / sum(predictedSelections)
+      }
+
+    } else if(strategy == "random") {
+      # Baseline: uniform selection
+      predictedSelections = rep(1/n_options, n_options)
+
+    } else if(strategy == "margin") {
+      # Choose objects where top 2 associations are most similar (least confident)
+      predictedSelections = rep(NA, n_options)
+
+      for(o in 1:n_options) {
+        word_assocs = mat[, o]
+
+        if(sum(word_assocs > 0) < 2) {
+          # Can't compute margin with fewer than 2 non-zero associations
+          predictedSelections[o] = 1  # High uncertainty
+        } else {
+          top2 = sort(word_assocs, decreasing = TRUE)[1:2]
+          margin = top2[1] - top2[2]
+          # Small margin = uncertain = high selection probability
+          predictedSelections[o] = 1 / (margin + 0.01)  # Add small constant to avoid division by zero
+        }
+      }
+
+      # Normalize
+      predictedSelections = predictedSelections / sum(predictedSelections)
+
+    } else if(strategy == "confirmatory") {
+      # Choose objects with strongest single association (most certain)
+      max_strength = apply(mat, 2, max)
+
+      if(sum(max_strength) == 0) {
+        predictedSelections = rep(1/n_options, n_options)
+      } else {
+        predictedSelections = exp(max_strength / temperature)
+        predictedSelections = predictedSelections / sum(predictedSelections)
+      }
+
+    } else if(strategy == "novelty") {
+      # Choose objects with weakest associations (least familiar)
+      max_strength = apply(mat, 2, max)
+
+      # Novelty is inverse of familiarity
+      novelty_scores = 1 / (max_strength + 0.01)  # Add constant to avoid division by zero
+
+      predictedSelections = exp(novelty_scores / temperature)
+      predictedSelections = predictedSelections / sum(predictedSelections)
+
+    } else {
+      stop("Unknown strategy: ", strategy)
+    }
+
+    # Get actual choice
+    actual_choice = selections[i,]$choice_image
+
+    # Find probability of actual choice
+    choice_idx = which(available_objects == actual_choice)
+
+    if(length(choice_idx) == 0) {
+      warning("Choice ", actual_choice, " not found in available objects for subject on trial ", i)
+      actual_selection_prob = 1e-10  # Small probability as penalty
+    } else {
+      actual_selection_prob = predictedSelections[choice_idx]
+
+      # Ensure probability is not too small (for numerical stability)
+      actual_selection_prob = max(actual_selection_prob, 1e-10)
+    }
+
+    # Accumulate negative log-likelihood
+    # This is CATEGORICAL choice, not binary
+    nlogLik = nlogLik - log(actual_selection_prob)
+    probOfSelections[i] = actual_selection_prob
+
+    # Update matrix with the selection that was made
+    # (for next trial's predictions)
+    mat[selections[i,]$choice_label, selections[i,]$choice_image] =
+      mat[selections[i,]$choice_label, selections[i,]$choice_image] + 1
+  }
+
+  return(list(
+    nlogLik = nlogLik,
+    probOfSelections = probOfSelections,
+    mat = mat,
+    mean_prob = mean(probOfSelections)  # Average predicted probability
+  ))
+}
+
+# iterates through participants, gets their model-based association matrix,
+eval_selection_trials_group <- function(ords, xd, strategy, use_model = FALSE,
+                                        model_params = NULL, temperature = 1.0) {
+  total_logLik = 0
+  n_selections = 0
+
+  for(s in names(ords)) {
+    # Get this subject's selection trials
+    selections_s = xd |> filter(subject == s, trial_type == "selection")
+
+    if(nrow(selections_s) == 0) {
+      next  # Skip subjects with no selection trials
+    }
+
+    if(use_model && !is.null(model_params)) {
+      # Use model-based association matrix
+      start_mat = crossact_mats[[xd |> filter(subject == s) |>
+                                   pull(experiment_name) |> first()]]
+      res = model(model_params, ord = ords[[s]], start_matrix = start_mat)
+      mat = res$matrix
+    } else {
+      # Use co-occurrence matrix from training
+      mat = create_cooc_matrix(ords[[s]])
+    }
+
+    # Evaluate selection strategy
+    sel = eval_selection_strategy(mat, selections_s, strategy = strategy,
+                                  temperature = temperature)
+
+    total_logLik = total_logLik + sel$nlogLik
+    n_selections = n_selections + nrow(selections_s)
+  }
+
+  # Return both total and per-selection average
+  return(list(
+    total_nlogLik = total_logLik,
+    mean_nlogLik = total_logLik / n_selections,
+    n_selections = n_selections
+  ))
+}

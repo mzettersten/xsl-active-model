@@ -181,75 +181,8 @@ test_run_model_per_subject <- function() {
   res <- model(c(), ords[[1]], start_matrix = crossact_mats$`Experiment 2`)
 }
 
-# take a single subject's selection trials and their association matrix, and evaluate given selection strategy
-eval_selection_strategy <- function(mat, selections, strategy) {
-  # mat could be model-based association matrix 
-  nlogLik = 0
-  probOfSelections = rep(NA, nrow(selections))
-  # 'learning progress' strat would consider how much entropy is reduced if each item is picked, and maximize
-  for(i in 1:nrow(selections)) { # each selection trial
-    if(strategy=="entropy") {
-      selection_entropy = apply(mat, 2, shannon.entropy) # entropy of each referent's associates
-      # vector of model-based (predicted) probabilities of choosing each referent on this selection trial
-      predictedSelections = selection_entropy / sum(selection_entropy) # could do exponentiated Luce choice (softmax)
-      # Model-based Prob of choosing referent that was actually selected:
-      actual_selection_prob = as.numeric(predictedSelections[selections[i,]$choice_image]) 
-    } else if(strategy=="random") {
-      actual_selection_prob = 1/ncol(mat) # baseline: choose referent randomly G: should this be predictedSelections ??
-    } else if(strategy=="margin") {
-      # for each label, find two strongest associates; choose with probability proportional to minimal difference between those strengths
-      predictedSelections = rep(NA, ncol(mat))
-      for(o in 1:ncol(mat)) {
-        top2 = sort(mat[,o], decreasing = T)[1:2]
-        predictedSelections[o] = 1-(top2[1]-top2[2])
-      }
-      predictedSelections = predictedSelections / sum(predictedSelections) # this assumes probabilistic choice based on relative margin difference
-      actual_selection_prob = as.numeric(predictedSelections[selections[i,]$choice_image]) 
-    } else if(strategy=="confirmatory") {
-      max_frequency = apply(mat, 2, max)
-      predictedSelections = max_frequency / sum(max_frequency)
-      actual_selection_prob = as.numeric(predictedSelections[selections[i,]$choice_image])
-    } else if(strategy=="novelty") {
-      ref_novelty = 1/apply(mat, 2, max) # inverse max frequency (problem if 0..)
-      predictedSelections = ref_novelty / sum(ref_novelty)
-      actual_selection_prob = as.numeric(predictedSelections[selections[i,]$choice_image])
-    }
-    other_selections_prob = 1-actual_selection_prob
-    nlogLik = nlogLik - (log(actual_selection_prob) + log(other_selections_prob)) 
-    probOfSelections[i] = actual_selection_prob
-    # need to update co-occurrences!
-    mat[selections[i,]$choice_label, selections[i,]$choice_image] = 
-      mat[selections[i,]$choice_label, selections[i,]$choice_image] + 1
-  }
-  return(list(nlogLik = nlogLik, probOfSelections = probOfSelections, mat = mat))
-}
-
 # right now, this evaluates selection strategies - 
 # want to jointly evaluate selection strategy + accuracy, given particular model (and parameters)
-
-# iterates through participants, gets their model-based association matrix,
-eval_selection_trials_group <- function(ords, xd, strategy) {
-  total_logLik = 0
-  for(s in names(ords)) {
-    #testdat_s <- testdat |> filter(subject == s)
-    #res <- model(parms, ord = ords[[s]], start_matrix = start_matrix)
-    # test evaluation
-    #mat <- res$matrix[testdat_s$target_label, testdat_s$target_image]
-    #mod_perf <- diag(mat) / rowSums(mat)
-    # s = "Crossact1_p101"
-    mat <- create_cooc_matrix(ords[[s]]) # training co-occurrences - want to eventually use model association matrix
-    
-    # evaluate selection strategy
-    sel <- eval_selection_strategy(mat, xd |> filter(subject==s, trial_type=="selection"), strategy=strategy)
-    
-    # matrix after selections 
-    post_selection_mat <- sel$mat
-    
-    total_logLik <- total_logLik + sel$nlogLik
-  }
-  
-  return(total_logLik)
-}
 
 
 ords <- list()
@@ -257,13 +190,151 @@ for(s in unique(xd$subject)) {
   ords[[s]] <- get_subject_trial_ordering(xd |> filter(subject==s))
 }
 
+eval_selection_trials_group(ords, xd, "entropy") # 1282.6 (was 1395.59)
+eval_selection_trials_group(ords, xd, "confirmatory") # 1276.1 (was 1384.43)
+eval_selection_trials_group(ords, xd, "random") # 1268 (was 1368.07)
+eval_selection_trials_group(ords, xd, "novelty") # 1281 (was 1355.55)
+eval_selection_trials_group(ords, xd, "margin") # 2760 - think through logic? 'object-perspective is correct'
+```
 
-eval_selection_trials_group(ords, xd, "entropy") # 1395.59
-eval_selection_trials_group(ords, xd, "confirmatory") # 1384.43
-eval_selection_trials_group(ords, xd, "random") # 1368.07
-eval_selection_trials_group(ords, xd, "novelty") # 1355.55
-eval_selection_trials_group(ords, xd, "margin") # NA: ToDo: think through logic - 'object-perspective is correct'
+```{r}
+strategies = c("entropy", "confirmatory", "random", "novelty", "margin")
 
+strategy_comparison = map_dfr(strategies, function(strat) {
+  result = eval_selection_trials_group(ords, xd, strat)
+  tibble(
+    strategy = strat,
+    total_nlogLik = result$total_nlogLik,
+    mean_nlogLik = result$mean_nlogLik,
+    n_selections = result$n_selections
+  )
+})
+
+# Visualize
+ggplot(strategy_comparison, aes(x = reorder(strategy, -mean_nlogLik), 
+                                y = mean_nlogLik)) +
+  geom_col(fill = "steelblue") +
+  labs(title = "Selection strategy model comparison",
+       subtitle = "Lower is better fit to human choices",
+       x = "Strategy",
+       y = "Mean Negative Log-Likelihood per Selection") +
+  theme_classic() +
+  coord_flip()
+```
+
+```{r}
+# Do children and adults use different strategies?
+age_strategy_comparison <- expand_grid(
+  age_group = c("kids", "adults"),
+  strategy = strategies
+) |>
+  mutate(
+    result = map2(age_group, strategy, function(ag, strat) {
+      # Filter subjects for this age group
+      subjects_in_group <- xd |> 
+        filter(age_group == ag) |> 
+        pull(subject) |> 
+        unique()
+      
+      # Subset ords and xd
+      ords_subset <- ords[subjects_in_group]
+      xd_subset <- xd |> filter(age_group == ag)
+      
+      # Evaluate strategy
+      eval_selection_trials_group(ords_subset, xd_subset, strat)
+    })
+  ) |>
+  unnest_wider(result)
+
+# Visualize developmental differences
+ggplot(age_strategy_comparison, aes(x = strategy, y = mean_nlogLik, 
+                                    fill = age_group)) +
+  geom_col(position = "dodge") +
+  labs(title = "Selection strategies by age group") +
+  theme_classic() +
+  coord_flip()
+```
+
+
+```{r}
+# Evaluate all strategies for each participant
+evaluate_subject_strategies <- function(subject_id, ords, xd, strategies) {
+  # Get this subject's data
+  selections <- xd |> 
+    filter(subject == subject_id, trial_type == "selection")
+  
+  if(nrow(selections) == 0) {
+    return(NULL)  # No selection trials for this subject
+  }
+  
+  # Get association matrix from training
+  mat <- create_cooc_matrix(ords[[subject_id]])
+  
+  # Evaluate each strategy
+  results <- map_dfr(strategies, function(strat) {
+    sel_result <- eval_selection_strategy(mat, selections, strategy = strat)
+    
+    tibble(
+      subject = subject_id,
+      strategy = strat,
+      nlogLik = sel_result$nlogLik,
+      mean_prob = sel_result$mean_prob,
+      n_selections = nrow(selections)
+    )
+  })
+  
+  return(results)
+}
+
+# Apply to all subjects
+strategies <- c("entropy", "confirmatory", "random", "novelty", "margin")
+
+subject_strategy_fits <- map_dfr(names(ords), function(subj) {
+  evaluate_subject_strategies(subj, ords, xd, strategies)
+})
+
+# Add subject metadata
+subject_strategy_fits <- subject_strategy_fits |>
+  left_join(
+    xd |> 
+      group_by(subject) |> 
+      summarise(
+        experiment_name = first(experiment_name),
+        age_group = first(age_group),
+        age = first(age)
+      ),
+    by = "subject"
+  )
+
+# Find best-fitting strategy for each subject
+best_strategies <- subject_strategy_fits |>
+  group_by(subject) |>
+  slice_min(nlogLik, n = 1) |>
+  ungroup()
+
+# Summary: How many subjects best fit each strategy?
+best_strategies |>
+  count(strategy) |>
+  arrange(desc(n)) |>
+  mutate(proportion = n / sum(n))
+
+# By age group
+best_strategies |>
+  count(age_group, strategy) |>
+  group_by(age_group) |>
+  mutate(proportion = n / sum(n)) |>
+  arrange(age_group, desc(n))
+
+# By experiment
+best_strategies |>
+  count(experiment_name, strategy) |>
+  group_by(experiment_name) |>
+  mutate(proportion = n / sum(n)) |>
+  arrange(experiment_name, desc(n))
+```
+
+
+```{r}
 fit_model_per_subject <- function(model_name, xd, lower, upper, par_priors=NULL) {
   source(paste0("R/",model_name,".R"))
   
@@ -390,7 +461,7 @@ ind_fits1 <- fit_model_per_subject("kachergis", xd |> filter(subject!="Crossact1
                                   lower=c(.001, .01, .5), upper=c(1, 12, 1))
 save(ind_fits1, file="data/ind_fits_kachergis_chi1.Rdata")
 mean(ind_fits1$sfits$neg_log_lik) # 2.71 - slightly better fit with more constrained chi
-
+# 2.508 w selection trials
 
 ind_fits <- fit_model_per_subject("kachergis", xd |> filter(subject!="Crossact1_p121"), 
                                   lower=c(.001, .01, .9), upper=c(3, 12, 1))
@@ -431,16 +502,26 @@ mean(ind_fits$sfits$neg_log_lik) # 2.94
 
 ```{r}
 load("data/ind_fits_kachergis.Rdata") # unconstrained
-#load("data/ind_fits_kachergis_chi1.Rdata") # chi constrained to 0-1
-#load("data/ind_fits_kachergis_alpha_p9-1.Rdata") # alpha constrained to 0.9 - 1.0
+load("data/ind_fits_kachergis_chi1.Rdata") # chi constrained to 0-1
+xx <- ind_fits$sfits |> left_join(ind_fits1$sfits, by="subject")
+# .x = unconstrained, .y = constrained
+xx |> ggplot(aes(x=neg_log_lik.x, y=neg_log_lik.y)) + geom_point()
+xx |> ggplot(aes(x=chi.x, y=chi.y)) + geom_point()
+xx |> ggplot(aes(x=lambda.x, y=lambda.y)) + geom_point()
+xx |> ggplot(aes(x=alpha.x, y=alpha.y)) + geom_point()
 
-results <- ind_fits$fit_results |> 
+#load("data/ind_fits_kachergis_alpha_p9-1.Rdata") # alpha constrained to 0.9 - 1.0
+```
+
+```{r}
+results <- ind_fits1$fit_results |> 
   mutate(age_years = ifelse(age<18, round(age), "adult"),
-         age_years = ifelse(is.na(age_years), "adult", age_years)) |> # 1 adult had NA age
-  group_by(experiment_name, age_years, subject, age) |>
+         age_years = ifelse(is.na(age_years), "adult", age_years),
+         adult = ifelse(age_years=="adult", 1, 0)) |> # 1 adult had NA age
+  group_by(experiment_name, age_years, adult, subject, age) |>
   summarise(Human = mean(is_right),
             Model = mean(mod_perf)) |>
-  left_join(ind_fits$sfits) 
+  left_join(ind_fits1$sfits) 
 
 results |>
   group_by(experiment_name, age_years) |>
@@ -455,43 +536,61 @@ results |>
   theme_classic() +
   ylim(0,1) + geom_hline(yintercept=1/8, linetype='dashed')
 ```
-```{r select-k, eval=F}
-library(cluster)
+
+```{r}
+library(fpc)
+library(factoextra)
 
 param_df <- results |> ungroup() |>
   select(chi, lambda, alpha) |>
   scale()
 
-wcss <- numeric(10)
-for (k in 1:10) {
-  set.seed(42) 
-  kmeans_model <- kmeans(param_df, centers=k, nstart=10)
-  wcss[k] <- kmeans_model$tot.withinss
-}
-plot(1:10, wcss, type="b", xlab="Number of clusters (k)", ylab="WCSS", 
-     main="Elbow Method for Optimal k")
+pk <- pamk(param_df)
+# Medoids:
+# pk$pamobject$medoids
+results[pk$pamobject$id.med,]
+
+results$cluster <- pk$pamobject$clustering
+
+#table(pk$pamobject$clustering) # 8 clusters
+#  1  2  3  4  5  6  7  8 
+# 15 29 36 40 16  8 22 24 
 ```
 
 
+
+
 ```{r}
-library(cluster)
-
-param_df <- results |> ungroup() |>
-  select(chi, lambda, alpha) |>
-  scale() |>
-  kmeans(centers = 3)
-
-results$cluster <- param_df$cluster
-
-results |> group_by(cluster) |>
+results |>
+  group_by(cluster) |>
   summarise(n = n(),
             age = mean(age, na.rm=T),
+            prop_adult = mean(adult, na.rm=T),
             lambda = mean(lambda),
             alpha = mean(alpha),
             chi = mean(chi), 
             Human = mean(Human),
-            Model = mean(Model))
+            Model = mean(Model),
+            neg_log_lik = mean(neg_log_lik)) |>
+  arrange(desc(Human))
+```
+```{r}
+t.test(results |> filter(adult==1) |> pull(chi),
+       results |> filter(adult==0) |> pull(chi)) # adults 0.45, kids 0.25 p=.002
 
+t.test(results |> filter(adult==1) |> pull(alpha),
+       results |> filter(adult==0) |> pull(alpha)) # n.s.
+
+t.test(results |> filter(adult==1) |> pull(lambda),
+       results |> filter(adult==0) |> pull(lambda)) # adults = 6.38, kids = 4.77
+
+cor.test(results$Model, results$lambda) # r=0.17 p=.02
+cor.test(results$Model, results$alpha) # r=-.62
+cor.test(results$Model, results$chi) # r=0.68
+```
+
+
+```{r}
 # Do different "learning styles" show different sampling patterns?
 results |>
   ggplot(aes(x = factor(cluster), y = Human)) +
