@@ -55,16 +55,21 @@ best_strategies <- read_csv("data/likely_selection_strategy.csv")
 
 Early word learning is often thought of as largely determined by the learners' linguistic environment, where they can only learn what is present in the input.
 Increasingly, research is finding that learners--even at a young age--are involved in selecting and shaping their input, and that such self-directed, active learning can accelerate acquisition. 
-Understanding the strategies that learners use to shape their experience will help us build and improve theories of language.
+Understanding the strategies that learners of all ages use to shape their experience will help us build and improve theories of language acquisition. 
+It can also help us understand what cognitive mechanisms and strategies learners are able to deploy, and consequently enable us to design curricula that better match their expanding capabilities.
+For example, although the classic conceptual @hunter1988 model posits that infants have preferences for both novel and familiar stimuli, and novelty preferences have been implicated in children's word learning at some ages [e.g. 22-month-olds: @mather2012; @horst2011], a recent study found that infants do not show a bias to attend to uncertain/novel stimuli (find citation on langcog slack..).
 
-The goal of our current study is to test how well previously proposed models of cross-situational word learning can explain the observed results of active learning experiments from @Zettersten2021.
-Aside from assessing the ability of the models to account for the overall data, it is of particular interest whether particular model parameters are associated with individuals' 1) learning performance and 2) deployed active learning strategy.
+Although numerous computational models of word learning have been proposed, the experimental paradigms they are tested on tend to be passive cross-situational word learning studies, in which participants are exposed to a series of ambiguous training trials, each of which presents multiple word-referent pairs, but with no indication of which word refers to each referent. While model comparisons based on these passive learning paradigms are suggestive (although a full overview is not possible here), applying these models to help understand active learning paradigms -- where learners select their input at some stage (e.g., requesting a label for a particular referent) can in theory be more diagnostic of the learning mechanisms at play, and may additionally help explain individual differences in learning. 
+And yet, few active word learning experiments have been conducted, and fewer still have attempted to understand active learning with computational models [@Kachergis2013].
+
+The goal of our current study is to test how well previously proposed models of cross-situational word learning can explain the observed results of active learning experiments from @Zettersten2021, which found that adults -- but not children -- were likely to select referents with ambiguous labels.
+Aside from assessing the ability of the models to account for the overall data, it is of particular interest whether particular model parameters (e.g., learning rate, memory decay rate, and novelty vs. familiarity bias) are associated with individuals' 1) learning performance and 2) deployed active learning strategy.
 We will also investigate age-related changes in model parameters.
 
 Past work has shown that both children and adults are active word learners, systematically seeking new information word meanings [@hembacher_childrens_2020; @janakiefski_gaining_2022; @Zettersten2021; other refs], with important implications for understanding how we are able to quickly build rich vocabularies [@Hidaka2017].
 Yet what types of active learners are children about word meanings, exactly?
 While work has begun to characterize a variety of strategies that learners pursue when encountering novel words [@Kachergis2013; @zettersten_active_2023], we lack a formal understanding of the specific sampling strategies that word learners use [@Settles2012; though see @gelderloos_active_2020; @Keijser2019].
-Recent work has documented broad changes in the sampling strategies that children and adolescents deploy across development across several cognitive domains, e.g. casual learning tasks [@nussenbaum_causal_2019] and foraging tasks [@nussenbaum_novelty_2023; @meder_directed_2021].
+Recent work has documented broad changes in the sampling strategies that children and adolescents deploy across development across several cognitive domains, e.g. causal learning tasks [@nussenbaum_causal_2019] and foraging tasks [@nussenbaum_novelty_2023; @meder_directed_2021].
 In the current work, we therefore explore what sampling decision rules best explain both children's and adults' information-seeking behavior when learning novel word-referent associations.
 
 ```{r fig-exp-one, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.2, fig.height=3.2, set.cap.width=T, num.cols.cap=1, fig.cap = "Word-referent co-occurrence matrix for Study (Experiment 1, Zettersten and Saffran, 2020)."}
@@ -78,8 +83,6 @@ GK: we can also test this based on best-fitting model parameters:
 they sampled more ambiguous items. Another possibility is that success fully learning novel words during training makes it more likely that learners will subsequently focus on ambiguous items during the Sampling Phase. In the supplementary in-lab replication experiment (see S1 for further details), we found preliminary evidence supporting the latter explanation– as 
 participants become more successful at learning the novel label-object associations, they also become more likely to seek out information about ambiguous items."
 
-for the ambiguous items, during training there is never any disconfirming evidence: a hypothesis-testing model's guesses will be confirmed on the subsequent appearances. No published hypothesis-testing model would predict that these would be selected during the sampling phase. 
-
 - kids weren't more likely to sample the ambiguous referents: either they are hypothesis testers (and saw no disconfirming evidence), or maybe they have less of a focus on uncertainty (and perhaps slower learning rate..and how does memory influence sampling choice? recency bias if worse memory?)
 
 # Method
@@ -87,7 +90,7 @@ for the ambiguous items, during training there is never any disconfirming eviden
 ## Data
 
 All data were taken from @Zettersten2021. 
-Data for our Study 1 were pooled from Experiment 1 (31 adults), Experiment 2 (40 children, 4-9 years of age), and adults in the Ambiguous Condition of Experiment S1 (FixMe adults), which had the same design as Experiments 1 and 2. <!-- Martin, where is condition info in Exp S1? -->
+Data for our Study 1 were pooled from Experiment 1 (31 adults), Experiment 2 (40 children, 4-9 years of age), and adults in the Ambiguous Condition of Experiment S1 (58 adults), which had the same design as Experiments 1 and 2, except for an additional test before the selection phase.
 
 <!-- S1: only difference from Exp1 is that there is a test of the original training (24 trials) before the selection phase -- as well as after the selection phase --> 
 
@@ -97,12 +100,14 @@ The accumulated word-referent co-occurrences are shown in Figure 1.
 
 Data for Study 2 come from Experiment 3, comprising 58 children, 3 to 8 years of age.
 
-Selection trials for kids differ slightly from adults in that there was no random label given. 
+Selection trials for kids differ slightly from adults in that there was no random label-referent pair given: thus, the evidence children received after selection was unambiguous, while adults received a training trial with a randomly-selected label and its corresponding referent.
 <!-- "Pick which of Teddy's friends you want to learn about. When you tap one of Teddy's friends you will hear their name." -->
 
 ## Models
 
 We focused on analyzing data from the familiarity- and uncertainty-biased associative model [@Kachergis2012,@Kachergis2017], and variations of that model, described below.
+We chose not to test any hypothesis-testing (HT) model as they are not consistent with the adult data in @Zettersten2021: for ambiguous items in the training phase, there was never any disconfirming evidence, so a hypothesis-tester's initial guess (i.e. hypothesis) for each label would be confirmed on subsequent appearances, and there would be no reason for (or basis for) preferentially selecting ambiguous referents during the sampling phase, which is what adults were observed to do.
+While it is possible that children -- who were at chance for selecting ambiguous vs. unambiguous referents -- are employing a hypothesis-testing strategy, some of the selection strategies we want to evaluate across development are only possible to use if a learner is simultaneously entertaining multiple hypotheses for a given label -- equivalent to associations rather than the mutually-exclusive hypotheses favored in HT accounts [e.g. @woodard2016].
 
 ### Familiarity- and Uncertainty-biased Associative Model (FUAM)
 
@@ -111,7 +116,7 @@ In particular, more attention (i.e. associative weight) is directed to associati
 In addition, more attention is directed to stimuli that have higher uncertainty (i.e. entropy, $H$) in their associations, whether because they are novel (and thus have no pre-existing associations) or because they have diffuse associations with several different stimuli.
 The model assumes learners knowledge grows trial-by-trial, and that a fixed amount of associative weight (learning rate $\chi$) is distributed among the presented word-referent associations on a given trial in proportion to the prior familiarity of the association and the uncertainty of the involved word and referent.
 The relative strength of the familiarity and uncertainty bias is governed by a parameter $\lambda$: for values of $\lambda>1$ the model focuses more attention on uncertain stimuli, while for values of $\lambda<1$ the model focuses more attention on familiar word-referent associations.
-Associations are also assumed to decay from trial to trial, at a rate governed by parameter $\alpha$. 
+Associations are also assumed to decay from trial to trial, at a rate governed by memory fidelity parameter $\alpha$. 
 The update rule for adjusting the association $M_{w,o}$ between word $w$ and referent $o$ on a given trial is
 
 \begin{equation}
@@ -127,9 +132,9 @@ The other models we tested are variations on this model.
 
 The familiarity-biased associative model (FAM) implemented just the familiarity bias of the FUAM, without the uncertainty bias term, and thus only implements a bias for already-strong associations, using learning rate ($\chi$) and decay $\alpha$ parameters.
 
-### Uncertainty-biased Associative Model (UAM)
+<!-- ### Uncertainty-biased Associative Model (UAM)
 
-The uncertainty-biased associative model (UAM) implemented only the uncertainty bias of the FUAM, without the familiarity bias term, and uses the same three parameters as the FUAM.
+The uncertainty-biased associative model (UAM) implemented only the uncertainty bias of the FUAM, without the familiarity bias term, and uses the same three parameters as the FUAM.-->
 
 ### Novelty-biased Associative Model (NAM)
 
@@ -137,13 +142,15 @@ The novelty-biased associative model (NAM), like the UAM, has no familiarity bia
 
 ## Fitting Procedure
 
-We first fitted each model to each participant's data individually.
-We then fitted the model simultaneously to all participants in each study.
-Finally, we again fitted individuals separately, but included a quadratic regularization term in the objective, penalizing parameter values that fell far from the optimal values for the group, approximating a weakly-informative Gaussian prior (-.004..)
+We first fitted each model to each participant's data individually, finding parameter values per participant to maximize the log-likelihood of the model's choices with respect to theirs. 
+We fitted each model to just the passive training trials, as well as to the passive training trials and the participant's selection trials, to confirm that including the selection trials yielded a better fit.
+We will report each model's average fit, and select the best-fitting model overall for further analysis.
+<!-- We then fitted the model simultaneously to all participants in each study.
+Finally, we again fitted individuals separately, but included a quadratic regularization term in the objective, penalizing parameter values that fell far from the optimal values for the group, approximating a weakly-informative Gaussian prior (-.004..) -->
 
 ## Modeling Sampling Choices
 
-Next, we used the best-fit models of participants' learning to investigate participants' search strategies in the sampling phase of the experiment. We considered three sampling decision rules commonly attested in the information-seeking literature to explain active choices: maximizing entropy reduction (information gain), maximizing the probability associated with labels (probability gain), and margin sampling.
+Next, we used the best-fit models of participants' learning to investigate their selection strategies in the sampling phase of the experiment. We considered three sampling decision rules commonly attested in the information-seeking literature to explain active choices: maximizing entropy reduction (information gain), maximizing the probability associated with labels (probability gain), and margin sampling.
 
 ### Maximizing entropy reduction.
 
@@ -179,9 +186,22 @@ In this decision rule, the model’s goal is to maximally increase the probabili
 
 ### Alternative strategies.
 
-We also explored several additional strategies. First, we also considered a *maximum certainty* (or confirmatory) strategy. Learners may gravitate towards confirming choices they already have high certainty for [Wason, 1960; @zettersten_active_2023]. Second, we considered a *novelty-based* strategy in which the model based its choices on the relative novelty (or familiarity) of the choice options.
+We also explored several additional strategies. First, we also considered a *maximum certainty* (or confirmatory) strategy. Learners may gravitate towards confirming choices they already have high certainty for [@wason1960; @zettersten_active_2023]. Second, we considered a *novelty-based* strategy in which the model based its choices on the relative novelty (or familiarity) of the choice options. 
+Third, we consider a random selection strategy as a baseline comparison.
 
 # Results
+
+First we determine which model best fits the data. 
+show that FUBAM fits better than FAM or NAM
+
+```{r model-comparison}
+load("../data/ind_fits_strength.Rdata")
+str_fits <- ind_fits$sfits
+load("../data/ind_fits_novelty_chi1.Rdata")
+nov_fits <- ind_fits$sfits
+
+```
+
 
 ```{r}
 load("../data/ind_fits_kachergis_chi1.Rdata")
