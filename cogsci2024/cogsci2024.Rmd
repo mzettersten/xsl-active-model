@@ -256,7 +256,7 @@ tab1 <- cbind(Model = c("FUAM","strength","novelty","uncertainty"),
                         colMeans(st_fits[nov_ss,2:5]),
                         colMeans(st_fits[unc_ss,2:5]))
 ) 
-xtable(tab1)
+xtable::xtable(tab1)
 ```
 
 
@@ -330,7 +330,7 @@ tab2 <- gres |> group_by(Group) |>
             alpha = mean(alpha),
             `Mean accuracy` = mean(Human)) 
 
-xtable(tab2) # |> kableExtra::kable(digits=2)
+xtable::xtable(tab2) # |> kableExtra::kable(digits=2)
 ```
 
 Table 2 shows the average parameter values for each group of participants, and the mean accuracy and number of participants per group.
@@ -427,23 +427,44 @@ ggarrange(p2, p3, p4, ncol=1)
 
 ## Selection Strategies
 
+The most likely selection strategy for each participant was calculated. 
+Confirmatory was the most common strategy (42% of participants), followed by entropy (29%), margin sampling (18%), random (8%), and novelty (3%).
+Adults were more likely to use entropy maximization (39% vs. 20% of children), whereas children were more likely to use a confirmatory strategy (62% vs. 22% of adults).
+Margin sampling was used at a similar rate by children (14%) and adults (22%), and a random selection was most likely for 13% of adults, but only 3% of children. 
+Novelty was the most likely strategy for 5% of adults, and no children.
+
+```{r strategy-by-group, include=F}
+best_strategies <- best_strategies |> 
+  left_join(gres |> ungroup() |> select(subject, Human, lambda, Group))
+
+table(best_strategies$strategy, best_strategies$Group)
+```
+
+
 ```{r, tab.cap="Most likely selection strategies."}
 # Summary: How many subjects best fit each strategy?
 best_strategies |>
   count(strategy) |>
   arrange(desc(n)) |>
   mutate(proportion = n / sum(n)) |>
-  xtable()
+  xtable::xtable()
 ```
 
-```{r, tab.cap="Selection strategies by age group."}
+```{r, tab.cap="Best-fitting selection strategies by age group."}
 # By age group
 best_strategies |>
+  mutate(age_group = ifelse(age_group == "kids", "children", "adults")) |>
   count(age_group, strategy) |>
   group_by(age_group) |>
   mutate(proportion = n / sum(n)) |>
-  arrange(age_group, desc(n)) |>
-  xtable()
+  ggplot(aes(x = strategy, y = proportion, fill = age_group)) + 
+  geom_col(position = "dodge") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Best-fitting selection strategies by age group",
+       x = "Strategy",
+       y = "Proportion of Participants",
+       fill = "Age Group") +
+  theme_classic()
 ```
 
 ```{r, include=F}
@@ -452,7 +473,8 @@ best_strategies |>
   count(experiment_name, strategy) |>
   group_by(experiment_name) |>
   mutate(proportion = n / sum(n)) |>
-  arrange(experiment_name, desc(n))
+  xtable::arrange(experiment_name, desc(n))
+# the bulk of confirmatory come from Experiment 3...mean anything?
 ```
 
 
