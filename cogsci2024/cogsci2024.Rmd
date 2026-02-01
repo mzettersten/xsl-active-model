@@ -191,29 +191,78 @@ Third, we consider a random selection strategy as a baseline comparison.
 
 # Results
 
-First we determine which model best fits the data. 
-show that FUBAM fits better than FAM or NAM
-
-```{r model-comparison}
+```{r model-comparison, include=F}
+# fits with selection trials:
 load("../data/ind_fits_strength.Rdata")
 str_fits <- ind_fits$sfits
+#load("../data/ind_fits_uncertainty.Rdata")
+#unc_fits <- ind_fits$sfits
 load("../data/ind_fits_novelty_chi1.Rdata")
 nov_fits <- ind_fits$sfits
+load("../data/ind_fits_kachergis_chi1.Rdata")
+sua_fits <- ind_fits1$sfits
 
+st_fits <- tibble(subject = str_fits$subject,
+                  strength = str_fits$neg_log_lik,
+                  novelty = nov_fits$neg_log_lik,
+                  `fam-unc` = sua_fits$neg_log_lik)
+colMeans(st_fits[,2:4])
+colSums(st_fits[,2:4])
+
+cor.test(st_fits$strength, st_fits$novelty) # .996
+cor.test(st_fits$strength, st_fits$`fam-unc`) # .983
+cor.test(st_fits$strength, st_fits$`fam-unc`)
+fits_long <- st_fits |> pivot_longer(cols = c("strength","novelty",`fam-unc`), 
+                                     names_to = "model", values_to = "NLL")
+#fits_long |> ggplot(aes(x = model, y = NLL)) + boxplot()
+
+# fam-unc is best fitting model for 110 / 190 subjects
+func_ss <- which(st_fits$`fam-unc` < st_fits$strength & st_fits$`fam-unc` < st_fits$novelty)
+length(func_ss)
+# strength is best fitting model for 57 participants
+str_ss <- which(st_fits$strength < st_fits$`fam-unc` & st_fits$strength < st_fits$novelty)
+length(str_ss)
+# novelty is best fitting model for 23 participants
+nov_ss <- which(st_fits$novelty < st_fits$`fam-unc` & st_fits$novelty < st_fits$strength)
+length(nov_ss)
+
+# are the fits much different?
+                               # strength  novelty  fam-unc 
+colMeans(st_fits[func_ss,2:4]) # 2.423575 2.400694 2.133551 <- fam-unc wins handily where it wins
+colMeans(st_fits[str_ss,2:4])  # 2.654242 2.654268 2.656741  <- identical until 3rd decimal
+colMeans(st_fits[nov_ss,2:4])  # 4.032874 3.773947 3.926793 <- novelty actually beats fam-unc for some Ss! but still not great fits
+
+# N = 1712 test trials, 
+# BIC_str = log(1712)*2 - 2*-510.6412 = 1036.17
+# BIC_nov = log(1712)*3 - 2*-502.1704 = 1026.68
+# BIC_sua = log(1712)*3 - 2*-476.4410 = 975.22
+
+# without selection trials:
+load("../data/fits_wo_selection_trials/ind_fits_strength.Rdata")
+str_fits_ns <- ind_fits$sfits
+load("../data/fits_wo_selection_trials/ind_fits_novelty_chi1.Rdata")
+nov_fits_ns <- ind_fits$sfits
+load("../data/fits_wo_selection_trials/ind_fits_kachergis_chi1.Rdata")
+sua_fits_ns <- ind_fits1
 ```
 
+To determine which model best fits the data, we calculate BIC (Bayesian Information Criterion), defined as $BIC=ln(N)k-2ln(L)$, where $L$ is the maximized likelihood, $k$ is the number of parameters, and $N$ is the number of data points (here, $N=1712$ test trials). The model with the lowest BIC is selected, as it balances model complexity and fit to the data.
+The strength-biased model yielded $BIC = 1036.17$, while the novelty-biased model scored $BIC = 1026.68$, and the familiarity- and uncertainty-biased model (FUAM) achieved the lowest $BIC = 975.22$. 
+The FUAM achieved the best fit for 110 of the 190 participants, and matched the best fit of the strength-biased model for a further 57 participants. The novelty-biased model was a better fit for 23 participants (12% of the study sample), which may warrant further investigation.
+For all three models, including the selection trials yielded a better fit to the data, showing that it is not unreasonable to apply these models to the selection trials, and supporting the idea that the model's knowledge state and parameters may bear some relation to participants' selection strategies.
+We will focus the remaining analysis on the parameters of the best-fitting model, the familiarity- and uncertainty-biased associative model (FUAM).
 
-```{r}
+```{r, model-cors}
 load("../data/ind_fits_kachergis_chi1.Rdata")
-ind_fits <- ind_fits1
+sua_fits <- ind_fits1
 
-results <- ind_fits$fit_results |>
+results <- sua_fits$fit_results |>
   mutate(age_years = ifelse(age<18, round(age), "adult"),
          age_years = ifelse(is.na(age_years), "adult", age_years)) |> # 1 adult had NA age
   group_by(experiment_name, age_years, subject, age) |>
   summarise(Human = mean(is_right),
             Model = mean(mod_perf)) |>
-  left_join(ind_fits$sfits) 
+  left_join(sua_fits$sfits) 
 
 perf_vs_chi = cor.test(results$Human, results$chi) # .65 p<.001
 perf_vs_lambda = cor.test(results$Human, results$lambda) # .15 p=.04
@@ -231,12 +280,9 @@ age_vs_alpha = cor.test(results$age, results$alpha) # .05 n.s.
 
 In the individual fits, the median value of $\chi=$ `r round(median(results$chi),2)`, the median value of $\lambda=$ `r round(median(results$lambda),2)`, and the median value of $\alpha=$ `r round(median(results$alpha),2)`.
 
-In the group fit, the best-fitting parameter values were $\chi=0.0323$, $\lambda=3.436$, and $\alpha=0.895$.
-
-The
 
 ```{r fig1-perf, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3, fig.height=3.5, set.cap.width=T, num.cols.cap=1, fig.cap = "One column image."}
-p1 <- results |>
+results |>
   filter(is.element(experiment_name, c("Experiment 1", "Experiment 2"))) |>
   pivot_longer(cols = c(Human, Model), names_to = "group", values_to = "value") |>
   group_by(age_years, group) |>

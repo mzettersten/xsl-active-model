@@ -473,13 +473,10 @@ save(ind_fits, file="data/ind_fits_kachergis_reparam.Rdata")
 mean(ind_fits$sfits$neg_log_lik) # 3.52
 
 
-ind_fits <- fit_model_per_subject("kachergis", xd |> filter(subject!="Crossact1_p121"),  
-                                  lower=c(.001, .01, .8), upper=c(.5, 8, 1))
-save(ind_fits, file="data/ind_fits_kachergis.Rdata")
-mean(ind_fits$sfits$neg_log_lik) # 2.94
-
-# broken for some param combos -> "Crossact2_p101"
-#  "Crossact2_p131"
+ind_fits <- fit_model_per_subject("uncertainty", xd |> filter(subject!="Crossact1_p121"),  
+                                  lower=c(.001, .01, .5), upper=c(1, 12, 1))
+save(ind_fits, file="data/ind_fits_uncertainty.Rdata")
+mean(ind_fits$sfits$neg_log_lik) # 
 ```
 
 
