@@ -476,7 +476,7 @@ mean(ind_fits$sfits$neg_log_lik) # 3.52
 ind_fits <- fit_model_per_subject("uncertainty", xd |> filter(subject!="Crossact1_p121"),  
                                   lower=c(.001, .01, .5), upper=c(1, 12, 1))
 save(ind_fits, file="data/ind_fits_uncertainty.Rdata")
-mean(ind_fits$sfits$neg_log_lik) # 
+mean(ind_fits$sfits$neg_log_lik) # 2.20
 ```
 
 
