@@ -52,23 +52,8 @@
 % \textwidth 16cm
 % \textheight 21cm
 
-\title{Towards a Model-based Understanding of Active Cross-situational
-Word Learning}
+\title{Modeling Selection in Active Cross-situational Word Learning}
 
-\usepackage{booktabs}
-\usepackage{longtable}
-\usepackage{array}
-\usepackage{multirow}
-\usepackage{wrapfig}
-\usepackage{float}
-\usepackage{colortbl}
-\usepackage{pdflscape}
-\usepackage{tabu}
-\usepackage{threeparttable}
-\usepackage{threeparttablex}
-\usepackage[normalem]{ulem}
-\usepackage{makecell}
-\usepackage{xcolor}
 
 \author{{\large \bf George~Kachergis (kachergis@stanford.edu)} \\ Department of Psychology, Stanford University \\ Stanford, CA \AND {\large \bf Martin~Zettersten (FIXME@princeton.edu)} \\ Department of Psychology, Princeton University \\ Princeton, NJ}
 
@@ -188,15 +173,11 @@ supporting the latter explanation-- as participants become more
 successful at learning the novel label-object associations, they also
 become more likely to seek out information about ambiguous items.''
 
-\begin{itemize}
-\tightlist
-\item
-  kids weren't more likely to sample the ambiguous referents: either
-  they are hypothesis testers (and saw no disconfirming evidence), or
-  maybe they have less of a focus on uncertainty (and perhaps slower
-  learning rate..and how does memory influence sampling choice? recency
-  bias if worse memory?)
-\end{itemize}
+kids weren't more likely to sample the ambiguous referents: either they
+are hypothesis testers (and saw no disconfirming evidence), or maybe
+they have less of a focus on uncertainty (and perhaps slower learning
+rate..and how does memory influence sampling choice? recency bias if
+worse memory?)
 
 \section{Method}\label{method}
 
@@ -374,9 +355,7 @@ based on determining the increase in (correct) association strength
 provided by a each potential object selection. The final object was
 selected that led to the largest increase in association strength
 (averaging across all possible distractors that could be chosen in the
-case of the adult data). - is this the same as Oudeyer's `learning
-progress' ? - pick the thing that results in the strongest association
-(and same as information gain?)
+case of the adult data).
 
 \begin{equation}
 \max_{s_o,w}({M_{w,s_o})- \max_{w,o}(M_{w,o}})
@@ -397,26 +376,34 @@ Third, we consider a random selection strategy as a baseline comparison.
 
 \begin{CodeChunk}
 \begin{CodeOutput}
-
-
-Table: Number of participants best fitted per model, and average negative log-likelihood (lower=better) per model.
-
-|Model       | N best fit| strength| uncertainty|  novelty|     FUAM|
-|:-----------|----------:|--------:|-----------:|--------:|--------:|
-|FUAM        |          0|      NaN|         NaN|      NaN|      NaN|
-|strength    |         24| 2.002545|    2.089643| 2.002552| 2.003514|
-|novelty     |          3| 3.221807|    3.418205| 3.014651| 3.188710|
-|uncertainty |         96| 3.556723|    2.568328| 3.487840| 3.368539|
-
+% latex table generated in R 4.5.2 by xtable 1.8-4 package
+% Sun Feb  1 15:10:36 2026
+\begin{table}[ht]
+\centering
+\begin{tabular}{rlrrrrr}
+  \hline
+ & Model & N best fit & strength & uncertainty & novelty & FUAM \\ 
+  \hline
+1 & FUAM &  67 & 1.66 & 1.66 & 1.65 & 1.42 \\ 
+  2 & strength &  24 & 2.00 & 2.09 & 2.00 & 2.00 \\ 
+  3 & novelty &   3 & 3.22 & 3.42 & 3.01 & 3.19 \\ 
+  4 & uncertainty &  96 & 3.56 & 2.57 & 3.49 & 3.37 \\ 
+   \hline
+\end{tabular}
+\end{table}
 \end{CodeOutput}
 \end{CodeChunk}
 
-For model comparison, we calculated BIC (Bayesian Information
-Criterion), defined as \(BIC=ln(N)k-2ln(L)\), where \(L\) is the
-maximized likelihood, \(k\) is the number of parameters, and \(N\) is
-the number of data points (here, \(N=1712\) test trials). The model with
-the lowest BIC is selected, as it balances model complexity and fit to
-the data. The strength-biased model yielded \(BIC = 1036.17\), the
+For all four models, including the selection trials yielded a better fit
+to the data, showing that it is not unreasonable to apply these models
+to the selection trials, and supporting the idea that the model's
+knowledge state and parameters may bear some relation to participants'
+selection strategies. For model comparison, we calculated BIC (Bayesian
+Information Criterion), defined as \(BIC=ln(N)k-2ln(L)\), where \(L\) is
+the maximized likelihood, \(k\) is the number of parameters, and \(N\)
+is the number of data points (here, \(N=1712\) test trials). The model
+with the lowest BIC is selected, as it balances model complexity and fit
+to the data. The strength-biased model yielded \(BIC = 1036.17\), the
 novelty-biased model scored \(BIC = 1026.68\), and the familiarity- and
 uncertainty-biased model (FUAM) had \(BIC = 975.22\). The
 uncertainty-biased model (UAM) yielded the best fit, with
@@ -436,17 +423,67 @@ well accounted for by the FUAM model (the uncertainty model did not fit
 as well to the strength participants). The novelty-biased model best
 fitted only 3 participants, although it's worth noting that its average
 fit to the strength participants was nearly the same as the FUAM and
-strength models. For all four models, including the selection trials
-yielded a better fit to the data, showing that it is not unreasonable to
-apply these models to the selection trials, and supporting the idea that
-the model's knowledge state and parameters may bear some relation to
-participants' selection strategies. We will focus our remaining analyses
-on the parameters of the best-fitting models, the familiarity- and
+strength models. We will focus our remaining analyses on the model
+parameters for the two best-fitting models, the familiarity- and
 uncertainty-biased associative model (FUAM) and its cousin the
 uncertainty-biased associative model (UAM).
 
-In the individual fits, the median value of \(\chi=\) 0.03, the median
-value of \(\lambda=\) 4.63, and the median value of \(\alpha=\) 0.82.
+\subsection{Model parameters}\label{model-parameters}
+
+The FUAM and UAM models achieved similar fit
+(\(|NLL_{FUAM} - NLL_{UAM}| \leq 0.1\)) for 98 participants. The UAM
+achieved better fit than the FUAM (\(NLL_{FUAM} - NLL_{UAM} > 0.1\)) for
+56 participants, and the FUAM achieved better fit than the UAM for the
+remaining 36 participants. We will call these participants the
+\emph{Either}, \emph{UAM}, and \emph{FUAM} groups, respectively.
+
+\begin{CodeChunk}
+\begin{CodeOutput}
+% latex table generated in R 4.5.2 by xtable 1.8-4 package
+% Sun Feb  1 15:10:36 2026
+\begin{table}[ht]
+\centering
+\begin{tabular}{rlrrrrr}
+  \hline
+ & Group & N & chi & lambda & alpha & Mean accuracy \\ 
+  \hline
+1 & Either &  98 & 0.32 & 5.34 & 0.77 & 0.59 \\ 
+  2 & FUAM &  36 & 0.41 & 4.97 & 0.77 & 0.65 \\ 
+  3 & UAM &  56 & 0.26 & 8.76 & 0.69 & 0.57 \\ 
+   \hline
+\end{tabular}
+\end{table}
+\end{CodeOutput}
+\end{CodeChunk}
+
+Table 2 shows the average parameter values for each group of
+participants, and the mean accuracy and number of participants per
+group. None of these values are strikingly different than the overall
+average parameter values (mean \(\chi=\) 0.32, mean \(\lambda=\) 6.28,
+mean \(\alpha=\) 0.75), though the UAM group shows lower learning rate
+(\(\chi = 0.26\)), lower memory fidelity (\(\alpha=0.69\)), and a higher
+focus on uncertainty (\(\lambda=8.76\)). The FUAM group has a somewhat
+higher learning rate (\(\chi = 0.41\) and the greatest overall accuracy
+(\(M_{acc} = 0.65\)).
+
+Figure 1 shows the correlations between participants' accuracy,
+best-fitting model parameters, and log(age). All correlations are
+significant (e.g., \(\lambda\) vs log(age) \(r = 0.14\),
+\(t(187) = 1.99\), \(p<.05\)) except \(\lambda\) vs.~\(\chi\). Most
+notable is that accuracy is strongly related to higher learning rate
+\(\chi\) (\(r=0.53\)) and lower memory fidelity (\(\alpha=0.58\); better
+learning is achieved by forgetting early, ambiguous evidence), and only
+weakly related to \(lambda\) (\(r=0.23\)) and age (\(r=0.29\)). A
+targeted analysis found that children (age\textless18) are more likely
+than adults to be familiarity-focused (\(\lambda<1\)) rather than
+uncertainty-focused (\(\chi^2 = 7.41\)): of 60 participants with
+\(\lambda<1\), 40 were children (and children are 51\% of the sample).
+
+\begin{CodeChunk}
+\begin{figure}[tb]
+\includegraphics{figs/unnamed-chunk-1-1} \caption[Correlation of best-fitting model parameters]{Correlation of best-fitting model parameters}\label{fig:unnamed-chunk-1}
+\end{figure}
+\end{CodeChunk}
 
 \begin{CodeChunk}
 \begin{figure}[H]
@@ -455,18 +492,7 @@ value of \(\lambda=\) 4.63, and the median value of \(\alpha=\) 0.82.
 
 }
 
-\caption[One column image]{One column image.}\label{fig:fig1-perf}
-\end{figure}
-\end{CodeChunk}
-
-\begin{CodeChunk}
-\begin{figure}[H]
-
-{\centering \includegraphics{figs/fig2-parms-1} 
-
-}
-
-\caption[One column image]{One column image.}\label{fig:fig2-parms}
+\caption[Model vs]{Model vs. human performance by age.}\label{fig:fig1-perf}
 \end{figure}
 \end{CodeChunk}
 
@@ -474,50 +500,47 @@ value of \(\lambda=\) 4.63, and the median value of \(\alpha=\) 0.82.
 
 \begin{CodeChunk}
 \begin{CodeOutput}
-# A tibble: 5 x 3
-  strategy         n proportion
-  <chr>        <int>      <dbl>
-1 confirmatory    81     0.424 
-2 entropy         56     0.293 
-3 margin          34     0.178 
-4 random          15     0.0785
-5 novelty          5     0.0262
+% latex table generated in R 4.5.2 by xtable 1.8-4 package
+% Sun Feb  1 15:10:37 2026
+\begin{table}[ht]
+\centering
+\begin{tabular}{rlrr}
+  \hline
+ & strategy & n & proportion \\ 
+  \hline
+1 & confirmatory &  81 & 0.42 \\ 
+  2 & entropy &  56 & 0.29 \\ 
+  3 & margin &  34 & 0.18 \\ 
+  4 & random &  15 & 0.08 \\ 
+  5 & novelty &   5 & 0.03 \\ 
+   \hline
+\end{tabular}
+\end{table}
 \end{CodeOutput}
+\end{CodeChunk}
+
+\begin{CodeChunk}
 \begin{CodeOutput}
-# A tibble: 9 x 4
-# Groups:   age_group [2]
-  age_group strategy         n proportion
-  <chr>     <chr>        <int>      <dbl>
-1 adults    entropy         36     0.387 
-2 adults    confirmatory    20     0.215 
-3 adults    margin          20     0.215 
-4 adults    random          12     0.129 
-5 adults    novelty          5     0.0538
-6 kids      confirmatory    61     0.622 
-7 kids      entropy         20     0.204 
-8 kids      margin          14     0.143 
-9 kids      random           3     0.0306
-\end{CodeOutput}
-\begin{CodeOutput}
-# A tibble: 15 x 4
-# Groups:   experiment_name [4]
-   experiment_name strategy         n proportion
-   <chr>           <chr>        <int>      <dbl>
- 1 Experiment 1    confirmatory    12     0.387 
- 2 Experiment 1    entropy         10     0.323 
- 3 Experiment 1    margin           4     0.129 
- 4 Experiment 1    novelty          3     0.0968
- 5 Experiment 1    random           2     0.0645
- 6 Experiment 2    entropy         20     0.5   
- 7 Experiment 2    margin          14     0.35  
- 8 Experiment 2    confirmatory     3     0.075 
- 9 Experiment 2    random           3     0.075 
-10 Experiment 3    confirmatory    58     1     
-11 Experiment S1   entropy         26     0.419 
-12 Experiment S1   margin          16     0.258 
-13 Experiment S1   random          10     0.161 
-14 Experiment S1   confirmatory     8     0.129 
-15 Experiment S1   novelty          2     0.0323
+% latex table generated in R 4.5.2 by xtable 1.8-4 package
+% Sun Feb  1 15:10:37 2026
+\begin{table}[ht]
+\centering
+\begin{tabular}{rllrr}
+  \hline
+ & age\_group & strategy & n & proportion \\ 
+  \hline
+1 & adults & entropy &  36 & 0.39 \\ 
+  2 & adults & confirmatory &  20 & 0.22 \\ 
+  3 & adults & margin &  20 & 0.22 \\ 
+  4 & adults & random &  12 & 0.13 \\ 
+  5 & adults & novelty &   5 & 0.05 \\ 
+  6 & kids & confirmatory &  61 & 0.62 \\ 
+  7 & kids & entropy &  20 & 0.20 \\ 
+  8 & kids & margin &  14 & 0.14 \\ 
+  9 & kids & random &   3 & 0.03 \\ 
+   \hline
+\end{tabular}
+\end{table}
 \end{CodeOutput}
 \end{CodeChunk}
 

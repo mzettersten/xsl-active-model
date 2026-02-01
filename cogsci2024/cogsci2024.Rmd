@@ -1,5 +1,5 @@
 ---
-title: "Towards a Model-based Understanding of Active Cross-situational Word Learning"
+title: "Modeling Selection in Active Cross-situational Word Learning"
 bibliography: library.bib
 csl: apa6.csl
 document-params: "10pt, letterpaper"
@@ -35,6 +35,7 @@ library(xtable)
 require(ggpubr)
 require(tidyverse)
 require(tidyboot)
+require(corrplot)
 ```
 
 ```{r, load-data, echo=F}
@@ -83,7 +84,7 @@ GK: we can also test this based on best-fitting model parameters:
 they sampled more ambiguous items. Another possibility is that success fully learning novel words during training makes it more likely that learners will subsequently focus on ambiguous items during the Sampling Phase. In the supplementary in-lab replication experiment (see S1 for further details), we found preliminary evidence supporting the latter explanation– as 
 participants become more successful at learning the novel label-object associations, they also become more likely to seek out information about ambiguous items."
 
-- kids weren't more likely to sample the ambiguous referents: either they are hypothesis testers (and saw no disconfirming evidence), or maybe they have less of a focus on uncertainty (and perhaps slower learning rate..and how does memory influence sampling choice? recency bias if worse memory?)
+kids weren't more likely to sample the ambiguous referents: either they are hypothesis testers (and saw no disconfirming evidence), or maybe they have less of a focus on uncertainty (and perhaps slower learning rate..and how does memory influence sampling choice? recency bias if worse memory?)
 
 # Method
 
@@ -255,7 +256,7 @@ tab1 <- cbind(Model = c("FUAM","strength","novelty","uncertainty"),
                         colMeans(st_fits[nov_ss,2:5]),
                         colMeans(st_fits[unc_ss,2:5]))
 ) 
-tab1 |> kableExtra::kable()
+xtable(tab1)
 ```
 
 
@@ -297,27 +298,22 @@ unc_res <- unc_fits$fit_results |>
             Model = mean(mod_perf)) |>
   left_join(unc_fits$sfits) 
 
-perf_vs_chi = cor.test(results$Human, results$chi) # .65 p<.001
-perf_vs_lambda = cor.test(results$Human, results$lambda) # .15 p=.04
-perf_vs_alpha= cor.test(results$Human, results$alpha) # -.46 p<.001
+#perf_vs_chi = cor.test(results$Human, results$chi) # .65 p<.001
+#perf_vs_lambda = cor.test(results$Human, results$lambda) # .15 p=.04
+#perf_vs_alpha= cor.test(results$Human, results$alpha) # -.46 p<.001
 
-age_vs_chi = cor.test(results$age, results$chi) # .20 p<.01
-age_vs_lambda = cor.test(results$age, results$lambda) # .20 p<.01
-age_vs_alpha = cor.test(results$age, results$alpha) # .05 n.s.
-
-#psych::corr.test(results$age, results$alpha)
-# median(results$chi) # .034
-# median(results$lambda) # 9.25
-# median(results$alpha) # .56
+#age_vs_chi = cor.test(results$age, results$chi) # .20 p<.01
+#age_vs_lambda = cor.test(results$age, results$lambda) # .20 p<.01
+#age_vs_alpha = cor.test(results$age, results$alpha) # .05 n.s.
 ```
 
 ## Model parameters
 
 The FUAM and UAM models achieved similar fit ($|NLL_{FUAM} - NLL_{UAM}| \leq 0.1$) for `r length(UAM_approx_equal_FUAM)` participants. 
-The UAM achieved better fit than the FUAM ($NLL_{FUAM} - NLL_UAM} > 0.1$) for `r length(UAM_beats_FUAM)` participants, and the FUAM achieved better fit than the UAM for the remaining `r length(FUAM_beats_UAM)` participants.
+The UAM achieved better fit than the FUAM ($NLL_{FUAM} - NLL_{UAM} > 0.1$) for `r length(UAM_beats_FUAM)` participants, and the FUAM achieved better fit than the UAM for the remaining `r length(FUAM_beats_UAM)` participants.
 We will call these participants the *Either*, *UAM*, and *FUAM* groups, respectively.
 
-```{r table2, tab.cap="Average parameter values per group of participants best fitted by each model.}
+```{r table2, tab.cap="Average parameter values per group of participants best fitted by each model."}
 fuam_ss <- sua_res[FUAM_beats_UAM,]
 fuam_ss$Group = "FUAM"
 uam_ss <- unc_res[UAM_beats_FUAM,]
@@ -334,7 +330,7 @@ tab2 <- gres |> group_by(Group) |>
             alpha = mean(alpha),
             `Mean accuracy` = mean(Human)) 
 
-tab2 |> kableExtra::kable(digits=2)
+xtable(tab2) # |> kableExtra::kable(digits=2)
 ```
 
 Table 2 shows the average parameter values for each group of participants, and the mean accuracy and number of participants per group.
@@ -387,11 +383,11 @@ gres |>
 
 
 
-```{r fig2-parms, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.2, fig.height=6, set.cap.width=T, num.cols.cap=1, fig.cap = "One column image."}
+```{r fig2-parms, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.2, fig.height=6, set.cap.width=T, num.cols.cap=1, fig.cap = "One column image.", include=F}
 # cor.test(results$neg_log_lik, results$alpha) # .35 - higher alpha = worse fit??
 # cor.test(results$neg_log_lik, results$chi) # -.37 - lower chi = worse fit
 
-p2 <- results |>
+p2 <- gres |>
   #filter(is.element(experiment_name, c("Experiment 1", "Experiment 2"))) |>
   group_by(age_years) |>
   summarise(mean = mean(chi), sd = sd(chi), n = n(), se = sd / sqrt(n)) |>
@@ -403,7 +399,7 @@ p2 <- results |>
     theme_classic() + xlab("Age (years)") + ylab("Chi (learning rate)")  
 
 
-p3 <- results |>
+p3 <- gres |>
   filter(is.element(experiment_name, c("Experiment 1", "Experiment 2"))) |>
   group_by(age_years) |>
   summarise(mean = mean(lambda), sd = sd(lambda), n = n(), se = sd / sqrt(n)) |>
@@ -414,7 +410,7 @@ p3 <- results |>
                       ymax = mean + 1.96 * se)) +
     theme_classic() + xlab("Age (years)") + ylab("Lambda (attn to uncertainty)") 
 
-p4 <- results |>
+p4 <- gres |>
   filter(is.element(experiment_name, c("Experiment 1", "Experiment 2"))) |>
   group_by(age_years) |>
   summarise(mean = mean(alpha), sd = sd(alpha), n = n(), se = sd / sqrt(n)) |>
@@ -431,20 +427,26 @@ ggarrange(p2, p3, p4, ncol=1)
 
 ## Selection Strategies
 
-```{r}
+```{r, tab.cap="Most likely selection strategies."}
 # Summary: How many subjects best fit each strategy?
 best_strategies |>
   count(strategy) |>
   arrange(desc(n)) |>
-  mutate(proportion = n / sum(n))
+  mutate(proportion = n / sum(n)) |>
+  xtable()
+```
 
+```{r, tab.cap="Selection strategies by age group."}
 # By age group
 best_strategies |>
   count(age_group, strategy) |>
   group_by(age_group) |>
   mutate(proportion = n / sum(n)) |>
-  arrange(age_group, desc(n))
+  arrange(age_group, desc(n)) |>
+  xtable()
+```
 
+```{r, include=F}
 # By experiment
 best_strategies |>
   count(experiment_name, strategy) |>
