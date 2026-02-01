@@ -340,7 +340,7 @@ The FUAM group has a somewhat higher learning rate ($\chi = 0.41$ and the greate
 Figure 1 shows the correlations between participants' accuracy, best-fitting model parameters, and log(age).
 All correlations are significant (e.g., $\lambda$ vs log(age) $r = 0.14$, $t(187) = 1.99$, $p<.05$) except $\lambda$ vs. $\chi$. 
 Most notable is that accuracy is strongly related to higher learning rate $\chi$ ($r=0.53$) and lower memory fidelity ($\alpha=0.58$; better learning is achieved by forgetting early, ambiguous evidence), and only weakly related to $lambda$ ($r=0.23$) and age ($r=0.29$).
-A targeted analysis found that children (age<18) are more likely than adults to be familiarity-focused ($\lambda<1$) rather than uncertainty-focused ($\chi^2 = 7.41$): of 60 participants with $\lambda<1$, 40 were children (and children are 51% of the sample).
+A targeted analysis found that children (age<18) are more likely than adults to be familiarity-focused ($\lambda<1$) rather than uncertainty-focused ($\chi^2 = 7.41$): of 22% of adults had $\lambda<1$, while 41% of children did.
 
 ```{r, fig.cap="Correlation of best-fitting model parameters"}
 corrplot(cor(gres |> ungroup() |> filter(!is.na(age)) |> mutate(`log(age)` = log(age)) |>
