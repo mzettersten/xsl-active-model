@@ -365,7 +365,7 @@ All correlations are significant (e.g., $\lambda$ vs log(age) $r = 0.14$, $t(187
 Most notable is that accuracy is strongly related to higher learning rate $\chi$ ($r=0.53$) and lower memory fidelity ($\alpha=0.58$; better learning is achieved by forgetting early, ambiguous evidence), and only weakly related to $lambda$ ($r=0.23$) and age ($r=0.29$).
 A targeted analysis found that children (age<18) are more likely than adults to be familiarity-focused ($\lambda<1$) rather than uncertainty-focused ($\chi^2 = 7.41$): of 22% of adults had $\lambda<1$, while 41% of children did.
 
-```{r, fig.cap="Correlation of best-fitting model parameters"}
+```{r, fig.cap="Correlation of best-fitting model parameters", fig.width=3.5, fig.height=3.5}
 corrplot(cor(gres |> ungroup() |> filter(!is.na(age)) |> mutate(`log(age)` = log(age)) |>
                select(Human, alpha, lambda, chi, `log(age)`) |> rename(Accuracy = Human)),
          addCoef.col = 'black', diag=F, type='upper', method='ellipse', tl.srt = 0) # , tl.pos='d'
@@ -485,12 +485,10 @@ best_strategies |>
   mutate(proportion = n / sum(n)) |>
   ggplot(aes(x = strategy, y = proportion, fill = age_group)) + 
   geom_col(position = "dodge") +
-  scale_y_continuous(labels = scales::percent) +
-  labs(title = "Best-fitting selection strategies by age group",
-       x = "Strategy",
+  labs(x = "Strategy",
        y = "Proportion of Participants",
        fill = "Age Group") +
-  theme_classic()
+  theme_classic() + theme(legend.position="bottom")
 ```
 
 ```{r, results="asis", include=F}
