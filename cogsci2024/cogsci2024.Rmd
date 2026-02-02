@@ -509,6 +509,19 @@ print(tab, type="latex", comment = F, table.placement = "H", include.rownames=F)
 
 # Discussion
 
+We investigated the computational mechanisms underlying active word learning by fitting associative learning models to individual participants' performance and analyzing their information-seeking strategies. 
+Two models with uncertainty-biased attention best explained learning for nearly all participants, with an uncertainty-only model (UAM) best accounting for 51% of individuals and the combined familiarity-uncertainty model (FUAM) accounting for 
+48%. This suggests that directing attention toward uncertain associations (i.e., items with diffuse mappings) is a fundamental mechanism in cross-situational word learning in both adults and children. 
+These two models -- differing only in whether the current association strength is considered in the update rule -- very nearly mimicked each other for the bulk of the participants (X%), but each model best explained a substantial group of participants, suggesting some individual variability in learning styles.
+Examining the best-fitting parameters showed that learning rate and memory decay predicted performance more strongly than attention biases. 
+Participants with higher learning rates ($\chi$) and lower memory fidelity ($\alpha$; effectively forgetting early ambiguous evidence) were more accurate at test. 
+A relatively weak relationship between $\lambda$ (attention to uncertainty) and performance ($r = 0.23$) suggests that how much learners encode matters more than what they attend to, at least in these experimental paradigms.
+
+An analysis of selection strategies showed striking developmental differences. 
+Adults predominantly employed entropy maximization (39%), actively seeking information about ambiguous items to reduce uncertainty. 
+In contrast, children favored confirmatory sampling (62%), requesting information about items for which they 
+already had strong associations. 
+This pattern suggests that uncertainty-reduction strategies emerge gradually across development, consistent with broader findings on the development of information-seeking in childhood [@nussenbaum_causal_2019; @meder_directed_2021].
 
 
 # Acknowledgements
