@@ -523,6 +523,20 @@ In contrast, children favored confirmatory sampling (62%), requesting informatio
 already had strong associations. 
 This pattern suggests that uncertainty-reduction strategies emerge gradually across development, consistent with broader findings on the development of information-seeking in childhood [@nussenbaum_causal_2019; @meder_directed_2021].
 
+A central theoretical question is whether sampling ambiguous items causes better learning, or whether successful learning enables more sophisticated sampling strategies. 
+Our results support the latter interpretation. 
+Learning parameters $\chi$ and $\alpha$ strongly predicted performance, while sampling strategy showed weaker 
+relationships to outcomes. <!-- test with regression? summary(lm(Human ~ strategy + lambda + chi + alpha, data=best_strategies)) --> 
+Moreover, children (who learn less successfully, overall) predominantly used confirmatory rather than uncertainty-reducing strategies.
+This finding aligns with @Zettersten2021's supplementary analysis which suggested that "successfully learning novel words during training makes it more likely that learners will subsequently focus on ambiguous items." 
+We extend this by showing that individual differences in learning mechanisms (learning rate, memory) are the primary drivers of both performance and sampling sophistication.
+Of course, the experimental design limits our ability to test causality: selection trials occurred *after* initial learning, and we modeled them using associations built during passive training. 
+Future work using trial-by-trial joint optimization of learning and selection parameters could better disentangle these relationships.
+
+Combining computational modeling of learning mechanisms with analysis of selection strategies reveals a nuanced picture of active word learning across development. 
+Successful learning depends more on fundamental learning parameters (i.e., how quickly associations form and how readily early evidence is forgotten) rather than a bias to attend more or less to uncertain (or already-familiar) items. 
+However, the likelihood of strategically sampling uncertain information emerges across childhood, which may suggest an increasing awareness of uncertainty, or of the value of reducing it. 
+These findings advance our understanding of how learners actively shape their own language learning experience, and how cognitive development enables increasingly sophisticated information-seeking strategies.
 
 # Acknowledgements
 
