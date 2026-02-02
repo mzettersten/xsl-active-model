@@ -481,7 +481,7 @@ mean(ind_fits$sfits$neg_log_lik) # 2.20
 
 
 ```{r}
-load("data/ind_fits_kachergis.Rdata") # unconstrained
+load("data/ind_fits_uncertainty.Rdata") # 
 load("data/ind_fits_kachergis_chi1.Rdata") # chi constrained to 0-1
 xx <- ind_fits$sfits |> left_join(ind_fits1$sfits, by="subject")
 # .x = unconstrained, .y = constrained
@@ -554,6 +554,7 @@ results |>
             neg_log_lik = mean(neg_log_lik)) |>
   arrange(desc(Human))
 ```
+
 ```{r}
 t.test(results |> filter(adult==1) |> pull(chi),
        results |> filter(adult==0) |> pull(chi)) # adults 0.45, kids 0.25 p=.002
