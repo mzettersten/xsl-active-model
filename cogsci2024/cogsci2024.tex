@@ -55,13 +55,8 @@
 \title{Modeling Selection in Active Cross-situational Word Learning}
 
 
-\author{{\large \bf George~Kachergis (kachergis@stanford.edu)} \\ Department of Psychology, Stanford University \\ Stanford, CA \AND {\large \bf Martin~Zettersten (FIXME@princeton.edu)} \\ Department of Psychology, Princeton University \\ Princeton, NJ}
+\author{{\large \bf George~Kachergis (kachergis@stanford.edu)} \\ Department of Psychology, Stanford University \\ Stanford, CA \AND {\large \bf Martin~Zettersten (mzettersten@ucsd.edu)} \\ Department of Cognitive Science, University of California, San Diego \\ San Diego, CA}
 
-\newlength{\cslhangindent}
-\setlength{\cslhangindent}{1.5em}
-\newenvironment{CSLReferences}%
-  {}%
-  {\par}
 
 \begin{document}
 
@@ -90,13 +85,12 @@ to shape their experience will help us build and improve theories of
 language acquisition. It can also help us understand what cognitive
 mechanisms and strategies learners are able to deploy, and consequently
 enable us to design curricula that better match their expanding
-capabilities. For example, although the classic conceptual Hunter \&
-Ames (1988) model posits that infants have preferences for both novel
-and familiar stimuli, and novelty preferences have been implicated in
-children's word learning at some ages (Horst, Samuelson, Kucker, \&
-McMurray, 2011; e.g.~22-month-olds: Mather \& Plunkett, 2012), a recent
-study found that infants do not show a bias to attend to uncertain/novel
-stimuli (find citation on langcog slack..).
+capabilities. For example, although the classic conceptual @hunter1988
+model posits that infants have preferences for both novel and familiar
+stimuli, and novelty preferences have been implicated in children's word
+learning at some ages {[}e.g. 22-month-olds: @mather2012; @horst2011{]},
+a recent study found that infants do not show a bias to attend to
+uncertain/novel stimuli (find citation on langcog slack..).
 
 Although numerous computational models of word learning have been
 proposed, the experimental paradigms they are tested on tend to be
@@ -112,40 +106,38 @@ more diagnostic of the learning mechanisms at play, and may additionally
 help explain individual differences in learning. And yet, few active
 word learning experiments have been conducted, and fewer still have
 attempted to understand active learning with computational models
-(George Kachergis, Yu, \& Shiffrin, 2013).
+{[}@Kachergis2013{]}.
 
 The goal of our current study is to test how well previously proposed
 models of cross-situational word learning can explain the observed
-results of active learning experiments from Zettersten \& Saffran
-(2021), which found that adults -- but not children -- were likely to
-select referents with ambiguous labels. Aside from assessing the ability
-of the models to account for the overall data, it is of particular
-interest whether particular model parameters (e.g., learning rate,
-memory decay rate, and novelty vs.~familiarity bias) are associated with
-individuals' 1) learning performance and 2) deployed active learning
-strategy. We will also investigate age-related changes in model
-parameters.
+results of active learning experiments from @Zettersten2021, which found
+that adults -- but not children -- were likely to select referents with
+ambiguous labels. Aside from assessing the ability of the models to
+account for the overall data, it is of particular interest whether
+particular model parameters (e.g., learning rate, memory decay rate, and
+novelty vs.~familiarity bias) are associated with individuals' 1)
+learning performance and 2) deployed active learning strategy. We will
+also investigate age-related changes in model parameters.
 
 Past work has shown that both children and adults are active word
 learners, systematically seeking new information word meanings
-{[}Hembacher, DeMayo, \& Frank (2020); Janakiefski et al. (2022);
-Zettersten \& Saffran (2021); other refs{]}, with important implications
-for understanding how we are able to quickly build rich vocabularies
-(Hidaka, Torii, \& Kachergis, 2017). Yet what types of active learners
-are children about word meanings, exactly? While work has begun to
-characterize a variety of strategies that learners pursue when
-encountering novel words (George Kachergis et al., 2013; Zettersten,
-Cutler, \& Lew-Williams, 2023), we lack a formal understanding of the
-specific sampling strategies that word learners use (Settles, 2012;
-though see Gelderloos, Mahmoudi Kamelabad, \& Alishahi, 2020; Keijser,
-Gelderloos, \& Alishahi, 2019). Recent work has documented broad changes
-in the sampling strategies that children and adolescents deploy across
-development across several cognitive domains, e.g.~causal learning tasks
-(Nussenbaum et al., 2019) and foraging tasks (Meder, Wu, Schulz, \&
-Ruggeri, 2021; Nussenbaum et al., 2023). In the current work, we
-therefore explore what sampling decision rules best explain both
-children's and adults' information-seeking behavior when learning novel
-word-referent associations.
+{[}@hembacher\_childrens\_2020; @janakiefski\_gaining\_2022;
+@Zettersten2021; other refs{]}, with important implications for
+understanding how we are able to quickly build rich vocabularies
+{[}@Hidaka2017{]}. Yet what types of active learners are children about
+word meanings, exactly? While work has begun to characterize a variety
+of strategies that learners pursue when encountering novel words
+{[}@Kachergis2013; @zettersten\_active\_2023{]}, we lack a formal
+understanding of the specific sampling strategies that word learners use
+{[}@Settles2012; though see @gelderloos\_active\_2020; @Keijser2019{]}.
+Recent work has documented broad changes in the sampling strategies that
+children and adolescents deploy across development across several
+cognitive domains, e.g.~causal learning tasks
+{[}@nussenbaum\_causal\_2019{]} and foraging tasks
+{[}@nussenbaum\_novelty\_2023; @meder\_directed\_2021{]}. In the current
+work, we therefore explore what sampling decision rules best explain
+both children's and adults' information-seeking behavior when learning
+novel word-referent associations.
 
 \begin{CodeChunk}
 \begin{figure}[H]
@@ -183,11 +175,11 @@ worse memory?)
 
 \subsection{Data}\label{data}
 
-All data were taken from Zettersten \& Saffran (2021). Data for our
-Study 1 were pooled from Experiment 1 (31 adults), Experiment 2 (40
-children, 4-9 years of age), and adults in the Ambiguous Condition of
-Experiment S1 (58 adults), which had the same design as Experiments 1
-and 2, except for an additional test before the selection phase.
+All data were taken from @Zettersten2021. Data for our Study 1 were
+pooled from Experiment 1 (31 adults), Experiment 2 (40 children, 4-9
+years of age), and adults in the Ambiguous Condition of Experiment S1
+(58 adults), which had the same design as Experiments 1 and 2, except
+for an additional test before the selection phase.
 
 The training phase of Study 1 contained 24 FixMe-second training trials,
 each comprised of 2 referents and 2 words. The particular words and
@@ -208,22 +200,22 @@ referent.
 \subsection{Models}\label{models}
 
 We focused on analyzing data from the familiarity- and
-uncertainty-biased associative model G. Kachergis, Yu, \& Shiffrin
-(2016), and variations of that model, described below. We chose not to
-test any hypothesis-testing (HT) model as they are not consistent with
-the adult data in Zettersten \& Saffran (2021): for ambiguous items in
-the training phase, there was never any disconfirming evidence, so a
-hypothesis-tester's initial guess (i.e.~hypothesis) for each label would
-be confirmed on subsequent appearances, and there would be no reason for
-(or basis for) preferentially selecting ambiguous referents during the
-sampling phase, which is what adults were observed to do. While it is
-possible that children -- who were at chance for selecting ambiguous
-vs.~unambiguous referents -- are employing a hypothesis-testing
-strategy, some of the selection strategies we want to evaluate across
-development are only possible to use if a learner is simultaneously
-entertaining multiple hypotheses for a given label -- equivalent to
-associations rather than the mutually-exclusive hypotheses favored in HT
-accounts (e.g. Woodard, Gleitman, \& Trueswell, 2016).
+uncertainty-biased associative model
+{[}@Kachergis2012,@Kachergis2017{]}, and variations of that model,
+described below. We chose not to test any hypothesis-testing (HT) model
+as they are not consistent with the adult data in @Zettersten2021: for
+ambiguous items in the training phase, there was never any disconfirming
+evidence, so a hypothesis-tester's initial guess (i.e.~hypothesis) for
+each label would be confirmed on subsequent appearances, and there would
+be no reason for (or basis for) preferentially selecting ambiguous
+referents during the sampling phase, which is what adults were observed
+to do. While it is possible that children -- who were at chance for
+selecting ambiguous vs.~unambiguous referents -- are employing a
+hypothesis-testing strategy, some of the selection strategies we want to
+evaluate across development are only possible to use if a learner is
+simultaneously entertaining multiple hypotheses for a given label --
+equivalent to associations rather than the mutually-exclusive hypotheses
+favored in HT accounts {[}e.g. @woodard2016{]}.
 
 \subsubsection{Familiarity- and Uncertainty-biased Associative Model
 (FUAM)}\label{familiarity--and-uncertainty-biased-associative-model-fuam}
@@ -310,7 +302,7 @@ reduction.}\label{maximizing-entropy-reduction.}
 
 In this decision rule, the model's goal is to maximally reduce the
 entropy of the object-label probability distribution across objects
-(Nelson, 2005; Settles, 2012). Sampling choices are modeled based on
+{[}@Settles2012;@Nelson2005{]}. Sampling choices are modeled based on
 comparing the relative entropy reduction provided by making a given
 sampling selection of a referent \(s_o\) (across the labels \(w\)):
 
@@ -328,7 +320,7 @@ adult data).
 
 An alternative strategy documented in describing active sampling
 strategies is focusing on reducing uncertainty for a more constrained
-set of items (Markant, Settles, \& Gureckis, 2016). This strategy can be
+set of items {[}@markant\_self-directed\_2016{]}. This strategy can be
 formalized as \emph{margin sampling}, in which the model focuses only on
 the boundary between two alternative options. Margin sampling predicts
 that learners will focus on instances where there is highest ambiguity
@@ -349,13 +341,13 @@ ambiguity or competition between its two strongest associates.
 gain.}\label{maximizing-probability-gain.}
 
 In this decision rule, the model's goal is to maximally increase the
-probability associated between a random label and its object (Nelson,
-McKenzie, Cottrell, \& Sejnowski, 2010). Selection choices are modeled
-based on determining the increase in (correct) association strength
-provided by a each potential object selection. The final object was
-selected that led to the largest increase in association strength
-(averaging across all possible distractors that could be chosen in the
-case of the adult data).
+probability associated between a random label and its object
+{[}@nelson\_experience\_2010{]}. Selection choices are modeled based on
+determining the increase in (correct) association strength provided by a
+each potential object selection. The final object was selected that led
+to the largest increase in association strength (averaging across all
+possible distractors that could be chosen in the case of the adult
+data).
 
 \begin{equation}
 \max_{s_o,w}({M_{w,s_o})- \max_{w,o}(M_{w,o}})
@@ -367,32 +359,26 @@ case of the adult data).
 We also explored several additional strategies. First, we also
 considered a \emph{maximum certainty} (or confirmatory) strategy.
 Learners may gravitate towards confirming choices they already have high
-certainty for (Wason, 1960; Zettersten et al., 2023). Second, we
+certainty for {[}@wason1960; @zettersten\_active\_2023{]}. Second, we
 considered a \emph{novelty-based} strategy in which the model based its
 choices on the relative novelty (or familiarity) of the choice options.
 Third, we consider a random selection strategy as a baseline comparison.
 
 \section{Results}\label{results}
 
-\begin{CodeChunk}
-\begin{CodeOutput}
-% latex table generated in R 4.5.2 by xtable 1.8-4 package
-% Sun Feb  1 15:10:36 2026
-\begin{table}[ht]
+\begin{table}[H]
 \centering
-\begin{tabular}{rlrrrrr}
+\begin{tabular}{lrrrrr}
   \hline
- & Model & N best fit & strength & uncertainty & novelty & FUAM \\ 
+Model & N best fit & strength & uncertainty & novelty & FUAM \\ 
   \hline
-1 & FUAM &  67 & 1.66 & 1.66 & 1.65 & 1.42 \\ 
-  2 & strength &  24 & 2.00 & 2.09 & 2.00 & 2.00 \\ 
-  3 & novelty &   3 & 3.22 & 3.42 & 3.01 & 3.19 \\ 
-  4 & uncertainty &  96 & 3.56 & 2.57 & 3.49 & 3.37 \\ 
+FUAM &  67 & 1.66 & 1.66 & 1.65 & 1.42 \\ 
+  strength &  24 & 2.00 & 2.09 & 2.00 & 2.00 \\ 
+  novelty &   3 & 3.22 & 3.42 & 3.01 & 3.19 \\ 
+  uncertainty &  96 & 3.56 & 2.57 & 3.49 & 3.37 \\ 
    \hline
 \end{tabular}
 \end{table}
-\end{CodeOutput}
-\end{CodeChunk}
 
 For all four models, including the selection trials yielded a better fit
 to the data, showing that it is not unreasonable to apply these models
@@ -437,24 +423,18 @@ achieved better fit than the FUAM (\(NLL_{FUAM} - NLL_{UAM} > 0.1\)) for
 remaining 36 participants. We will call these participants the
 \emph{Either}, \emph{UAM}, and \emph{FUAM} groups, respectively.
 
-\begin{CodeChunk}
-\begin{CodeOutput}
-% latex table generated in R 4.5.2 by xtable 1.8-4 package
-% Sun Feb  1 15:10:36 2026
-\begin{table}[ht]
+\begin{table}[H]
 \centering
-\begin{tabular}{rlrrrrr}
+\begin{tabular}{lrrrrr}
   \hline
- & Group & N & chi & lambda & alpha & Mean accuracy \\ 
+Group & N & chi & lambda & alpha & Mean accuracy \\ 
   \hline
-1 & Either &  98 & 0.32 & 5.34 & 0.77 & 0.59 \\ 
-  2 & FUAM &  36 & 0.41 & 4.97 & 0.77 & 0.65 \\ 
-  3 & UAM &  56 & 0.26 & 8.76 & 0.69 & 0.57 \\ 
+Either &  98 & 0.32 & 5.34 & 0.77 & 0.59 \\ 
+  FUAM &  36 & 0.41 & 4.97 & 0.77 & 0.65 \\ 
+  UAM &  56 & 0.26 & 8.76 & 0.69 & 0.57 \\ 
    \hline
 \end{tabular}
 \end{table}
-\end{CodeOutput}
-\end{CodeChunk}
 
 Table 2 shows the average parameter values for each group of
 participants, and the mean accuracy and number of participants per
@@ -476,12 +456,12 @@ learning is achieved by forgetting early, ambiguous evidence), and only
 weakly related to \(lambda\) (\(r=0.23\)) and age (\(r=0.29\)). A
 targeted analysis found that children (age\textless18) are more likely
 than adults to be familiarity-focused (\(\lambda<1\)) rather than
-uncertainty-focused (\(\chi^2 = 7.41\)): of 60 participants with
-\(\lambda<1\), 40 were children (and children are 51\% of the sample).
+uncertainty-focused (\(\chi^2 = 7.41\)): of 22\% of adults had
+\(\lambda<1\), while 41\% of children did.
 
 \begin{CodeChunk}
 \begin{figure}[tb]
-\includegraphics{figs/unnamed-chunk-1-1} \caption[Correlation of best-fitting model parameters]{Correlation of best-fitting model parameters}\label{fig:unnamed-chunk-1}
+\includegraphics{figs/unnamed-chunk-2-1} \caption[Correlation of best-fitting model parameters]{Correlation of best-fitting model parameters}\label{fig:unnamed-chunk-2}
 \end{figure}
 \end{CodeChunk}
 
@@ -496,52 +476,49 @@ uncertainty-focused (\(\chi^2 = 7.41\)): of 60 participants with
 \end{figure}
 \end{CodeChunk}
 
-\subsection{Selection Strategies}\label{selection-strategies}
-
 \begin{CodeChunk}
-\begin{CodeOutput}
-% latex table generated in R 4.5.2 by xtable 1.8-4 package
-% Sun Feb  1 15:10:37 2026
-\begin{table}[ht]
-\centering
-\begin{tabular}{rlrr}
-  \hline
- & strategy & n & proportion \\ 
-  \hline
-1 & confirmatory &  81 & 0.42 \\ 
-  2 & entropy &  56 & 0.29 \\ 
-  3 & margin &  34 & 0.18 \\ 
-  4 & random &  15 & 0.08 \\ 
-  5 & novelty &   5 & 0.03 \\ 
-   \hline
-\end{tabular}
-\end{table}
-\end{CodeOutput}
+\begin{figure}[H]
+
+{\centering \includegraphics{figs/fig2-parms-1} 
+
+}
+
+\caption[One column image]{One column image.}\label{fig:fig2-parms}
+\end{figure}
 \end{CodeChunk}
 
-\begin{CodeChunk}
-\begin{CodeOutput}
-% latex table generated in R 4.5.2 by xtable 1.8-4 package
-% Sun Feb  1 15:10:37 2026
-\begin{table}[ht]
+\subsection{Selection Strategies}\label{selection-strategies}
+
+The most likely selection strategy for each participant was calculated.
+Confirmatory was the most common strategy (42\% of participants),
+followed by entropy (29\%), margin sampling (18\%), random (8\%), and
+novelty (3\%). Adults were more likely to use entropy maximization (39\%
+vs.~20\% of children), whereas children were more likely to use a
+confirmatory strategy (62\% vs.~22\% of adults). Margin sampling was
+used at a similar rate by children (14\%) and adults (22\%), and a
+random selection was most likely for 13\% of adults, but only 3\% of
+children. Novelty was the most likely strategy for 5\% of adults, and no
+children.
+
+\begin{table}[H]
 \centering
-\begin{tabular}{rllrr}
+\begin{tabular}{lrr}
   \hline
- & age\_group & strategy & n & proportion \\ 
+strategy & n & proportion \\ 
   \hline
-1 & adults & entropy &  36 & 0.39 \\ 
-  2 & adults & confirmatory &  20 & 0.22 \\ 
-  3 & adults & margin &  20 & 0.22 \\ 
-  4 & adults & random &  12 & 0.13 \\ 
-  5 & adults & novelty &   5 & 0.05 \\ 
-  6 & kids & confirmatory &  61 & 0.62 \\ 
-  7 & kids & entropy &  20 & 0.20 \\ 
-  8 & kids & margin &  14 & 0.14 \\ 
-  9 & kids & random &   3 & 0.03 \\ 
+confirmatory &  81 & 0.42 \\ 
+  entropy &  56 & 0.29 \\ 
+  margin &  34 & 0.18 \\ 
+  random &  15 & 0.08 \\ 
+  novelty &   5 & 0.03 \\ 
    \hline
 \end{tabular}
 \end{table}
-\end{CodeOutput}
+
+\begin{CodeChunk}
+\begin{figure}[tb]
+\includegraphics{figs/unnamed-chunk-5-1} \caption[Best-fitting selection strategies by age group]{Best-fitting selection strategies by age group.}\label{fig:unnamed-chunk-5}
+\end{figure}
 \end{CodeChunk}
 
 \section{Discussion}\label{discussion}
@@ -557,137 +534,6 @@ the end of the paper.
 \setlength{\leftskip}{0.125in}
 
 \noindent
-
-\phantomsection\label{refs}
-\begin{CSLReferences}{1}{0}
-\bibitem[\citeproctext]{ref-gelderloos_active_2020}
-Gelderloos, L., Mahmoudi Kamelabad, A., \& Alishahi, A. (2020). Active
-word learning through self-supervision. In S. Denison, M. Mack, Y. Xu,
-\& B. C. Armstrong (Eds.), \emph{Proceedings for the 42nd {Annual}
-{Meeting} of the {Cognitive} {Science} {Society}} (pp. 1050--1056).
-Cognitive Science Society.
-
-\bibitem[\citeproctext]{ref-hembacher_childrens_2020}
-Hembacher, E., DeMayo, B., \& Frank, M. C. (2020). Children's social
-information seeking is sensitive to referential ambiguity. \emph{Child
-Development}, \emph{91}(6), e1178--e1193.
-http://doi.org/\href{https://doi.org/10.1111/cdev.13427}{10.1111/cdev.13427}
-
-\bibitem[\citeproctext]{ref-Hidaka2017}
-Hidaka, S., Torii, T., \& Kachergis, G. (2017). Quantifying the impact
-of active choice in word learning. In G. Gunzelmann, A. Howes, T.
-Tenbrink, \& E. Davelaar (Eds.), \emph{Proceedings of the 39th {Annual}
-{Meeting} of the {Cognitive} {Science} {Society}} (pp. 519--525).
-Austion, TX: Cognitive Science Society.
-
-\bibitem[\citeproctext]{ref-horst2011}
-Horst, J. S., Samuelson, L. K., Kucker, S. C., \& McMurray, B. (2011).
-What's new? Children prefer novelty in referent selection.
-\emph{Cognition}, \emph{118}(2), 234--244.
-
-\bibitem[\citeproctext]{ref-hunter1988}
-Hunter, M. A., \& Ames, E. W. (1988). A multifactor model of infant
-preferences for novel and familiar stimuli. \emph{Advances in Infancy
-Research}.
-
-\bibitem[\citeproctext]{ref-janakiefski_gaining_2022}
-Janakiefski, L., Tippenhauer, N., Liu, Q., Green, M., Loughmiller, S.,
-\& Saylor, M. M. (2022). Gaining access to the unknown: {Preschoolers}
-privilege unknown information as the target of their questions about
-verbs. \emph{Journal of Experimental Child Psychology}, \emph{217},
-105358.
-http://doi.org/\href{https://doi.org/10.1016/j.jecp.2021.105358}{10.1016/j.jecp.2021.105358}
-
-\bibitem[\citeproctext]{ref-Kachergis2013}
-Kachergis, George, Yu, C., \& Shiffrin, R. M. (2013). Actively learning
-object names across ambiguous situations. \emph{Topics in Cognitive
-Science}, \emph{5}(1), 200--13.
-http://doi.org/\href{https://doi.org/10.1111/tops.12008}{10.1111/tops.12008}
-
-\bibitem[\citeproctext]{ref-Kachergis2017}
-Kachergis, G., Yu, C., \& Shiffrin, R. M. (2016). A bootstrapping model
-of frequency and contextual diversity effects in word learning.
-\emph{Cognitive Science}, \emph{41}(3).
-
-\bibitem[\citeproctext]{ref-Kachergis2012}
-Kachergis, Y., G. (2012). An associative model of adaptive inference for
-learning word--referent mappings. \emph{Psychonomic Bulletin and
-Review}, \emph{19}(2), 317--324.
-
-\bibitem[\citeproctext]{ref-Keijser2019}
-Keijser, D., Gelderloos, L., \& Alishahi, A. (2019). Curious topics: {A}
-curiosity-based model of first language word learning. In
-\emph{Proceedings of the 41st {Annual} {Conference} of the {Cognitive}
-{Science} {Society}} (pp. 1991--1997). Montreal, QB: Cognitive Science
-Society.
-
-\bibitem[\citeproctext]{ref-markant_self-directed_2016}
-Markant, D. B., Settles, B., \& Gureckis, T. M. (2016). Self-directed
-learning favors local, rather than global, uncertainty. \emph{Cognitive
-Science}, \emph{40}(1), 100--120.
-http://doi.org/\href{https://doi.org/10.1111/cogs.12220}{10.1111/cogs.12220}
-
-\bibitem[\citeproctext]{ref-mather2012}
-Mather, E., \& Plunkett, K. (2012). The role of novelty in early word
-learning. \emph{Cognitive Science}, \emph{36}(7), 1157--1177.
-
-\bibitem[\citeproctext]{ref-meder_directed_2021}
-Meder, B., Wu, M. C., Schulz, E., \& Ruggeri, A. (2021).
-\href{https://www.ncbi.nlm.nih.gov/pubmed/25246403}{Directed and random
-exploration in children}. \emph{Preprint}.
-
-\bibitem[\citeproctext]{ref-Nelson2005}
-Nelson, J. D. (2005). Finding useful questions: {On} {Bayesian}
-diagnosticity, probability, impact, and information. \emph{Psychological
-Review}, \emph{112}(4), 979--999.
-
-\bibitem[\citeproctext]{ref-nelson_experience_2010}
-Nelson, J. D., McKenzie, C. R. M., Cottrell, G. W., \& Sejnowski, T. J.
-(2010). Experience {Matters}: {Information} {Acquisition} {Optimizes}
-{Probability} {Gain}. \emph{Psychological Science}, \emph{21}(7),
-960--969.
-http://doi.org/\href{https://doi.org/10.1177/0956797610372637}{10.1177/0956797610372637}
-
-\bibitem[\citeproctext]{ref-nussenbaum_causal_2019}
-Nussenbaum, K., Cohen, A. O., Davis, Z., Halpern, D., Gureckis, T., \&
-Hartley, C. (2019). Causal information-seeking strategies change across
-childhood and adolescence,\emph{ April 12}, 1--18.
-http://doi.org/\href{https://doi.org/10.31234/OSF.IO/QUKAC}{10.31234/OSF.IO/QUKAC}
-
-\bibitem[\citeproctext]{ref-nussenbaum_novelty_2023}
-Nussenbaum, K., Martin, R. E., Maulhardt, S., Yang, Y. J.,
-Bizzell-Hatcher, G., Bhatt, N. S., \ldots{} Cockburn, J. (2023). Novelty
-and uncertainty differentially drive exploration across development.
-\emph{Elife}, \emph{12}, e84260. Retrieved from
-\url{https://elifesciences.org/articles/84260}
-
-\bibitem[\citeproctext]{ref-Settles2012}
-Settles, B. (2012). \emph{Active {Learning}} (Vol. 6).
-http://doi.org/\href{https://doi.org/10.2200/S00429ED1V01Y201207AIM018}{10.2200/S00429ED1V01Y201207AIM018}
-
-\bibitem[\citeproctext]{ref-wason1960}
-Wason, P. C. (1960). On the failure to eliminate hypotheses in a
-conceptual task. \emph{Quarterly Journal of Experimental Psychology},
-\emph{12}(3), 129--140.
-
-\bibitem[\citeproctext]{ref-woodard2016}
-Woodard, K., Gleitman, L. R., \& Trueswell, J. C. (2016). Two-and
-three-year-olds track a single meaning during word learning: Evidence
-for propose-but-verify. \emph{Language Learning and Development},
-\emph{12}(3), 252--261.
-
-\bibitem[\citeproctext]{ref-zettersten_active_2023}
-Zettersten, M., Cutler, M., \& Lew-Williams, C. (2023). \emph{Active
-information-seeking in support of learning extensions of novel words}
-(preprint). PsyArXiv. Retrieved from \url{https://osf.io/ecq85}
-
-\bibitem[\citeproctext]{ref-Zettersten2021}
-Zettersten, M., \& Saffran, J. R. (2021). Sampling to learn words:
-Adults and children sample words that reduce referential ambiguity.
-\emph{Developmental Science}, \emph{24}(3).
-http://doi.org/\href{https://doi.org/10.1111/desc.13064}{10.1111/desc.13064}
-
-\end{CSLReferences}
 
 \bibliographystyle{apacite}
 

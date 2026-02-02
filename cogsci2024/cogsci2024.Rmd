@@ -1,12 +1,15 @@
 ---
 title: "Modeling Selection in Active Cross-situational Word Learning"
 bibliography: library.bib
-csl: apa6.csl
+citation_package: apacite
+citeproc: false
+biblio-style: apacite
+#csl: apa6.csl
 document-params: "10pt, letterpaper"
 
 author-information: > 
     \author{{\large \bf George~Kachergis (kachergis@stanford.edu)} \\ Department of Psychology, Stanford University \\ Stanford, CA
-    \AND {\large \bf Martin~Zettersten (FIXME@princeton.edu)} \\ Department of Psychology, Princeton University \\ Princeton, NJ}
+    \AND {\large \bf Martin~Zettersten (mzettersten@ucsd.edu)} \\ Department of Cognitive Science, University of California, San Diego \\ San Diego, CA}
 
 abstract: >
     Word learning is a complex process, influenced not only by the words and referents 
@@ -51,6 +54,10 @@ best_strategies <- read_csv("../data/likely_selection_strategy.csv")
 
 ```
 
+
+```{r, include=FALSE}
+options(tinytex.verbose = TRUE)
+```
 
 # Introduction
 
@@ -248,7 +255,7 @@ sua_fits_ns <- ind_fits1
 ```
 
 
-```{r table-1, tab.cap="Number of participants best fitted per model, and average negative log-likelihood (lower=better) per model."}
+```{r table-1, tab.cap="Number of participants best fitted per model, and average negative log-likelihood (lower=better) per model.", results="asis"}
 tab1 <- cbind(Model = c("FUAM","strength","novelty","uncertainty"), 
               `N best fit` = c(length(func_ss), length(str_ss), length(nov_ss), length(unc_ss)),
               bind_rows(colMeans(st_fits[func_ss,2:5]),
@@ -256,7 +263,7 @@ tab1 <- cbind(Model = c("FUAM","strength","novelty","uncertainty"),
                         colMeans(st_fits[nov_ss,2:5]),
                         colMeans(st_fits[unc_ss,2:5]))
 ) 
-xtable::xtable(tab1)
+print(xtable::xtable(tab1), type="latex", comment = F, table.placement = "H", include.rownames=F)
 ```
 
 
@@ -313,7 +320,7 @@ The FUAM and UAM models achieved similar fit ($|NLL_{FUAM} - NLL_{UAM}| \leq 0.1
 The UAM achieved better fit than the FUAM ($NLL_{FUAM} - NLL_{UAM} > 0.1$) for `r length(UAM_beats_FUAM)` participants, and the FUAM achieved better fit than the UAM for the remaining `r length(FUAM_beats_UAM)` participants.
 We will call these participants the *Either*, *UAM*, and *FUAM* groups, respectively.
 
-```{r table2, tab.cap="Average parameter values per group of participants best fitted by each model."}
+```{r table2, tab.cap="Average parameter values per group of participants best fitted by each model.", results="asis"}
 fuam_ss <- sua_res[FUAM_beats_UAM,]
 fuam_ss$Group = "FUAM"
 uam_ss <- unc_res[UAM_beats_FUAM,]
@@ -330,7 +337,7 @@ tab2 <- gres |> group_by(Group) |>
             alpha = mean(alpha),
             `Mean accuracy` = mean(Human)) 
 
-xtable::xtable(tab2) # |> kableExtra::kable(digits=2)
+print(xtable::xtable(tab2), type="latex", comment = F, table.placement = "H", include.rownames=F)
 ```
 
 Table 2 shows the average parameter values for each group of participants, and the mean accuracy and number of participants per group.
@@ -383,7 +390,7 @@ gres |>
 
 
 
-```{r fig2-parms, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.2, fig.height=6, set.cap.width=T, num.cols.cap=1, fig.cap = "One column image.", include=F}
+```{r fig2-parms, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.2, fig.height=6, set.cap.width=T, num.cols.cap=1, fig.cap = "One column image."}
 # cor.test(results$neg_log_lik, results$alpha) # .35 - higher alpha = worse fit??
 # cor.test(results$neg_log_lik, results$chi) # -.37 - lower chi = worse fit
 
@@ -441,16 +448,19 @@ table(best_strategies$strategy, best_strategies$Group)
 ```
 
 
-```{r, tab.cap="Most likely selection strategies."}
+```{r, tab.cap="Most likely selection strategies.", results="asis"}
 # Summary: How many subjects best fit each strategy?
-best_strategies |>
+tab <- best_strategies |>
   count(strategy) |>
   arrange(desc(n)) |>
   mutate(proportion = n / sum(n)) |>
   xtable::xtable()
+
+print(tab, type="latex", comment = F, table.placement = "H", include.rownames=F)
 ```
 
-```{r, tab.cap="Best-fitting selection strategies by age group."}
+
+```{r, fig.cap="Best-fitting selection strategies by age group.", fig.width=3.5}
 # By age group
 best_strategies |>
   mutate(age_group = ifelse(age_group == "kids", "children", "adults")) |>
@@ -467,14 +477,16 @@ best_strategies |>
   theme_classic()
 ```
 
-```{r, include=F}
+```{r, results="asis", include=F}
 # By experiment
-best_strategies |>
+tab <- best_strategies |>
   count(experiment_name, strategy) |>
   group_by(experiment_name) |>
   mutate(proportion = n / sum(n)) |>
-  xtable::arrange(experiment_name, desc(n))
+  arrange(experiment_name, desc(n)) |>
+  xtable::xtable()
 # the bulk of confirmatory come from Experiment 3...mean anything?
+print(tab, type="latex", comment = F, table.placement = "H", include.rownames=F)
 ```
 
 
