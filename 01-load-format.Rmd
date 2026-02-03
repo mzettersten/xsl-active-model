@@ -312,7 +312,19 @@ best_strategies <- subject_strategy_fits |>
   slice_min(nlogLik, n = 1) |>
   ungroup()
 
+# Likelihood ratio tests for model comparison
+subject_strategy_fits <- subject_strategy_fits |>
+  group_by(subject) |>
+  mutate(
+    best_nlogLik = min(nlogLik),
+    LR = -2 * (nlogLik - best_nlogLik),
+    p_value = pchisq(LR, df = 0, lower.tail = FALSE)  # df=0 for non-nested
+  )
+
+subject_strategy_fits |> ggplot(aes(x=strategy, y=LR)) + geom_boxplot()
+
 best_strategies |> write_csv("data/likely_selection_strategy.csv")
+subject_strategy_fits |> write_csv("data/subject_strategy_fits.csv")
 ```
 
 
