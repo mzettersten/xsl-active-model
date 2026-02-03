@@ -1,9 +1,9 @@
 ---
 title: "Modeling Selection in Active Cross-situational Word Learning"
 bibliography: library.bib
-#citation_package: apacite
-#citeproc: false
-#biblio-style: apacite
+citation_package: apacite
+citeproc: false
+biblio-style: apacite
 csl: apa6.csl
 document-params: "10pt, letterpaper"
 
@@ -22,8 +22,8 @@ abstract: >
     receive additional training on. Participants' individual training data, selection choices, and
     test trials were used to fit four associative word learning models, and to infer the most 
     likely of five sampling strategies. Models with a bias to attend to stimuli with uncertain 
-    (i.e. high-entropy) knowledge states best accounted for the data, although 51% participants
-    appear to be driven solely by this bias, while another 48% apparently also engage a competing
+    (i.e. high-entropy) knowledge states best accounted for the data, though there were individual differences in the degree to which this bias appeared to be the main driver of learning. Approximately half of participants
+    appear to be driven solely by this bias (51%), while another 48% were best accounted for by a model additionally engaging a competing
     familiarity bias. Analysis of selection strategies revealed developmental differences: adults 
     often used entropy maximization (39% of adults vs. 20% of children) to reduce uncertainty about 
     ambiguous items, while children favored confirmatory sampling (62% vs. 22% of adults), seeking 
@@ -51,6 +51,7 @@ library(png)
 library(grid)
 library(ggplot2)
 library(xtable)
+library(here)
 require(ggpubr)
 require(tidyverse)
 require(tidyboot)
@@ -58,7 +59,7 @@ require(corrplot)
 ```
 
 ```{r, load-data, echo=F}
-load("../data/cross_act_preprocessed.Rdata")
+load(here("data","cross_act_preprocessed.Rdata"))
 
 N_per_exp <- xd |> 
   group_by(subject, experiment_name, age_group) |>
@@ -66,7 +67,7 @@ N_per_exp <- xd |>
   group_by(experiment_name, age_group) |>
   summarise(n = n())
 
-best_strategies <- read_csv("../data/likely_selection_strategy.csv")
+best_strategies <- read_csv(here("data","likely_selection_strategy.csv"))
 
 ```
 
@@ -95,7 +96,7 @@ The current work therefore explores what sampling decision rules best explain ch
 
 
 ```{r fig-exp-one, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.2, fig.height=3.2, set.cap.width=T, num.cols.cap=1, fig.cap = "Word-referent co-occurrence matrix for Study (Experiment 1, Zettersten and Saffran, 2020).", include=F}
-img <- png::readPNG("figs/exp1-cooccurrences.png")
+img <- png::readPNG(here("cogsci2024","figs","exp1-cooccurrences.png"))
 grid::grid.raster(img)
 ```
 
@@ -213,13 +214,13 @@ Third, we consider a random selection strategy as a baseline comparison.
 
 ```{r model-comparison, include=F}
 # fits with selection trials:
-load("../data/ind_fits_strength.Rdata")
+load(here("data","ind_fits_strength.Rdata"))
 str_fits <- ind_fits$sfits
-load("../data/ind_fits_uncertainty.Rdata")
+load(here("data","ind_fits_uncertainty.Rdata"))
 unc_fits <- ind_fits$sfits
-load("../data/ind_fits_novelty_chi1.Rdata")
+load(here("data","ind_fits_novelty_chi1.Rdata"))
 nov_fits <- ind_fits$sfits
-load("../data/ind_fits_kachergis_chi1.Rdata")
+load(here("data","ind_fits_kachergis_chi1.Rdata"))
 sua_fits <- ind_fits1$sfits
 
 st_fits <- tibble(subject = str_fits$subject,
@@ -257,11 +258,11 @@ UAM_beats_FUAM = which(st_fits$uncertainty < (st_fits$FUAM - .1)) # UAM beats FU
 FUAM_beats_UAM = which(st_fits$FUAM < (st_fits$uncertainty - .1)) # FUAM beats UAM for 36 with >.1 difference
 
 # without selection trials:
-load("../data/fits_wo_selection_trials/ind_fits_strength.Rdata")
+load(here("data","fits_wo_selection_trials/ind_fits_strength.Rdata"))
 str_fits_ns <- ind_fits$sfits
-load("../data/fits_wo_selection_trials/ind_fits_novelty_chi1.Rdata")
+load(here("data","fits_wo_selection_trials/ind_fits_novelty_chi1.Rdata"))
 nov_fits_ns <- ind_fits$sfits
-load("../data/fits_wo_selection_trials/ind_fits_kachergis_chi1.Rdata")
+load(here("data","fits_wo_selection_trials/ind_fits_kachergis_chi1.Rdata"))
 sua_fits_ns <- ind_fits1
 # ToDo: fit uncertainty model wo selection trials
 ```
@@ -293,10 +294,10 @@ The novelty-biased model best fitted only 3 participants, although it's worth no
 We will focus our remaining analyses on the model parameters for the two best-fitting models, the familiarity- and uncertainty-biased associative model (FUAM) and its cousin the uncertainty-biased associative model (UAM).
 
 ```{r, model-cors}
-load("../data/ind_fits_uncertainty.Rdata")
+load(here("data","ind_fits_uncertainty.Rdata"))
 unc_fits <- ind_fits
 
-load("../data/ind_fits_kachergis_chi1.Rdata")
+load(here("data","ind_fits_kachergis_chi1.Rdata"))
 sua_fits <- ind_fits1
 
 # FUAM 
@@ -467,7 +468,7 @@ This suggests that developmental improvements in word learning operate primarily
 
 
 ```{r, eval=F}
-subject_strategy_fits <- read_csv("../data/subject_strategy_fits.csv")
+subject_strategy_fits <- read_csv(here("data","subject_strategy_fits.csv"))
 
 # Does strategy fit depend on test performance?
 strategy_performance_cor <- subject_strategy_fits |>
@@ -562,19 +563,23 @@ Adults predominantly employed entropy maximization (39%), actively seeking infor
 In contrast, children favored confirmatory sampling (62%), requesting information about items for which they 
 already had strong associations. 
 This pattern suggests that uncertainty-reduction strategies emerge gradually across development, consistent with broader findings on the development of information-seeking in childhood [@nussenbaum_causal_2019; @meder_directed_2021].
+It is also consistent with other recent work finding that children are often conservative in their sampling strategies when learning to generalize word meanings [@ZetterstenChenWilliams2025].
+Notably, these findings contrast with evidence from other domains that children are sometimes more exploratory than adults [@liquin_children_2022], highlighting that children's tendency to engage in exploratory information-seeking varies by context and the demands of the task [@ruggeri_how_2021].
 
-This could be due to a variety of reasons, including that children's limited working memory doesn't allow them to effectively evaluate multiple competing associations per item, or because they lack the metacognitive awareness that a strategy of reducing uncertainty would be beneficial. 
+Why might children be more confirmatory in their information sampling about novel words than adults?
+One possibility is that children's limited working memory doesn't allow them to effectively evaluate multiple competing associations per item during sampling.
+However, other work suggests that children at similar ages are sensitive to the relative informativeness of options when making active choices, suggesting memory limitations are likely not the sole factor at play [@zettersten_active_2025].
+Another possibility is that children's ability to engage in information-seeking that targets uncertainty reduction develops in concert with growth in metacognitive reasoning skills that allow them to access their own uncertainty [@de_eccher_childrens_2024; @baer_learning_2022]. 
 In contrast, a confirmatory sampling strategy can be conducted even if a learner tracks only their strongest hypothesis.
-<!-- [@GK and can contrast this with other findings suggesting targeted uncertainty reduction in other contexts] citation? ^^ -->
 
 A central theoretical question is whether sampling ambiguous items causes better learning, or whether successful learning enables more sophisticated sampling strategies. 
 Our results support the latter interpretation. 
 Learning parameters $\chi$ and $\alpha$ strongly predicted performance, while sampling strategy showed weaker 
 relationships to outcomes. 
 Moreover, children (who learn less successfully, overall) predominantly used confirmatory rather than uncertainty-reducing strategies.
-This finding aligns with @Zettersten2021's supplementary analysis which suggested that "successfully learning novel words during training makes it more likely that learners will subsequently focus on ambiguous items." 
-We extend this by showing that individual differences in learning mechanisms (learning rate, memory) are the primary drivers of both performance and sampling sophistication.
-Of course, the experimental design limits our ability to test causality: selection trials occurred *after* initial learning, and we modeled them using associations built during passive training. 
+This finding aligns with @Zettersten2021's supplementary analysis which suggested that successfully learning novel words during training makes it more likely that learners will subsequently focus on ambiguous items. 
+We extend this result by showing that individual differences in learning mechanisms (learning rate, memory) are the primary drivers of both performance and sampling sophistication.
+However, the current experimental design limits our ability to test causality: selection trials occurred *after* initial learning, and we modeled them using associations built during passive training. 
 Future work using trial-by-trial joint optimization of learning and selection parameters could better disentangle these relationships.
 
 Combining computational modeling of learning mechanisms with analysis of selection strategies reveals a nuanced picture of active word learning across development. 
