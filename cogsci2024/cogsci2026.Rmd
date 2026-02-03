@@ -100,7 +100,7 @@ img <- png::readPNG(here("cogsci2024","figs","exp1-cooccurrences.png"))
 grid::grid.raster(img)
 ```
 
-Finally, a central theoretical question concerns the relationship between learning success and sampling strategy. 
+A final important theoretical question concerns the relationship between learning success and sampling strategy. 
 @Zettersten2021 found that adults who sampled more ambiguous items during the selection phase showed higher test accuracy. 
 However, the directionality of this relationship remains unclear: does sampling ambiguous items *cause* better learning, or does successful learning *enable* more sophisticated ambiguity-seeking strategies? 
 Their supplementary analyses suggested the latter: as participants became more successful at learning during training, they became more likely to seek information about ambiguous items. 
