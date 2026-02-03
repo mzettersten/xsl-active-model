@@ -22,7 +22,7 @@ abstract: >
     receive additional training on. Participants' individual training data, selection choices, and
     test trials were used to fit four associative word learning models, and to infer the most 
     likely of five sampling strategies. Models with a bias to attend to stimuli with uncertain 
-    (i.e. high-entropy) knowledge states best accounted for the data, although ~51% participants
+    (i.e. high-entropy) knowledge states best accounted for the data, although 51% participants
     appear to be driven solely by this bias, while another 48% apparently also engage a competing
     familiarity bias. Analysis of selection strategies revealed developmental differences: adults 
     often used entropy maximization (39% of adults vs. 20% of children) to reduce uncertainty about 
@@ -584,8 +584,7 @@ These findings advance our understanding of how learners actively shape their ow
 
 # Acknowledgements
 
-Place acknowledgments (including funding information) in a section at
-the end of the paper.
+We thank the participants who enabled this research.
 
 # References 
 
