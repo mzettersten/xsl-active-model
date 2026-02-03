@@ -82,26 +82,25 @@ Despite growing interest in active learning, most computational models of word l
 While model comparisons in these passive contexts are informative, active learning paradigms in which learners control some aspect of their input (e.g., selecting which item to learn about next) can be more diagnostic of underlying learning mechanisms and may better capture individual differences in learning success [@markant2016; @gureckis2012self]. 
 Yet few active word learning experiments have been conducted, and fewer still have attempted to explain active learning behavior with computational models [though see @Kachergis2013].
 
-The goal of the current study is to test how well associative models of cross-situational word learning can explain both learning outcomes and sampling strategies in the active learning experiments of @Zettersten2021. 
-In those experiments, adults preferentially selected items with ambiguous word-referent mappings during a sampling phase, while children (ages 3-8) did not show this preference. 
+The goal of the current study is to test how well associative models can explain both learning outcomes and information-seeking during cross-situational word learning, identify what sampling strategies learners pursue, and track how sampling strategies develop with age.
+To investigate these questions, we model data from a set of active, cross-situational word learning experiments with children and adults [@Zettersten2021]. 
+In these experiments, adults preferentially selected items with ambiguous word-referent mappings during a sampling phase, while children (ages 3-8) increased their preference to sample ambiguous items across age. 
 We address three main questions: First, which model architecture best captures individual learning performance? 
 Second, do specific model parameters (learning rate, memory decay, attention to uncertainty) predict learning success? 
 To address these first two issues, we chose a family of models that instantiate trial-by-trial associative learning with memory decay and selective attention to familiar and/or uncertain (or novel) stimuli, which have been shown to account well for semantic bootstrapping and mutual exclusivity effects in prior work [@Kachergis2012; @Kachergis2017].
-Third, what sampling strategies (e.g., information gain, confirmatory sampling, margin sampling) best explain participants' information-seeking choices, and how do these strategies develop with age?
+Third, what sampling strategies (e.g., entropy reduction vs. confirmatory sampling) best explain participants' information-seeking choices, and how do these strategies develop with age?
 
 Understanding children's and adults' sampling strategies during word learning has important implications for theories of vocabulary development. Past work shows that both children and adults actively seek information about word meanings [@hembacher_childrens_2020], which may help explain rapid vocabulary growth [@Hidaka2017]. 
 However, we lack a formal understanding of the specific decision rules governing when learners seek new information versus consolidate existing knowledge [@Settles2012; though see @gelderloos_active_2020; @Keijser2019]. 
 Recent developmental work documents broad changes in information-seeking strategies across childhood in domains such as causal learning [@nussenbaum_causal_2019] and foraging [@nussenbaum_novelty_2023; @meder_directed_2021], suggesting that strategic sampling may emerge gradually with age and cognitive development. 
 The current work therefore explores what sampling decision rules best explain children's and adults' information-seeking during word learning, and how learning mechanisms relate to sampling strategies.
 
-
 ```{r fig-exp-one, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.2, fig.height=3.2, set.cap.width=T, num.cols.cap=1, fig.cap = "Word-referent co-occurrence matrix for Study (Experiment 1, Zettersten and Saffran, 2020).", include=F}
 img <- png::readPNG(here("cogsci2024","figs","exp1-cooccurrences.png"))
 grid::grid.raster(img)
 ```
 
-
-A central theoretical question concerns the relationship between learning success and sampling strategy. 
+Finally, a central theoretical question concerns the relationship between learning success and sampling strategy. 
 @Zettersten2021 found that adults who sampled more ambiguous items during the selection phase showed higher test accuracy. 
 However, the directionality of this relationship remains unclear: does sampling ambiguous items *cause* better learning, or does successful learning *enable* more sophisticated ambiguity-seeking strategies? 
 Their supplementary analyses suggested the latter: as participants became more successful at learning during training, they became more likely to seek information about ambiguous items. 
@@ -553,7 +552,7 @@ print(tab, type="latex", comment = F, table.placement = "H", include.rownames=F)
 We investigated the computational mechanisms underlying active word learning by fitting associative learning models to individual participants' performance and analyzing their information-seeking strategies. 
 Two models with uncertainty-biased attention best explained learning for nearly all participants, with an uncertainty-only model (UAM) best accounting for 51% of individuals and the combined familiarity-uncertainty model (FUAM) accounting for 
 48%. This suggests that directing attention toward uncertain associations (i.e., items with diffuse mappings) is a fundamental mechanism in cross-situational word learning in both adults and children. 
-These two models -- differing only in whether the current association strength is considered in the update rule -- very nearly mimicked each other for the bulk of the participants (X%), but each model best explained a substantial group of participants, suggesting some individual variability in learning styles.
+These two models -- differing only in whether the current association strength is considered in the update rule -- very nearly mimicked each other for the bulk of the participants, but each model best explained a substantial group of participants, suggesting some individual variability in learning styles.
 Examining the best-fitting parameters showed that learning rate and memory decay predicted performance more strongly than attention biases. 
 Participants with higher learning rates ($\chi$) and lower memory fidelity ($\alpha$; effectively forgetting early ambiguous evidence) were more accurate at test. 
 A relatively weak relationship between $\lambda$ (attention to uncertainty) and performance ($r = 0.23$) suggests that how much learners encode matters more than what they attend to, at least in these experimental paradigms.
