@@ -156,8 +156,8 @@ crossact_mats[["Experiment 3"]] <- get_experiment_cooc_matrix(xd, "Experiment 3"
 crossact_mats[["Experiment S1"]] <- get_experiment_cooc_matrix(xd, "Experiment S1")
 
 # in expt 3: 4 words are novel, 2 are familiar (pig, dog) -- need to be given strong associations
-crossact_mats[["Experiment 3"]]["dog","dog.png"] = 10
-crossact_mats[["Experiment 3"]]["pig","pig.png"] = 10
+crossact_mats[["Experiment 3"]]["dog","dog.png"] = 100
+crossact_mats[["Experiment 3"]]["pig","pig.png"] = 100
 
 # empty matrices for each expt -- actually all the same?
 
