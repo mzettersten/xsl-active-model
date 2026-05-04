@@ -156,12 +156,16 @@ crossact_mats[["Experiment 3"]] <- get_experiment_cooc_matrix(xd, "Experiment 3"
 crossact_mats[["Experiment S1"]] <- get_experiment_cooc_matrix(xd, "Experiment S1")
 
 # in expt 3: 4 words are novel, 2 are familiar (pig, dog) -- need to be given strong associations
-crossact_mats[["Experiment 3"]]["dog","dog.png"] = 1
-crossact_mats[["Experiment 3"]]["pig","pig.png"] = 1
+crossact_mats[["Experiment 3"]]["dog","dog.png"] = 10
+crossact_mats[["Experiment 3"]]["pig","pig.png"] = 10
 
 # empty matrices for each expt -- actually all the same?
 
 # iterate over trials, handle training and selection/test trials
+run_subject_trials(xd_s)
+
+# Exp 3
+xd_s <- xd |> filter(subject=="Crossact2_p101", !startsWith(trial_type, "fam"))
 run_subject_trials(xd_s)
 ```
 
@@ -181,6 +185,11 @@ test_run_model_per_subject <- function() {
   res <- model(c(), ords[[1]], start_matrix = crossact_mats$`Experiment 2`)
 }
 
+test_run_model_exp3 <- function() {
+  s = "Crossact2_p101"
+  source("R/baseline.R") # source("R/kachergis.R")
+  res <- model(c(), ords[[s]], start_matrix = crossact_mats$`Experiment 3`)
+}
 # right now, this evaluates selection strategies - 
 # want to jointly evaluate selection strategy + accuracy, given particular model (and parameters)
 
@@ -259,16 +268,17 @@ ggplot(age_strategy_comparison, aes(x = strategy, y = mean_nlogLik,
 ```{r}
 # Evaluate all strategies for each participant
 evaluate_subject_strategies <- function(subject_id, ords, xd, strategies) {
-  # Get this subject's data
-  selections <- xd |> 
-    filter(subject == subject_id, trial_type == "selection")
+  selections <- xd |> filter(subject == subject_id, trial_type == "selection")
+  if(nrow(selections) == 0) return(NULL)
   
-  if(nrow(selections) == 0) {
-    return(NULL)  # No selection trials for this subject
-  }
+  # Get experiment name to use correct starting matrix
+  expt_name <- xd |> filter(subject == subject_id) |> 
+    pull(experiment_name) |> first()
   
-  # Get association matrix from training
-  mat <- create_cooc_matrix(ords[[subject_id]])
+  # Start with experiment-specific matrix, THEN add training
+  mat <- crossact_mats[[expt_name]]
+  training_mat <- create_cooc_matrix(ords[[subject_id]])
+  mat <- mat + training_mat  # Combine priors with training
   
   # Evaluate each strategy
   results <- map_dfr(strategies, function(strat) {
@@ -311,6 +321,10 @@ best_strategies <- subject_strategy_fits |>
   group_by(subject) |>
   slice_min(nlogLik, n = 1) |>
   ungroup()
+
+# FixMe: looks like an odd scoring issue for Exp3 - all kids have the same nLogLik:
+# (and look confirmatory) - is this related to the familiar items during training? 
+# (we should make those have strong prior associations, rather than learned)
 
 # Likelihood ratio tests for model comparison
 subject_strategy_fits <- subject_strategy_fits |>
