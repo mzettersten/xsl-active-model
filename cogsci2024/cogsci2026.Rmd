@@ -23,20 +23,18 @@ abstract: >
     test trials were used to fit four associative word learning models, and to infer the most 
     likely of five sampling strategies. Models with a bias to attend to stimuli with uncertain 
     (i.e. high-entropy) knowledge states best accounted for the data, though there were individual differences in the degree to which this bias appeared to be the main driver of learning. Approximately half of participants
-    appear to be driven solely by this bias (51%), while another 48% were best accounted for by a model additionally engaging a competing
-    familiarity bias. Analysis of selection strategies revealed developmental differences: adults 
-    often used an information gain strategy (39% of adults vs. 20% of children) to reduce uncertainty about 
-    ambiguous items, while children favored confirmatory sampling (62% vs. 22% of adults), seeking 
-    information about items with established associations. These findings suggest that the ability to 
-    strategically sample ambiguous information develops gradually, and that individual differences 
-    in learning mechanisms—particularly learning rate and memory—are more predictive of word learning 
-    success than sampling strategy alone.
+    appear to be driven solely by this bias (51%), while another 48% were best accounted for by a model additionally 
+    engaging a competing familiarity bias. Analysis of selection strategies revealed both developmental consistencies and 
+    differences: while adults and children predominantly use an information gain strategy to reduce uncertainty about ambiguous items, adults deployed more diverse strategies (confirmatory, margin, and random sampling). These findings 
+    suggest that reducing uncertainty can drive sampling behavior even in young children, but that the repertoire of 
+    sampling strategies grows with maturity. Moreover, individual differences in learning mechanisms—particularly 
+    learning rate and memory—are more predictive of word learning success than sampling strategy alone.
     
 keywords: >
     active learning; cross-situational word learning; self-directed learning; uncertainty reduction
     
 output: cogsci2016::cogsci_paper
-#final-submission: \cogscifinalcopy
+final-submission: \cogscifinalcopy
 ---
 
 ```{r global_options, include=FALSE}
@@ -150,7 +148,7 @@ The other models we tested are variations on this model.
 
 ### Familiarity-biased Associative Model (FAM)
 
-The familiarity-biased associative model (FAM) implemented just the familiarity bias of the FUAM, without the uncertainty bias term, and thus only implements a bias for already-strong associations, using learning rate ($\chi$) and decay $\alpha$ parameters.
+The familiarity-biased associative model (FAM) implemented just the familiarity bias of the FUAM, without the uncertainty bias term, and thus only implements a bias for already-strong associations, using learning rate ($\chi$) and decay ($\alpha$) parameters.
 
 ### Uncertainty-biased Associative Model (UAM)
 
@@ -457,12 +455,10 @@ ggarrange(p2, p3, p4, ncol=1)
 
 ## Selection strategies
 The most likely selection strategy for each participant was calculated, and the results are shown in Table 3. 
-Confirmatory was the most common strategy (42% of participants), followed by entropy (29%), margin sampling (18%), random (8%), and novelty (3%).
+Entropy was the most common strategy (60% of participants), followed by margin sampling (18%), confirmatory (12%), random (8%), and novelty (3%).
 Figure 4 shows the proportion of participants by age group that are most likely to be using each selection strategy.
-Adults were more likely to use entropy maximization (39% vs. 20% of children), whereas children were more likely to use a confirmatory strategy (62% vs. 22% of adults).
-Margin sampling was used at a similar rate by children (14%) and adults (22%), and a random selection was most likely for 13% of adults, but only 3% of children. 
-Novelty was the most likely strategy for only 5% of adults, and was not used by any children.
-
+Children were more likely to use entropy maximization (84% vs. 37% of adults), whereas adults were more likely to use a confirmatory strategy (22% vs. 3% of children) or margin sampling (22% vs. 14% of children).
+Random selection was most likely for only 13% of adults and only 3% of children, and novelty was most likely for 5% of adults and no children. 
 
 ```{r strategy-by-group, include=F}
 best_strategies <- best_strategies |> 
@@ -488,11 +484,25 @@ print(tab, type="latex", comment = F, table.placement = "H", include.rownames=F)
 ## Relative contributions of strategy, age, and learning mechanisms
 To assess the relative importance of sampling strategy versus learning mechanisms in predicting performance, we fitted a series of nested regression models. 
 A model including only sampling strategy explained minimal variance in test accuracy ($R^2 = .02$, F(4,185) = 0.94, $p=0.44$). 
-Adding age modestly improved the model ($R^2 = 0.12$, $\beta = 0.15$, F(5,183) = 4.90, $p<.001$). 
+Adding age modestly improved the model ($R^2 = 0.12$, $\beta = 0.16$, F(5,183) = 5.12, $p<.001$), and one sampling strategy effect emerged: margin sampling was better than confirmatory sampling ($\beta = 0.20$, $p=.02$). 
 A model including sampling strategy and learning parameters ($\chi$, $\lambda$, $\alpha$) explained much more variance ($R^2 = 0.55$), demonstrating that individual differences in learning mechanisms vastly outweigh strategy choice in determining learning success. 
-Within the parameter model, learning rate ($\chi$: $\beta = 0.35$, $p < .001$), memory decay ($\alpha$: $\beta = -0.70$, $p < .001$), and attention to uncertainty ($\lambda$: $\beta = 0.01$, $p = .002$) were significant predictors, and one sampling strategy effect emerged: information gain (entropy) was better than confirmatory sampling ($\beta = 0.08$, $p=.03$)
-Notably, age effects were fully mediated by learning parameters: when they were included, age no longer predicted performance ($\beta = 0.04$, $p = .17$). 
-This suggests that developmental improvements in word learning operate primarily through changes in learning rate and memory, rather than through strategy sophistication or other age-related factors.
+Within the parameter model, learning rate ($\chi$: $\beta = 0.35$, $p < .001$), memory decay ($\alpha$: $\beta = -0.67$, $p < .001$), and attention to uncertainty ($\lambda$: $\beta = 0.01$, $p < .001$) were significant predictors, with margin sampling only marginally better than confirmatory sampling ($\beta = 0.10$, $p=.08$).
+
+However, the full model with age ($R^2=0.58$) revealed that age retained significant predictive power ($\beta = 0.08$, $p=.002$) even after accounting for learning mechanisms. This indicates that developmental improvements in word learning operate through both measurable changes in learning rate and memory *and* additional age-related factors not captured by these parameters. 
+Notably, in the full model, strategy effects strengthened: both entropy ($\beta = 0.14$, $p=.007$) and margin sampling ($\beta = 0.14$, $p=.02$) significantly outperformed confirmatory sampling, suggesting that strategy choice matters more when controlling for individual differences in learning mechanisms.
+
+```{r, eval=F}
+# how to look at strategy by age (and by accuracy)?
+strat_m <- lm(Human ~ strategy, data=best_strategies)
+age_m <- lm(Human ~ strategy + log(age), data=best_strategies)
+par_m <- lm(Human ~ strategy + lambda + alpha + chi, data=best_strategies)
+all_m <- lm(Human ~ strategy + lambda + alpha + chi + log(age), data=best_strategies) 
+
+summary(strat_m) # rsq=.02
+summary(age_m) # rsq=.12 log(age) beta = 0.16, p<.001, margin* beta = .20 p<.05
+summary(par_m) # rsq=.55 lambda +.01, alpha -0.67, chi 0.35
+summary(all_m) # rsq=.58 lambda +.01, alpha -0.65, chi 0.33, log(age) 0.08
+```
 
 
 ```{r, eval=F}
@@ -506,22 +516,6 @@ strategy_performance_cor <- subject_strategy_fits |>
 
 strategy_performance_cor
 ```
-
-
-```{r, eval=F}
-# how to look at strategy by age (and by accuracy)?
-strat_m <- lm(Human ~ strategy, data=best_strategies)
-age_m <- lm(Human ~ strategy + log(age), data=best_strategies)
-par_m <- lm(Human ~ strategy + lambda + alpha + chi, data=best_strategies)
-all_m <- lm(Human ~ strategy + lambda + alpha + chi + log(age), data=best_strategies) 
-
-summary(strat_m) # rsq=.02
-summary(age_m) # rsq=.12 log(age) beta = 0.15, p<.001
-summary(par_m) # rsq=.55 entropy +.08, lambda +.01
-summary(all_m) # rsq=.56
-
-```
-
 
 
 
@@ -565,25 +559,26 @@ Examining the best-fitting parameters showed that learning rate and memory decay
 Participants with higher learning rates ($\chi$) and lower memory fidelity ($\alpha$; effectively forgetting early ambiguous evidence) were more accurate at test. 
 A relatively weak relationship between $\lambda$ (attention to uncertainty) and performance ($r = 0.23$) suggests that how much learners encode matters more than what they attend to, at least in these experimental paradigms.
 
-An analysis of selection strategies showed striking developmental differences. 
-Adults predominantly employed entropy maximization (39%), actively seeking information about ambiguous items to reduce uncertainty. 
-In contrast, children favored confirmatory sampling (62%), requesting information about items for which they 
-already had strong associations. 
-This pattern suggests that uncertainty-reduction strategies emerge gradually across development, consistent with broader findings on the development of information-seeking in childhood [@nussenbaum_causal_2019; @meder_directed_2021].
-It is also consistent with other recent work finding that children are often conservative in their sampling strategies when learning to generalize word meanings [@ZetterstenChenWilliams2025].
-Notably, these findings contrast with evidence from other domains that children are sometimes more exploratory than adults [@liquin_children_2022], highlighting that children's tendency to engage in exploratory information-seeking varies by context and the demands of the task [@ruggeri_how_2021].
+An analysis of selection strategies showed some developmental differences, but also some consistency: 
+Adults and children both predominantly employed entropy maximization (39% of adults; 84% of children), actively seeking information about ambiguous items to reduce uncertainty. 
+However, adults deployed more diverse strategies: 22% used confirmatory sampling (vs. 3% of children), 22% used margin sampling (vs. 14% of children), and 13% used random selection (vs. 3% of children). 
 
-Why might children be more confirmatory in their information sampling about novel words than adults?
-One possibility is that children's limited working memory doesn't allow them to effectively evaluate multiple competing associations per item during sampling.
-However, other work suggests that children at similar ages are sensitive to the relative informativeness of options when making active choices, suggesting memory limitations are likely not the sole factor at play [@zettersten_active_2025].
-Another possibility is that children's ability to engage in information-seeking that targets uncertainty reduction develops in concert with growth in metacognitive reasoning skills that allow them to access their own uncertainty [@de_eccher_childrens_2024; @baer_learning_2022]. 
-In contrast, a confirmatory sampling strategy can be conducted even if a learner tracks only their strongest hypothesis.
+This pattern suggests that children robustly deploy uncertainty-reduction strategies, consistent with broader findings on the development of information-seeking in childhood [@nussenbaum_causal_2019; @meder_directed_2021].
+The high prevalence of entropy maximization in children aligns with evidence that young learners actively seek information to resolve uncertainty across multiple domains [@liquin_children_2022].
+However, adults' greater strategic diversity suggests that development may involve not the emergence of uncertainty reduction *per se*, but rather the acquisition of a more flexible repertoire of strategies that can be adaptively deployed depending on task demands [@ruggeri_how_2021].
+This flexibility may reflect adults' greater metacognitive awareness of when uncertainty reduction is optimal versus when alternative strategies (e.g., confirmation, exploitation) are more efficient.
+
+Why might children show less strategic diversity than adults, relying so heavily on entropy maximization?
+One possibility is that children's nascent metacognitive skills make it harder to flexibly shift between different information-seeking strategies based on task context [@de_eccher_childrens_2024; @baer_learning_2022].
+Entropy maximization may be a robust default strategy that works well across many learning contexts and requires only tracking which items are most ambiguous.
+In contrast, deploying confirmatory or margin sampling strategies effectively may require greater metacognitive sophistication: recognizing when one's current strongest hypothesis is worth testing (confirmation) or when near-threshold distinctions matter most (margin sampling).
+Thus, adults' strategic diversity may reflect the development of metacognitive flexibility that allows adaptive strategy selection based on learning goals and task structure [@ruggeri_how_2021].
+Alternatively, children's limited working memory may make it difficult to simultaneously maintain multiple competing hypotheses and evaluate the diagnosticity of different sampling strategies, leading them to default to a single reliable approach [@zettersten_active_2025].
 
 A central theoretical question is whether sampling ambiguous items causes better learning, or whether successful learning enables more sophisticated sampling strategies. 
 Our results support the latter interpretation. 
 Learning parameters $\chi$ and $\alpha$ strongly predicted performance, while sampling strategy showed weaker 
 relationships to outcomes. 
-Moreover, children (who learn less successfully, overall) predominantly used confirmatory rather than uncertainty-reducing strategies.
 This finding aligns with @Zettersten2021's supplementary analysis which suggested that successfully learning novel words during training makes it more likely that learners will subsequently focus on ambiguous items. 
 We extend this result by showing that individual differences in learning mechanisms (learning rate, memory) are the primary drivers of both performance and sampling sophistication.
 However, the current experimental design limits our ability to test causality: selection trials occurred *after* initial learning, and we modeled them using associations built during passive training. 
