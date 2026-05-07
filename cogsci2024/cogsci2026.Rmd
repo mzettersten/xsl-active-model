@@ -110,12 +110,12 @@ We investigate this question by examining whether individual differences in lear
 ## Data
 
 All data were taken from @Zettersten2021. 
-Data for our Study 1 were pooled from Experiment 1 (31 adults), Experiment 2 (40 children, 4-9 years of age), and adults in the Ambiguous Condition of Experiment S1 (58 adults), which had the same design as Experiments 1 and 2, except for an additional test before the selection phase.
-The training phase of Study 1 contained 24 trials, each comprised of 2 referents and 2 words. 
+Data from Experiment 1 (31 adults), Experiment 2 (40 children, 4-9 years of age), and adults in the Ambiguous Condition of Experiment S1 (58 adults) were pooled, as they all had the same design, except for an additional test before the selection phase in Exp. S1.
+The training phase of these data contained 24 trials, each comprised of 2 referents and 2 words. 
 The particular words and referents involved in each pairing were randomized per participant, but the same training trial sequence--and thus co-occurrence statistics--were experienced by all participants. 
 <!-- The accumulated word-referent co-occurrences are shown in Figure 1. -->
 
-Data for Study 2 come from Experiment 3, comprising 58 children, 3 to 8 years of age. <!-- @MZ: Exp 3 details? similar enough to include as one large study? -->
+Experiment 3, with data from 58 children, 3 to 8 years of age, had a similar design, except that two of the word-referent pairs were already familiar to children ("dog" and "pig"). <!-- @MZ: Exp 3 details? similar enough to include as one large study? -->
 
 Selection trials for kids differ slightly from adults in that there was no random label-referent pair given: thus, the evidence children received after selection was unambiguous, while adults received a training trial with a randomly-selected label and its corresponding referent.
 The models will see what the learner saw: for children, that would be an unambiguous trial with the selected referent and its label; while for adults, the model will be presented with the selected stimulus pair alongside the random pair the learner saw.
