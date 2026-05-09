@@ -12,23 +12,16 @@ author-information: >
     \AND {\large \bf Martin~Zettersten (mzettersten@ucsd.edu)} \\ Department of Cognitive Science, University of California, San Diego \\ San Diego, CA}
 
 abstract: >
-    Word learning is a complex, interactive process, in which learners do not passively observe
-    a stream of words and referents, but are rather actively involved in selecting referents and
-    directing their attention -- both of which are likely determined by their current knowledge
-    state. Thus, understanding how learners actively select information during word learning can
-    reveal the cognitive mechanisms underlying language acquisition. The present study reanalyzes
-    data from Zettersten & Saffran (2021), in which adults and children (ages 3-8) learned novel 
-    word-referent mappings through cross-situational learning, then selected which referents to 
-    receive additional training on. Participants' individual training data, selection choices, and
-    test trials were used to fit four associative word learning models, and to infer the most 
-    likely of five sampling strategies. Models with a bias to attend to stimuli with uncertain 
-    (i.e. high-entropy) knowledge states best accounted for the data, though there were individual differences in the degree to which this bias appeared to be the main driver of learning. Approximately half of participants
-    appear to be driven solely by this bias (51%), while another 48% were best accounted for by a model additionally 
-    engaging a competing familiarity bias. Analysis of selection strategies revealed both developmental consistencies and 
-    differences: while adults and children predominantly use an information gain strategy to reduce uncertainty about ambiguous items, adults deployed more diverse strategies (confirmatory, margin, and random sampling). These findings 
-    suggest that reducing uncertainty can drive sampling behavior even in young children, but that the repertoire of 
-    sampling strategies grows with maturity. Moreover, individual differences in learning mechanisms—particularly 
-    learning rate and memory—are more predictive of word learning success than sampling strategy alone.
+    Word learning is an active process in which learners select referents and direct attention based on their 
+    current knowledge state. Understanding how learners actively select information can reveal the cognitive 
+    mechanisms underlying language acquisition. The present study reanalyzes data from Zettersten & Saffran (2021), 
+    in which adults and children (ages 3-8) learned novel word-referent mappings through cross-situational learning, 
+    then selected which referents to receive additional training on. We fit associative word learning models to 
+    individual training, selection, and test data, and inferred the most likely sampling strategies. Models with 
+    a bias to attend to stimuli with uncertain knowledge states best accounted for the data, though there were 
+    substantial individual differences in learning mechanisms. These findings suggest that reducing uncertainty 
+    drives sampling behavior across development, but that individual differences in learning parameters (in particular, 
+    learning rate and memory) are more predictive of word learning success than sampling strategy alone.
     
 keywords: >
     active learning; cross-situational word learning; self-directed learning; uncertainty reduction
@@ -455,7 +448,7 @@ ggarrange(p2, p3, p4, ncol=1)
 
 ## Selection strategies
 <!-- The most likely selection strategy for each participant was calculated, and the results are shown in Table 3. -->
-Overall, entropy was the most common strategy (60% of participants), followed by margin sampling (18%), confirmatory (12%), random (8%), and novelty (3%).
+Overall, confirmatory was the most common strategy (42% of participants), followed by entropy (29%), margin sampling (18%), random (8%), and novelty (3%).
 Figure 4 shows the proportion of participants by age group that are most likely to be using each selection strategy.
 Children were more likely to use entropy maximization (84% vs. 37% of adults), whereas adults were more likely to use a confirmatory strategy (22% vs. 3% of children) or margin sampling (22% vs. 14% of children).
 Random selection was most likely for only 13% of adults and only 3% of children, and novelty was most likely for 5% of adults and no children. 

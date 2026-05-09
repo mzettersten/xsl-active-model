@@ -199,11 +199,11 @@ for(s in unique(xd$subject)) {
   ords[[s]] <- get_subject_trial_ordering(xd |> filter(subject==s))
 }
 
-eval_selection_trials_group(ords, xd, "entropy") # 1282.6 (was 1395.59)
-eval_selection_trials_group(ords, xd, "confirmatory") # 1276.1 (was 1384.43)
-eval_selection_trials_group(ords, xd, "random") # 1268 (was 1368.07)
-eval_selection_trials_group(ords, xd, "novelty") # 1281 (was 1355.55)
-eval_selection_trials_group(ords, xd, "margin") # 2760 - think through logic? 'object-perspective is correct'
+eval_selection_trials_group(ords, xd, "entropy") # 1235.1
+eval_selection_trials_group(ords, xd, "confirmatory") # 1253.7 
+eval_selection_trials_group(ords, xd, "random") # 1221.0 
+eval_selection_trials_group(ords, xd, "novelty") # 1232.5 
+eval_selection_trials_group(ords, xd, "margin") # 2681.2 - think through logic? 'object-perspective is correct'
 ```
 
 ```{r}
@@ -331,7 +331,7 @@ subject_strategy_fits <- subject_strategy_fits |>
   group_by(subject) |>
   mutate(
     best_nlogLik = min(nlogLik),
-    LR = -2 * (nlogLik - best_nlogLik),
+    LR = -2 * (nlogLik - best_nlogLik), 
     p_value = pchisq(LR, df = 0, lower.tail = FALSE)  # df=0 for non-nested
   )
 

@@ -112,9 +112,14 @@ eval_selection_strategy <- function(mat, selections, strategy, temperature = 1.0
   probOfSelections = rep(NA, nrow(selections))
 
   for(i in 1:nrow(selections)) {
-    # Get available options (all objects in matrix)
-    available_objects = colnames(mat)
+    # Get ACTUAL available options from this trial
+    available_objects = selections[i, ] |>
+      select(starts_with("image")) |>
+      unlist() |> na.omit() |> as.character()
     n_options = length(available_objects)
+
+    # Subset matrix to only available objects
+    mat_subset = mat[, available_objects, drop = FALSE]
 
     # Calculate selection probabilities based on strategy
     if(strategy == "entropy") {
@@ -136,13 +141,13 @@ eval_selection_strategy <- function(mat, selections, strategy, temperature = 1.0
     } else if(strategy == "random") {
       # Baseline: uniform selection
       predictedSelections = rep(1/n_options, n_options)
-
+5
     } else if(strategy == "margin") {
       # Choose objects where top 2 associations are most similar (least confident)
       predictedSelections = rep(NA, n_options)
 
       for(o in 1:n_options) {
-        word_assocs = mat[, o]
+        word_assocs = mat_subset[, o]
 
         if(sum(word_assocs > 0) < 2) {
           # Can't compute margin with fewer than 2 non-zero associations
@@ -160,7 +165,7 @@ eval_selection_strategy <- function(mat, selections, strategy, temperature = 1.0
 
     } else if(strategy == "confirmatory") {
       # Choose objects with strongest single association (most certain)
-      max_strength = apply(mat, 2, max)
+      max_strength = apply(mat_subset, 2, max)
 
       if(sum(max_strength) == 0) {
         predictedSelections = rep(1/n_options, n_options)
@@ -171,7 +176,7 @@ eval_selection_strategy <- function(mat, selections, strategy, temperature = 1.0
 
     } else if(strategy == "novelty") {
       # Choose objects with weakest associations (least familiar)
-      max_strength = apply(mat, 2, max)
+      max_strength = apply(mat_subset, 2, max)
 
       # Novelty is inverse of familiarity
       novelty_scores = 1 / (max_strength + 0.01)  # Add constant to avoid division by zero
