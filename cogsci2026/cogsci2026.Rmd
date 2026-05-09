@@ -214,6 +214,8 @@ Third, we consider a *random* selection strategy as a baseline comparison.
 
 # Results
 
+Data and code is openly available at https://github.com/mzettersten/xsl-active-model.
+
 ```{r model-comparison, include=F}
 # fits with selection trials:
 load(here("data","ind_fits_strength.Rdata"))
