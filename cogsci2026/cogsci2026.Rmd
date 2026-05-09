@@ -408,10 +408,10 @@ Figure 1 shows the correlations between participants' accuracy, best-fitting mod
 All correlations are significant (e.g., $\lambda$ vs log(age) $r = 0.14$, $t(187) = 1.99$, $p<.05$) except $\lambda$ vs. $\chi$. <!--Martin says 129 total subjects counting adults and kids: I'm using Exp 1, 2, S1, and 3...should I cut Exp 3?? -->
 Most notable is that accuracy is strongly related to higher learning rate $\chi$ ($r=0.53$) and lower memory fidelity ($\alpha=0.58$; better learning is achieved by forgetting early, ambiguous evidence -- as has been seen in other applications of this model), and only weakly related to $lambda$ ($r=0.23$) and age ($r=0.29$).
 Figure 3 shows participants' best-fitting model parameters by age, revealing developmental increases in learning rate ($\chi$) and attention to uncertainty ($\lambda$), and decrease in memory fidelity ($\alpha$). Children show greater individual differences, but on average match adults' parameter values by age 8.
-A targeted analysis found that children (age<18) are more likely than adults to be familiarity-focused ($\lambda<1$) rather than uncertainty-focused ($\chi^2 = 7.41$): of 22% of adults had $\lambda<1$, while 41% of children did.
+A targeted analysis found that children are more likely than adults to be familiarity-focused ($\lambda<1$) rather than uncertainty-focused ($\chi^2 = 7.41$): 22% of adults had $\lambda<1$, while 41% of children did.
 
 
-```{r fig2-parms, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.5, fig.height=5.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Participants' best-fitting model parameters by age reveal developmental change: learning rate (chi) and attention to uncertainty (lambda) generally increase with age, while memory fidelity (alpha) decreases. Children show larger individual differences, but on average match adults' values by age 8. Error bars show +/-1SE."}
+```{r fig2-parms, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.5, fig.height=5.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Participants' best-fitting model parameters by age reveal developmental change: learning rate (chi) and attention to uncertainty (lambda) generally increase with age, while memory fidelity (alpha) decreases. Error bars show +/-1SE."}
 # cor.test(results$neg_log_lik, results$alpha) # .35 - higher alpha = worse fit??
 # cor.test(results$neg_log_lik, results$chi) # -.37 - lower chi = worse fit
 gres_filt <- gres |> #filter(is.element(experiment_name, c("Experiment 1", "Experiment 2"))) |>
@@ -517,7 +517,7 @@ strategy_performance_cor
 
 
 
-```{r, fig.cap="Best-fitting selection strategies by age group. A higher proportion of children (vs. adults) used a confirmatory strategy, while a higher proportion of adults used an entropy-based information gain strategy.", fig.width=3.5, fig.height=3.5}
+```{r, fig.cap="Best-fitting selection strategies by age group. A higher proportion of children (vs. adults) used a entropy-based information gain strategy, while a higher proportion of adults used a confirmatory or margin sampling strategy.", fig.width=3.5, fig.height=3.5}
 # By age group
 best_strategies |>
   mutate(age_group = ifelse(age_group == "kids", "children", "adults")) |>
