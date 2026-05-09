@@ -94,7 +94,7 @@ Recent developmental work documents broad changes in information-seeking strateg
 The current work therefore explores what sampling decision rules best explain children's and adults' information-seeking during word learning, and how learning mechanisms relate to sampling strategies.
 
 ```{r fig-exp-one, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.2, fig.height=3.2, set.cap.width=T, num.cols.cap=1, fig.cap = "Word-referent co-occurrence matrix for Study (Experiment 1, Zettersten and Saffran, 2020).", include=F}
-img <- png::readPNG(here("cogsci2024","figs","exp1-cooccurrences.png"))
+img <- png::readPNG(here("cogsci2026","figs","exp1-cooccurrences.png"))
 grid::grid.raster(img)
 ```
 
