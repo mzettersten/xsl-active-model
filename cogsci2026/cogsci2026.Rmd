@@ -34,7 +34,7 @@ keywords: >
     active learning; cross-situational word learning; self-directed learning; uncertainty reduction
     
 output: cogsci2024::cogsci_paper
-final-submission: \cogscifinalcopy
+header-includes: \cogscifinalcopy
 ---
 
 ```{r global_options, include=FALSE}
