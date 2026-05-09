@@ -4,7 +4,7 @@ bibliography: library.bib
 #citation_package: apacite
 #citeproc: false
 #biblio-style: apacite
-csl: apa6.csl
+csl: apa7.csl
 document-params: "10pt, letterpaper"
 
 author-information: > 
@@ -33,7 +33,7 @@ abstract: >
 keywords: >
     active learning; cross-situational word learning; self-directed learning; uncertainty reduction
     
-output: cogsci2016::cogsci_paper
+output: cogsci2024::cogsci_paper
 final-submission: \cogscifinalcopy
 ---
 
@@ -85,8 +85,9 @@ To investigate these questions, we model data from a set of active, cross-situat
 In these experiments, adults preferentially selected items with ambiguous word-referent mappings during a sampling phase, while children (ages 3-8) increased their preference to sample ambiguous items across age. 
 We address three main questions: First, which model architecture best captures individual learning performance? 
 Second, do specific model parameters (learning rate, memory decay, attention to uncertainty) predict learning success? 
-To address these first two issues, we chose a family of models that instantiate trial-by-trial associative learning with memory decay and selective attention to familiar and/or uncertain (or novel) stimuli, which have been shown to account well for semantic bootstrapping and mutual exclusivity effects in prior work [@Kachergis2012; @Kachergis2017].
 Third, what sampling strategies (e.g., entropy reduction vs. confirmatory sampling) best explain participants' information-seeking choices, and how do these strategies develop with age?
+To address these first two issues, we chose a family of models that instantiate trial-by-trial associative learning with memory decay and selective attention to familiar and/or uncertain (or novel) stimuli, which have been shown to account well for semantic bootstrapping and mutual exclusivity effects in prior work [@Kachergis2012; @Kachergis2017].
+To answer the third question, we subsequently used the best-fitting models of participant learning to investigate which of a range of decision rules best accounted for individuals' sampling choices.
 
 Understanding children's and adults' sampling strategies during word learning has important implications for theories of vocabulary development. Past work shows that both children and adults actively seek information about word meanings [@hembacher_childrens_2020], which may help explain rapid vocabulary growth [@Hidaka2017]. 
 However, we lack a formal understanding of the specific decision rules governing when learners seek new information versus consolidate existing knowledge [@Settles2012; though see @gelderloos_active_2020; @Keijser2019]. 
